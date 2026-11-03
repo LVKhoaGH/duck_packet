@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import 'i18n.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'duck.dart';
 import 'game_session_screen.dart';
 import 'models.dart';
 import 'providers.dart';
@@ -8,14 +10,72 @@ import 'study.dart';
 import 'theme.dart';
 import 'widgets.dart';
 
-// ───────────────────────── Learn tab: list of lessons ─────────────────────────
-class LearnTab extends ConsumerWidget {
+// ───────────────────────── Learn tab: continue card + collapsible chapters ─────────────────────────
+class LearnTab extends ConsumerStatefulWidget {
   final Course? course;
-  const LearnTab({super.key, required this.course});
+  final VoidCallback? onGoMap;
+  const LearnTab({super.key, required this.course, this.onGoMap});
+  @override
+  ConsumerState<LearnTab> createState() => _LearnTabState();
+}
+
+class _LearnTabState extends ConsumerState<LearnTab> {
+  final Set<String> _expanded = {};
+  String? _lastCh;
+
+  void _openLesson(Course c, CourseNode n) {
+    Sfx.play('tap');
+    Navigator.push(context, slideUpRoute(LessonScreen(course: c, node: n)));
+  }
+
+  Widget _continueCard(Course c, CourseNode? next, int total) {
+    if (total == 0) return const SizedBox.shrink();
+    final done = next == null;
+    final col = done ? AppColors.success : AppColors.primary;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: duoCard(
+        border: col,
+        fill: done ? const Color(0xFFE6F8EF) : AppColors.tint,
+        shadow: done ? AppColors.successShadow : AppColors.primaryShadow,
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          const DuckView(size: 48, mood: DuckMood.happy),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(done ? 'All lessons read!' : 'Continue learning',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: col)),
+              const SizedBox(height: 2),
+              Text(done ? 'Time to fight the monsters' : (next?.title ?? ''),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.ink)),
+              if (!done)
+                Text('${next?.lesson.length ?? 0} cards',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
+            ]),
+          ),
+        ]),
+        const SizedBox(height: 12),
+        Button3D(
+          label: done ? 'Open map' : 'Continue',
+          color: col,
+          shadow: done ? AppColors.successShadow : AppColors.primaryShadow,
+          onPressed: done
+              ? widget.onGoMap
+              : () {
+                  if (next != null) _openLesson(c, next);
+                },
+        ),
+      ]),
+    );
+  }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final c = course;
+  Widget build(BuildContext context) {
+    final c = widget.course;
     if (c == null) {
       return const Center(
         child: Padding(
@@ -29,45 +89,96 @@ class LearnTab extends ConsumerWidget {
     final withLesson = c.allNodes.where((n) => n.lesson.isNotEmpty).length;
     final read = c.allNodes.where((n) => n.lesson.isNotEmpty && seen.contains(n.id)).length;
 
+    // first lesson not read yet (in course order)
+    CourseNode? next;
+    Chapter? nextCh;
+    for (final ch in c.chapters) {
+      for (final n in ch.nodes) {
+        if (n.lesson.isNotEmpty && !seen.contains(n.id)) {
+          next = n;
+          nextCh = ch;
+          break;
+        }
+      }
+      if (next != null) break;
+    }
+    // auto-open the chapter we are studying
+    final focus = nextCh ?? (c.chapters.isEmpty ? null : c.chapters.first);
+    if (focus != null && focus.id != _lastCh) {
+      _expanded.add(focus.id);
+      _lastCh = focus.id;
+    }
+
     final children = <Widget>[
       Row(children: [
-        Image.asset('assets/mascot/duck_happy.png', height: 64, errorBuilder: (_, __, ___) => const SizedBox(height: 64, width: 64)),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('Learn', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.ink)),
-            Text('$read / $withLesson lessons read  ·  swipe the cards',
-                style: const TextStyle(color: Colors.black45, fontWeight: FontWeight.w700)),
-          ]),
-        ),
+        const Text('Learn', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.ink)),
+        const Spacer(),
+        Text('$read / $withLesson lessons read',
+            style: const TextStyle(color: Colors.black45, fontWeight: FontWeight.w700)),
       ]),
-      const SizedBox(height: 8),
+      const SizedBox(height: 12),
+      _continueCard(c, next, withLesson),
     ];
 
     for (final ch in c.chapters) {
       if (ch.nodes.isEmpty) continue;
+      final open = _expanded.contains(ch.id);
+      final tot = ch.nodes.where((n) => n.lesson.isNotEmpty).length;
+      final rd = ch.nodes.where((n) => n.lesson.isNotEmpty && seen.contains(n.id)).length;
       children.add(Padding(
-        padding: const EdgeInsets.only(top: 18, bottom: 8),
-        child: Text(ch.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.secondary)),
+        padding: const EdgeInsets.only(top: 14, bottom: 4),
+        child: PressScale(
+          scale: 0.99,
+          onTap: () {
+            Sfx.play('tap');
+            setState(() {
+              if (open) {
+                _expanded.remove(ch.id);
+              } else {
+                _expanded.add(ch.id);
+              }
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: duoCard(border: AppColors.line),
+            child: Row(children: [
+              Expanded(
+                child: Text(ch.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.secondary)),
+              ),
+              const SizedBox(width: 8),
+              Text('$rd/$tot', style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.black38)),
+              const SizedBox(width: 4),
+              Icon(open ? Icons.expand_less_rounded : Icons.expand_more_rounded, color: AppColors.locked),
+            ]),
+          ),
+        ),
       ));
+      if (!open) continue;
       for (final n in ch.nodes) {
         final has = n.lesson.isNotEmpty;
         final isSeen = seen.contains(n.id);
+        final isNext = next != null && n.id == next.id;
         children.add(Padding(
-          padding: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.only(top: 6, bottom: 4),
           child: PressScale(
             scale: 0.98,
             onTap: () {
-              Sfx.play('tap');
               if (!has) {
+                Sfx.play('tap');
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Lesson coming soon')));
                 return;
               }
-              Navigator.push(context, slideUpRoute(LessonScreen(course: c, node: n)));
+              _openLesson(c, n);
             },
             child: Container(
               padding: const EdgeInsets.all(12),
-              decoration: has ? duoCard(border: isSeen ? AppColors.success : AppColors.line) : duoCard(border: AppColors.line, fill: const Color(0xFFF7F7F7), shadow: AppColors.line),
+              decoration: has
+                  ? duoCard(border: isSeen ? AppColors.success : (isNext ? AppColors.primary : AppColors.line))
+                  : duoCard(border: AppColors.line, fill: const Color(0xFFF7F7F7), shadow: AppColors.line),
               child: Row(children: [
                 Container(
                   width: 44,
@@ -97,7 +208,7 @@ class LearnTab extends ConsumerWidget {
         ));
       }
     }
-    return ListView(padding: const EdgeInsets.fromLTRB(16, 16, 16, 32), children: children);
+    return ListView(padding: const EdgeInsets.fromLTRB(16, 14, 16, 32), children: children);
   }
 }
 
@@ -113,6 +224,39 @@ class LessonScreen extends ConsumerStatefulWidget {
 class _LessonScreenState extends ConsumerState<LessonScreen> {
   final _pc = PageController();
   int _page = 0;
+  String? _tapMsg;
+  int _pokeI = 0;
+
+  static const _cheers = ['Keep going!', 'You got this!', 'Quack! Nice pace.'];
+  static const _pokes = ['Quack!', 'Hey, that tickles!', 'Back to studying!', 'Quack quack!'];
+
+  String _duckMsg(bool canFight) {
+    if (_tapMsg != null) return _tapMsg!;
+    if (_page == 0) return "Ready? Let's learn!";
+    if (_last) return canFight ? 'Last card! Now go fight!' : 'Nice work, all done!';
+    switch (_cards[_page].type) {
+      case 'tip':
+        return 'Exam tip! Remember this one.';
+      case 'warn':
+        return 'Careful, this is a common trap!';
+      case 'flow':
+        return 'Follow the flow step by step.';
+      case 'code':
+        return 'Try it in a lab later.';
+      case 'compare':
+        return 'Spot the differences.';
+      default:
+        return _cheers[_page % _cheers.length];
+    }
+  }
+
+  DuckMood _duckMood() {
+    if (_tapMsg != null || _last) return DuckMood.happy;
+    final ty = _cards[_page].type;
+    if (ty == 'tip') return DuckMood.happy;
+    if (ty == 'warn') return DuckMood.confused;
+    return DuckMood.idle;
+  }
 
   List<LessonCard> get _cards => widget.node.lesson;
   bool get _last => _page >= _cards.length - 1;
@@ -167,15 +311,54 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
                   style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.black45)),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
+            child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+              DuckView(
+                size: 60,
+                mood: _duckMood(),
+                onTap: () => setState(() => _tapMsg = _pokes[_pokeI++ % _pokes.length]),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  margin: const EdgeInsets.only(bottom: 8),
+                  decoration: duoCard(border: AppColors.line, radius: 14),
+                  child: Text(_duckMsg(true),
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                ),
+              ),
+            ]),
+          ),
           Expanded(
-            child: PageView.builder(
-              controller: _pc,
-              itemCount: n,
-              onPageChanged: (i) {
-                setState(() => _page = i);
-                if (i == n - 1) ref.read(studyProvider.notifier).markSeen(widget.node.id);
-              },
-              itemBuilder: (_, i) => _CardView(card: _cards[i]),
+            child: LayoutBuilder(
+              builder: (ctx, bc) => GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTapUp: (d) {
+                  if (d.localPosition.dx < bc.maxWidth / 2) {
+                    if (_page > 0) {
+                      Sfx.play('tap');
+                      _go(_page - 1);
+                    }
+                  } else if (!_last) {
+                    Sfx.play('tap');
+                    _go(_page + 1);
+                  }
+                },
+                child: PageView.builder(
+                  controller: _pc,
+                  itemCount: n,
+                  onPageChanged: (i) {
+                    setState(() {
+                      _page = i;
+                      _tapMsg = null;
+                    });
+                    if (i == n - 1) ref.read(studyProvider.notifier).markSeen(widget.node.id);
+                  },
+                  itemBuilder: (_, i) => _CardView(card: _cards[i]),
+                ),
+              ),
             ),
           ),
           Container(

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'bag.dart';
 import 'bag_screen.dart';
+import 'duck.dart';
 import 'extras.dart';
 import 'game_session_screen.dart';
 import 'history.dart';
@@ -28,6 +29,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _tab = 1; // 0 Learn, 1 Map, 2 Practice, 3 Profile
+  final PageController _pc = PageController(initialPage: 1);
 
   @override
   void initState() {
@@ -40,6 +42,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(used == 1 ? 'Streak Freeze used. Your streak is safe!' : 'Streak Freezes used. Your streak is safe!')));
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _pc.dispose();
+    super.dispose();
+  }
+
+  void _goTab(int i) {
+    Sfx.play('tap');
+    if (i == _tab) return;
+    if ((i - _tab).abs() > 1) {
+      _pc.jumpToPage(i);
+    } else {
+      _pc.animateToPage(i, duration: const Duration(milliseconds: 250), curve: Curves.easeOut);
+    }
   }
 
   void _openLibrary() => Navigator.push(context, slideUpRoute(const LibraryScreen()));
@@ -57,27 +75,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: Column(children: [
           _TopBar(label: course?.id.split('_').first.toUpperCase() ?? 'DUCK', stats: stats),
           Expanded(
-            child: IndexedStack(index: _tab, children: [
-              LearnTab(course: course),
-              courseAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text('Error: $e')),
-                data: (c) => c == null ? _EmptyState(onImport: _openLibrary) : _MapView(course: c),
-              ),
-              PracticeTab(course: course),
-              ProfileTab(course: course, onImport: _openLibrary),
-            ]),
+            child: PageView(
+              controller: _pc,
+              onPageChanged: (i) => setState(() => _tab = i),
+              children: [
+                _KeepAlive(child: LearnTab(course: course, onGoMap: () => _goTab(1))),
+                _KeepAlive(
+                  child: courseAsync.when(
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (e, _) => Center(child: Text('Error: $e')),
+                    data: (c) => c == null ? _EmptyState(onImport: _openLibrary) : _MapView(course: c),
+                  ),
+                ),
+                _KeepAlive(child: PracticeTab(course: course)),
+                _KeepAlive(child: ProfileTab(course: course, onImport: _openLibrary)),
+              ],
+            ),
           ),
         ]),
       ),
       bottomNavigationBar: _BottomNav(
         index: _tab,
-        onTap: (i) {
-          Sfx.play('tap');
-          setState(() => _tab = i);
-        },
+        onTap: _goTab,
       ),
     );
+  }
+}
+
+/// Keeps a tab (and its scroll position) alive inside the PageView.
+class _KeepAlive extends StatefulWidget {
+  final Widget child;
+  const _KeepAlive({required this.child});
+  @override
+  State<_KeepAlive> createState() => _KeepAliveState();
+}
+
+class _KeepAliveState extends State<_KeepAlive> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }
 
@@ -179,10 +218,7 @@ class _EmptyState extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Bobbing(
-              amplitude: 10,
-              child: Image.asset('assets/mascot/duck_idle.png', height: 150, errorBuilder: (_, __, ___) => const SizedBox(height: 150)),
-            ),
+            const DuckView(size: 150, mood: DuckMood.happy),
             const SizedBox(height: 16),
             const Text('Welcome to DuckPacket!', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink)),
             const SizedBox(height: 6),
@@ -216,9 +252,66 @@ IconData _nodeIcon(String file) {
   }
 }
 
-class _MapView extends ConsumerWidget {
+class _MapView extends ConsumerStatefulWidget {
   final Course course;
   const _MapView({required this.course});
+  @override
+  ConsumerState<_MapView> createState() => _MapViewState();
+}
+
+class _MapViewState extends ConsumerState<_MapView> {
+  Course get course => widget.course;
+  final ScrollController _sc = ScrollController();
+  final GlobalKey _curKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _toCurrent(animate: false));
+  }
+
+  @override
+  void dispose() {
+    _sc.dispose();
+    super.dispose();
+  }
+
+  void _toCurrent({bool animate = true}) {
+    final ctx = _curKey.currentContext;
+    if (ctx == null) return;
+    Scrollable.ensureVisible(ctx,
+        alignment: 0.35,
+        duration: animate ? const Duration(milliseconds: 450) : Duration.zero,
+        curve: Curves.easeOutCubic);
+  }
+
+  Widget _pill() => Positioned(
+        left: 16,
+        right: 16,
+        bottom: 12,
+        child: Center(
+          child: PressScale(
+            scale: 0.97,
+            onTap: () {
+              Sfx.play('tap');
+              _toCurrent();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: const [BoxShadow(color: AppColors.primaryShadow, offset: Offset(0, 4))],
+              ),
+              child: Row(mainAxisSize: MainAxisSize.min, children: const [
+                Icon(Icons.my_location_rounded, color: Colors.white, size: 20),
+                SizedBox(width: 8),
+                Text('Current stage', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+              ]),
+            ),
+          ),
+        ),
+      );
 
   void _snack(BuildContext c, String t) =>
       ScaffoldMessenger.of(c).showSnackBar(SnackBar(content: Text(t), duration: const Duration(seconds: 2)));
@@ -244,6 +337,8 @@ class _MapView extends ConsumerWidget {
     ref.read(extrasProvider.notifier).addXp(r.xp);
     ref.read(historyProvider.notifier).addXp(r.xp);
     await showChestDialog(context, r);
+    final gotItem = ref.read(duckProvider.notifier).awardForChapter(ch.id);
+    if (gotItem != null && context.mounted) await showDuckUnlock(context, ref, gotItem);
   }
 
   void _guide(BuildContext context, Chapter ch, Set<String> done, Map<String, int> best) {
@@ -302,7 +397,7 @@ class _MapView extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final done = ref.watch(statsProvider).completed;
     final best = ref.watch(studyProvider).best;
     final chests = ref.watch(bagProvider).chests;
@@ -353,7 +448,8 @@ class _MapView extends ConsumerWidget {
             ),
           ),
         );
-        rows.add(_withMascot(row, dx, isCurrent));
+        final withM = _withMascot(row, dx, isCurrent);
+        rows.add(isCurrent ? KeyedSubtree(key: _curKey, child: withM) : withM);
         rows.add(_Connector(fromDx: dx, toDx: nextDx, active: isDone));
         k++;
       }
@@ -382,7 +478,8 @@ class _MapView extends ConsumerWidget {
           ),
         ),
       );
-      rows.add(_withMascot(bossRow, bdx, bCurrent));
+      final bossM = _withMascot(bossRow, bdx, bCurrent);
+      rows.add(bCurrent ? KeyedSubtree(key: _curKey, child: bossM) : bossM);
       k++;
 
       // chest: appears after the boss, opens once
@@ -423,7 +520,10 @@ class _MapView extends ConsumerWidget {
       ]));
     }
     slivers.add(const SliverToBoxAdapter(child: SizedBox(height: 100)));
-    return CustomScrollView(slivers: slivers);
+    return Stack(children: [
+      CustomScrollView(controller: _sc, slivers: slivers),
+      if (currentId != null) _pill(),
+    ]);
   }
 }
 

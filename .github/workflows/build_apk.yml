@@ -22,11 +22,17 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Ensure mascot asset folder exists
+        run: mkdir -p assets/mascot
+
       - name: Get dependencies
         run: flutter pub get
 
       - name: Build APK Release
-        run: flutter build apk --release
+        run: |
+          flutter build apk --release --dart-define=ENVIRONMENT=production -- \
+            -Pandroid.nonTransitiveRClass=true \
+            -x :file_picker:checkReleaseAarMetadata
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

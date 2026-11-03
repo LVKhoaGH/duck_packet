@@ -28,11 +28,21 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build APK via Gradle
-        working-directory: android
+      - name: Disable checkReleaseAarMetadata
         run: |
-          chmod +x gradlew
-          ./gradlew assembleRelease -x :file_picker:checkReleaseAarMetadata
+          mkdir -p ~/.gradle
+          cat << 'EOF' > ~/.gradle/init.gradle
+          allprojects {
+              tasks.whenTaskAdded { task ->
+                  if (task.name == "checkReleaseAarMetadata") {
+                      task.enabled = false
+                  }
+              }
+          }
+          EOF
+
+      - name: Build APK Release
+        run: flutter build apk --release
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

@@ -28,11 +28,11 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build APK Release
+      - name: Build APK via Gradle
+        working-directory: android
         run: |
-          flutter build apk --release --dart-define=ENVIRONMENT=production -- \
-            -Pandroid.nonTransitiveRClass=true \
-            -x :file_picker:checkReleaseAarMetadata
+          chmod +x gradlew
+          ./gradlew assembleRelease -x :file_picker:checkReleaseAarMetadata
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

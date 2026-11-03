@@ -25,21 +25,26 @@ jobs:
       - name: Ensure mascot asset folder exists
         run: mkdir -p assets/mascot
 
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Disable checkReleaseAarMetadata
+      - name: Force compileSdkVersion 36 across all plugins
         run: |
           mkdir -p ~/.gradle
           cat << 'EOF' > ~/.gradle/init.gradle
           allprojects {
-              tasks.whenTaskAdded { task ->
-                  if (task.name == "checkReleaseAarMetadata") {
-                      task.enabled = false
+              plugins.withId('com.android.library') {
+                  android {
+                      compileSdkVersion 36
+                  }
+              }
+              plugins.withId('com.android.application') {
+                  android {
+                      compileSdkVersion 36
                   }
               }
           }
           EOF
+
+      - name: Get dependencies
+        run: flutter pub get
 
       - name: Build APK Release
         run: flutter build apk --release

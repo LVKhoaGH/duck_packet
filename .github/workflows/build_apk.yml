@@ -22,32 +22,25 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Ensure mascot asset folder exists
+      - name: Ensure mascot folder exists
         run: mkdir -p assets/mascot
-
-      - name: Force compileSdkVersion 36 across all plugins
-        run: |
-          mkdir -p ~/.gradle
-          cat << 'EOF' > ~/.gradle/init.gradle
-          allprojects {
-              plugins.withId('com.android.library') {
-                  android {
-                      compileSdkVersion 36
-                  }
-              }
-              plugins.withId('com.android.application') {
-                  android {
-                      compileSdkVersion 36
-                  }
-              }
-          }
-          EOF
 
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Patch all plugins compileSdk to 36
+        run: |
+          find ~/.pub-cache/hosted/pub.dev/ -name "build.gradle" -exec sed -i -E 's/compileSdkVersion[[:space:]]+[0-9]+/compileSdkVersion 36/g' {} + || true
+          find ~/.pub-cache/hosted/pub.dev/ -name "build.gradle.kts" -exec sed -i -E 's/compileSdk[[:space:]]*=[[:space:]]*[0-9]+/compileSdk = 36/g' {} + || true
+
+      - name: Configure Gradle properties
+        run: |
+          mkdir -p android
+          echo "android.suppressUnsupportedCompileSdk=36" >> android/gradle.properties
+          echo "android.disableMinifyLocalDependenciesForLibraries=true" >> android/gradle.properties
+
       - name: Build APK Release
-        run: flutter build apk --release
+        run: flutter build apk --release --no-tree-shake-icons
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

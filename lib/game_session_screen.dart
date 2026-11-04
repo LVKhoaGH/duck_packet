@@ -4,6 +4,7 @@ import 'i18n.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'bag.dart';
+import 'duck.dart';
 import 'extras.dart';
 import 'history.dart';
 import 'models.dart';
@@ -233,11 +234,7 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
           duration: const Duration(milliseconds: 450),
           curve: Curves.easeOutBack,
           builder: (_, v, c) => Transform.translate(offset: Offset(0, 40 * (1 - v)), child: c),
-          child: Image.asset(
-            ok ? 'assets/mascot/duck_happy.png' : 'assets/mascot/duck_confused.png',
-            height: 78,
-            errorBuilder: (_, __, ___) => const SizedBox(height: 78),
-          ),
+          child: DuckView(size: 70, mood: ok ? DuckMood.happy : DuckMood.confused),
         ),
       ),
     ]);
@@ -330,7 +327,7 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
                       const SizedBox(height: 16),
                       _PromptBubble(
                         text: q.prompt,
-                        duck: _combo >= 3 ? 'assets/mascot/duck_happy.png' : 'assets/mascot/duck_idle.png',
+                        mood: _combo >= 3 ? DuckMood.happy : DuckMood.idle,
                       ),
                       const SizedBox(height: 24),
                       if (q.type == 'reorder')
@@ -383,14 +380,7 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
             padding: const EdgeInsets.all(24),
             child: Column(children: [
               const Spacer(),
-              Bobbing(
-                amplitude: 10,
-                child: Image.asset(
-                  lost ? 'assets/mascot/duck_confused.png' : (acc >= 60 ? 'assets/mascot/duck_happy.png' : 'assets/mascot/duck_idle.png'),
-                  height: 170,
-                  errorBuilder: (_, __, ___) => const SizedBox(height: 170),
-                ),
-              ),
+              DuckView(size: 160, mood: lost ? DuckMood.confused : (acc >= 60 ? DuckMood.happy : DuckMood.idle)),
               const SizedBox(height: 16),
               Pop(
                 child: Text(title,
@@ -486,11 +476,12 @@ class _Tile extends StatelessWidget {
 
 /// Mascot + speech bubble holding the question prompt.
 class _PromptBubble extends StatelessWidget {
-  final String text, duck;
-  const _PromptBubble({required this.text, required this.duck});
+  final String text;
+  final DuckMood mood;
+  const _PromptBubble({required this.text, required this.mood});
   @override
   Widget build(BuildContext context) => Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-        Image.asset(duck, height: 84, errorBuilder: (_, __, ___) => const SizedBox(width: 84, height: 84)),
+        SizedBox(width: 76, child: DuckView(size: 76, mood: mood)),
         const SizedBox(width: 14),
         Expanded(
           child: Stack(clipBehavior: Clip.none, children: [

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'duck.dart';
 import 'providers.dart';
 import 'sfx.dart';
 import 'theme.dart';
@@ -211,14 +212,7 @@ class _MascotTipState extends State<MascotTip> {
         height: 84,
         child: Stack(clipBehavior: Clip.none, children: [
           Positioned.fill(
-            child: GestureDetector(
-              onTap: _tap,
-              behavior: HitTestBehavior.opaque,
-              child: Bobbing(
-                amplitude: 5,
-                child: Image.asset('assets/mascot/duck_idle.png', fit: BoxFit.contain, errorBuilder: (_, __, ___) => const SizedBox()),
-              ),
-            ),
+            child: Center(child: DuckView(size: 72, onTap: _tap)),
           ),
           Positioned(
             bottom: 92,
@@ -371,7 +365,7 @@ Future<bool?> showQuitSheet(BuildContext context) => showModalBottomSheet<bool>(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Image.asset('assets/mascot/duck_confused.png', height: 110, errorBuilder: (_, __, ___) => const SizedBox(height: 110)),
+            const DuckView(size: 100, mood: DuckMood.confused),
             const SizedBox(height: 12),
             const Text("Wait, don't go!", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink)),
             const SizedBox(height: 6),

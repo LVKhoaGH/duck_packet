@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart' hide Text;
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'i18n.dart';
@@ -254,6 +256,31 @@ final duckLookProvider = Provider<DuckLook>((ref) {
   return d.look.withMuscle(m);
 });
 
+// ───────────────────────── artwork (PNG layers) ─────────────────────────
+/// The duck is a picture: four transparent PNG layers drawn bottom to top (feet, body, eyes, beak).
+/// Only the body layer is tinted by the Color slot. Call [DuckArt.load] once before runApp.
+class DuckArt {
+  static ui.Image? feet, body, eyes, beak;
+  static bool get ready => body != null;
+
+  static Future<ui.Image> _one(String name) async {
+    final data = await rootBundle.load('assets/mascot/duck_$name.png');
+    final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+    return (await codec.getNextFrame()).image;
+  }
+
+  static Future<void> load() async {
+    try {
+      feet = await _one('feet');
+      body = await _one('body');
+      eyes = await _one('eyes');
+      beak = await _one('beak');
+    } catch (_) {
+      // Missing asset: the painter falls back to a plain circle instead of crashing.
+    }
+  }
+}
+
 // ───────────────────────── painter ─────────────────────────
 Paint _fill(Color c) => Paint()..color = c;
 Paint _stroke(Color c, double w) => Paint()
@@ -263,270 +290,327 @@ Paint _stroke(Color c, double w) => Paint()
   ..strokeCap = StrokeCap.round
   ..strokeJoin = StrokeJoin.round;
 
-/// Draws the duck in a 200 x 220 design space.
+/// Stroke for hats and glasses (drawn in "old head units", so a little thinner).
+Paint _hs(Color c, double w) => _stroke(c, w * 0.8);
+
+/// Draws the duck. World = pixels of the source picture; the view shows x 90..1210, y -140..1092 (ratio 1 : 1.1).
 class DuckPainter extends CustomPainter {
   final DuckLook look;
   final DuckMood mood;
   final bool blink;
   const DuckPainter(this.look, {this.mood = DuckMood.idle, this.blink = false});
 
+  static const _artRect = Rect.fromLTRB(125, 130, 1130, 1097);
+  static const _eyeL = Offset(499, 427), _eyeR = Offset(827, 486);
+  static const _eyeMid = Offset(663, 456);
+  static const _tilt = 0.178; // the head leans a little to the right
+  static const _cream = Color(0xFFF8F4ED);
   static const _ink = Color(0xFF263238);
-  static const _beak = Color(0xFFFFA726);
-  static const _beakDark = Color(0xFFEF6C00);
+  static const _pupil = Color(0xFF3C3B3B);
+
+  bool get _tinted => look.color != Colors.white;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final s = size.width / 200;
     canvas.save();
-    canvas.scale(s, s);
-    canvas.translate(0, 22);
+    canvas.scale(size.width / 1120);
+    canvas.translate(-90, 140);
 
-    final fe = look.color;
-    final line = Color.lerp(fe, const Color(0xFF3C4A57), 0.4)!;
     final m = look.muscle;
-    final body = Rect.fromCenter(center: const Offset(100, 134), width: 118.0 + m * 5, height: 100);
+    final closed = blink || mood == DuckMood.sleepy || mood == DuckMood.happy;
 
     // legend aura
     if (m >= 6) {
-      canvas.drawCircle(const Offset(100, 110), 100, _fill(const Color(0x1AFFC107)));
-      canvas.drawCircle(const Offset(100, 110), 78, _fill(const Color(0x22FFC107)));
+      canvas.drawCircle(const Offset(650, 620), 600, _fill(const Color(0x14FFC107)));
+      canvas.drawCircle(const Offset(650, 620), 480, _fill(const Color(0x1EFFC107)));
     }
+    // ground shadow
+    canvas.drawOval(Rect.fromCenter(center: const Offset(660, 1078), width: 640, height: 46), _fill(const Color(0x1A000000)));
 
-    // ground shadow + feet
-    canvas.drawOval(Rect.fromCenter(center: const Offset(100, 192), width: 110, height: 14), _fill(const Color(0x1A000000)));
-    for (final x in [76.0, 124.0]) {
-      final f = Rect.fromCenter(center: Offset(x, 184), width: 32, height: 16);
-      canvas.drawOval(f, _fill(_beak));
-      canvas.drawOval(f, _stroke(_beakDark, 2.5));
-    }
-
-    // body
-    canvas.drawOval(body, _fill(fe));
-    _shirt(canvas, body, fe);
-    canvas.drawOval(body, _stroke(line, 4));
-
-    // wings
-    for (final side in [-1.0, 1.0]) {
-      canvas.save();
-      canvas.translate(100 + side * (56 + m * 2.5), 138);
-      canvas.rotate(side * -0.35);
-      final ww = 28.0 + m * 3.5;
-      final w = Rect.fromCenter(center: Offset.zero, width: ww, height: 52.0 + m * 1.5);
-      final wf = _fill(Color.lerp(fe, Colors.black, 0.05)!);
-      canvas.drawOval(w, wf);
-      canvas.drawOval(w, _stroke(line, 3.5));
-      if (m >= 2) {
-        final bc = Offset(side * (ww / 2 - 2), -6);
-        final br = 5.0 + m * 1.3;
-        canvas.drawCircle(bc, br, wf);
-        canvas.drawCircle(bc, br, _stroke(line, 3));
-      }
+    if (!DuckArt.ready) {
+      canvas.drawCircle(const Offset(650, 600), 420, _fill(look.color));
       canvas.restore();
+      return;
     }
 
-    // chest and abs (they show through shirts a little)
-    if (m >= 1) {
-      final mp = _stroke(line.withAlpha(130), 2.8);
-      canvas.drawArc(Rect.fromCenter(center: const Offset(84, 134), width: 36, height: 26), 0.1, 2.4, false, mp);
-      canvas.drawArc(Rect.fromCenter(center: const Offset(116, 134), width: 36, height: 26), 0.64, 2.4, false, mp);
-    }
-    if (m >= 3) {
-      final ap = _stroke(line.withAlpha(110), 2.5);
-      canvas.drawLine(const Offset(100, 150), const Offset(100, 178), ap);
-      canvas.drawLine(const Offset(88, 158), const Offset(112, 158), ap);
-      canvas.drawLine(const Offset(89, 168), const Offset(111, 168), ap);
+    _img(canvas, DuckArt.feet, false);
+    final hasShirt = look.shirt != null && look.shirt != 'scarf';
+    if (hasShirt) {
+      // the shirt is only painted where the body is (srcATop), and never over the right wing
+      canvas.saveLayer(_artRect.inflate(40), Paint());
+      _img(canvas, DuckArt.body, true);
+      canvas.save();
+      canvas.clipPath(_shirtRegion());
+      _shirtShapes(canvas);
+      canvas.restore();
+      canvas.restore();
+    } else {
+      _img(canvas, DuckArt.body, true);
     }
 
-    // scarf goes under the head
+    if (m >= 1) _medal(canvas, m);
+
+    // eyes
+    if (closed) {
+      _closedEyes(canvas, mood == DuckMood.happy && !blink);
+    } else {
+      _img(canvas, DuckArt.eyes, false);
+      if (mood == DuckMood.confused) {
+        _brows(canvas, false);
+      } else if (m >= 4) {
+        _brows(canvas, true);
+      }
+    }
+    _img(canvas, DuckArt.beak, false);
+
     if (look.shirt == 'scarf') _scarf(canvas);
 
-    // head
-    const hc = Offset(100, 72);
-    canvas.drawCircle(hc, 42, _fill(fe));
-    canvas.drawCircle(hc, 42, _stroke(line, 4));
-
-    // tuft (hidden under tall hats)
-    if (look.hat == null || look.hat == 'phones') {
-      canvas.drawPath(
-          Path()
-            ..moveTo(98, 31)
-            ..quadraticBezierTo(94, 18, 104, 14),
-          _stroke(line, 4));
-      canvas.drawPath(
-          Path()
-            ..moveTo(106, 31)
-            ..quadraticBezierTo(108, 22, 116, 21),
-          _stroke(line, 4));
-    }
-
-    // cheeks
-    canvas.drawCircle(const Offset(66, 86), 7, _fill(const Color(0x59FF6E6E)));
-    canvas.drawCircle(const Offset(134, 86), 7, _fill(const Color(0x59FF6E6E)));
-
-    _beakAndMouth(canvas);
-    _eyes(canvas);
+    canvas.save();
+    _headT(canvas, 9.2);
     _glasses(canvas);
-    _hat(canvas, line);
+    canvas.restore();
+
+    canvas.save();
+    _headT(canvas, 8.0);
+    canvas.translate(0, -5);
+    _hat(canvas, _ink);
+    canvas.restore();
+
     _weapon(canvas);
+
+    if (m >= 5) {
+      _sparkle(canvas, const Offset(230, 300), 46, const Color(0xFFFFD54A));
+      _sparkle(canvas, const Offset(1150, 560), 38, const Color(0xFFFFD54A));
+      _sparkle(canvas, const Offset(190, 960), 34, const Color(0xFFFFD54A));
+    }
+    if (mood == DuckMood.confused) {
+      _text(canvas, '?', const Offset(985, 120), 260, const Color(0xFF29B6F6));
+    } else if (mood == DuckMood.sleepy) {
+      _text(canvas, 'Z', const Offset(950, 120), 170, const Color(0xFF29B6F6));
+      _text(canvas, 'Z', const Offset(1060, 20), 120, const Color(0xFF29B6F6));
+      _text(canvas, 'Z', const Offset(1130, -60), 85, const Color(0xFF29B6F6));
+    } else if (mood == DuckMood.happy && !blink) {
+      _sparkle(canvas, const Offset(1040, 250), 40, const Color(0xFFFFD54A));
+      _sparkle(canvas, const Offset(1120, 380), 28, const Color(0xFFFFD54A));
+      _sparkle(canvas, const Offset(240, 560), 30, const Color(0xFFFFD54A));
+    }
 
     canvas.restore();
   }
 
-  void _beakAndMouth(Canvas canvas) {
-    if (mood == DuckMood.happy) {
-      canvas.drawOval(Rect.fromCenter(center: const Offset(100, 100), width: 26, height: 12), _fill(_beakDark));
+  // ───────── helpers ─────────
+  void _img(Canvas canvas, ui.Image? im, bool tint) {
+    if (im == null) return;
+    final p = Paint()
+      ..filterQuality = FilterQuality.high
+      ..isAntiAlias = true;
+    if (tint && _tinted) p.colorFilter = ColorFilter.mode(look.color, BlendMode.modulate);
+    canvas.drawImageRect(im, Rect.fromLTWH(0, 0, im.width.toDouble(), im.height.toDouble()), _artRect, p);
+  }
+
+  void _headT(Canvas canvas, double k) {
+    canvas.translate(_eyeMid.dx, _eyeMid.dy);
+    canvas.rotate(_tilt);
+    canvas.scale(k);
+    canvas.translate(-100, -66);
+  }
+
+  void _text(Canvas canvas, String t, Offset at, double size, Color c) {
+    final tp = TextPainter(
+      text: TextSpan(text: t, style: TextStyle(fontFamily: 'Nunito', fontSize: size, fontWeight: FontWeight.w700, color: c)),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    tp.paint(canvas, at - Offset(tp.width / 2, tp.height / 2));
+  }
+
+  Path _star(Offset c, double r, double ri, int n) {
+    final p = Path();
+    for (var i = 0; i < n * 2; i++) {
+      final a = -pi / 2 + i * pi / n;
+      final rr = i.isEven ? r : ri;
+      final x = c.dx + cos(a) * rr, y = c.dy + sin(a) * rr;
+      if (i == 0) {
+        p.moveTo(x, y);
+      } else {
+        p.lineTo(x, y);
+      }
     }
-    final up = Rect.fromCenter(center: const Offset(100, 90), width: 40, height: 24);
-    canvas.drawOval(up, _fill(_beak));
-    canvas.drawOval(up, _stroke(_beakDark, 3));
-    if (mood == DuckMood.idle || mood == DuckMood.sleepy) {
-      canvas.drawLine(const Offset(88, 93), const Offset(112, 93), _stroke(_beakDark, 2.5));
-    } else if (mood == DuckMood.confused) {
-      canvas.drawLine(const Offset(88, 95), const Offset(112, 91), _stroke(_beakDark, 2.5));
+    p.close();
+    return p;
+  }
+
+  void _sparkle(Canvas canvas, Offset c, double r, Color col) => canvas.drawPath(_star(c, r, r * 0.3, 4), _fill(col));
+
+  // ───────── face ─────────
+  void _closedEyes(Canvas canvas, bool happy) {
+    final p = _stroke(_pupil, 30);
+    for (final c in [_eyeL, _eyeR]) {
+      if (happy) {
+        canvas.drawArc(Rect.fromCenter(center: c.translate(0, 30), width: 170, height: 120), pi + 0.25, pi - 0.5, false, p);
+      } else {
+        canvas.drawArc(Rect.fromCenter(center: c.translate(0, -25), width: 170, height: 100), 0.25, pi - 0.5, false, p);
+      }
     }
   }
 
-  void _eyes(Canvas canvas) {
-    const l = Offset(82, 66), r = Offset(118, 66);
-    if (mood == DuckMood.happy) {
-      for (final c in [l, r]) {
-        canvas.drawArc(Rect.fromCenter(center: c.translate(0, 3), width: 16, height: 14), pi, pi, false, _stroke(_ink, 4.5));
-      }
-    } else if (blink || mood == DuckMood.sleepy) {
-      for (final c in [l, r]) {
-        canvas.drawLine(c.translate(-7, 0), c.translate(7, 0), _stroke(_ink, 4.5));
-      }
+  void _brows(Canvas canvas, bool angry) {
+    final p = _stroke(_ink, 30);
+    if (angry) {
+      canvas.drawLine(_eyeL.translate(-120, -150), _eyeL.translate(120, -80), p);
+      canvas.drawLine(_eyeR.translate(-120, -80), _eyeR.translate(120, -150), p);
     } else {
-      final conf = mood == DuckMood.confused;
-      final lr = conf ? 5.0 : 6.0;
-      final rr = conf ? 8.0 : 6.0;
-      canvas.drawOval(Rect.fromCenter(center: l, width: lr * 2, height: lr * 2.4), _fill(_ink));
-      canvas.drawOval(Rect.fromCenter(center: r, width: rr * 2, height: rr * 2.4), _fill(_ink));
-      canvas.drawCircle(l.translate(1.8, -2.5), 2.2, _fill(Colors.white));
-      canvas.drawCircle(r.translate(1.8, -2.5), 2.2, _fill(Colors.white));
-      if (!conf && look.muscle >= 4) {
-        canvas.drawLine(const Offset(70, 52), const Offset(92, 59), _stroke(_ink, 4.5));
-        canvas.drawLine(const Offset(130, 52), const Offset(108, 59), _stroke(_ink, 4.5));
-      }
-      if (conf) {
-        canvas.drawLine(const Offset(72, 52), const Offset(92, 47), _stroke(_ink, 3.5));
-        canvas.drawLine(const Offset(108, 49), const Offset(128, 55), _stroke(_ink, 3.5));
-      }
+      canvas.drawLine(_eyeL.translate(-110, -135), _eyeL.translate(110, -180), p);
+      canvas.drawLine(_eyeR.translate(-110, -100), _eyeR.translate(110, -95), p);
     }
   }
 
+  // ───────── rank medal (the muscle tier) ─────────
+  void _medal(Canvas canvas, int m) {
+    final ribbon = _stroke(const Color(0xFFC62828), 26);
+    canvas.drawLine(const Offset(600, 690), const Offset(655, 772), ribbon);
+    canvas.drawLine(const Offset(712, 690), const Offset(655, 772), ribbon);
+    final Color metal = m >= 5 ? const Color(0xFFFFC107) : (m >= 3 ? const Color(0xFFCFD8DC) : const Color(0xFFCD7F32));
+    final Color edge = m >= 5 ? const Color(0xFFFF8F00) : (m >= 3 ? const Color(0xFF90A4AE) : const Color(0xFF8D5524));
+    canvas.drawCircle(const Offset(655, 818), 54, _fill(metal));
+    canvas.drawCircle(const Offset(655, 818), 54, _stroke(edge, 9));
+    canvas.drawPath(_star(const Offset(655, 818), 30, 13, 5), _fill(edge));
+  }
+
+  // ───────── shirt ─────────
+  Path _shirtRegion() {
+    final body = Path()..addOval(const Rect.fromLTWH(330, 665, 650, 340));
+    final wing = Path()..addOval(Rect.fromCenter(center: const Offset(990, 785), width: 290, height: 290));
+    return Path.combine(PathOperation.difference, body, wing);
+  }
+
+  Paint _sa(Color c) => Paint()
+    ..color = c
+    ..blendMode = BlendMode.srcATop;
+
+  Paint _saLine(Color c, double w) => Paint()
+    ..color = c
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = w
+    ..strokeCap = StrokeCap.round
+    ..blendMode = BlendMode.srcATop;
+
+  Paint _skin() {
+    final p = _sa(_cream);
+    if (_tinted) p.colorFilter = ColorFilter.mode(look.color, BlendMode.modulate);
+    return p;
+  }
+
+  void _shirtShapes(Canvas canvas) {
+    switch (look.shirt) {
+      case 'tee':
+        canvas.drawRect(const Rect.fromLTWH(300, 640, 720, 420), _sa(const Color(0xFF29B6F6)));
+        canvas.drawOval(Rect.fromCenter(center: const Offset(655, 668), width: 250, height: 110), _skin());
+        break;
+      case 'hoodie':
+        canvas.drawRect(const Rect.fromLTWH(300, 640, 720, 420), _sa(const Color(0xFFFF8A65)));
+        canvas.drawOval(Rect.fromCenter(center: const Offset(655, 668), width: 320, height: 140), _sa(const Color(0xFFF4511E)));
+        canvas.drawOval(Rect.fromCenter(center: const Offset(655, 672), width: 220, height: 92), _skin());
+        canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(520, 860, 270, 120), const Radius.circular(40)), _sa(const Color(0xFFF4511E)));
+        canvas.drawLine(const Offset(595, 720), const Offset(595, 810), _saLine(Colors.white, 18));
+        canvas.drawLine(const Offset(715, 720), const Offset(715, 810), _saLine(Colors.white, 18));
+        break;
+      case 'suit':
+        canvas.drawRect(const Rect.fromLTWH(300, 640, 720, 420), _sa(const Color(0xFF37474F)));
+        canvas.drawPath(
+            Path()
+              ..moveTo(560, 650)
+              ..lineTo(750, 650)
+              ..lineTo(655, 880)
+              ..close(),
+            _sa(Colors.white));
+        canvas.drawPath(
+            Path()
+              ..moveTo(655, 722)
+              ..lineTo(550, 668)
+              ..lineTo(550, 776)
+              ..close(),
+            _sa(const Color(0xFFE53935)));
+        canvas.drawPath(
+            Path()
+              ..moveTo(655, 722)
+              ..lineTo(760, 668)
+              ..lineTo(760, 776)
+              ..close(),
+            _sa(const Color(0xFFE53935)));
+        canvas.drawCircle(const Offset(655, 722), 28, _sa(const Color(0xFFB71C1C)));
+        break;
+      case 'jersey':
+        canvas.drawRect(const Rect.fromLTWH(300, 640, 720, 420), _sa(const Color(0xFF43A047)));
+        canvas.drawRect(const Rect.fromLTWH(300, 815, 720, 44), _sa(Colors.white));
+        canvas.drawRect(const Rect.fromLTWH(300, 905, 720, 44), _sa(Colors.white));
+        canvas.drawOval(Rect.fromCenter(center: const Offset(655, 668), width: 250, height: 110), _skin());
+        break;
+      default:
+        break;
+    }
+  }
+
+  void _scarf(Canvas canvas) {
+    canvas.save();
+    canvas.translate(665, 678);
+    canvas.rotate(0.1);
+    canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(120, 10, 120, 250), const Radius.circular(40)), _fill(const Color(0xFFC62828)));
+    canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: Offset.zero, width: 620, height: 108), const Radius.circular(54)), _fill(const Color(0xFFE53935)));
+    canvas.drawLine(const Offset(-210, -34), const Offset(-210, 34), _stroke(const Color(0xFFFFCDD2), 14));
+    canvas.drawLine(const Offset(210, -34), const Offset(210, 34), _stroke(const Color(0xFFFFCDD2), 14));
+    canvas.restore();
+  }
+
+  // ───────── glasses / weapon / hats (old design coordinates, placed by a transform) ─────────
   void _glasses(Canvas canvas) {
     const l = Offset(82, 66), r = Offset(118, 66);
     switch (look.glasses) {
       case 'round':
         for (final c in [l, r]) {
           canvas.drawCircle(c, 14, _fill(const Color(0x33FFFFFF)));
-          canvas.drawCircle(c, 14, _stroke(_ink, 3.5));
+          canvas.drawCircle(c, 14, _hs(_ink, 3.5));
         }
-        canvas.drawLine(const Offset(96, 64), const Offset(104, 64), _stroke(_ink, 3.5));
+        canvas.drawLine(const Offset(96, 64), const Offset(104, 64), _hs(_ink, 3.5));
         break;
       case 'shades':
         final rl = RRect.fromRectAndRadius(Rect.fromLTWH(66, 55, 32, 22), const Radius.circular(8));
         final rr = RRect.fromRectAndRadius(Rect.fromLTWH(102, 55, 32, 22), const Radius.circular(8));
         canvas.drawRRect(rl, _fill(const Color(0xFF212121)));
         canvas.drawRRect(rr, _fill(const Color(0xFF212121)));
-        canvas.drawLine(const Offset(98, 62), const Offset(102, 62), _stroke(const Color(0xFF212121), 4));
-        canvas.drawLine(const Offset(72, 60), const Offset(78, 60), _stroke(const Color(0x66FFFFFF), 3));
-        canvas.drawLine(const Offset(108, 60), const Offset(114, 60), _stroke(const Color(0x66FFFFFF), 3));
+        canvas.drawLine(const Offset(98, 62), const Offset(102, 62), _hs(const Color(0xFF212121), 4));
+        canvas.drawLine(const Offset(72, 60), const Offset(78, 60), _hs(const Color(0x66FFFFFF), 3));
+        canvas.drawLine(const Offset(108, 60), const Offset(114, 60), _hs(const Color(0x66FFFFFF), 3));
         break;
       case 'square':
         const col = Color(0xFFE53935);
         for (final x in [66.0, 102.0]) {
           final rc = RRect.fromRectAndRadius(Rect.fromLTWH(x, 54, 32, 24), const Radius.circular(5));
           canvas.drawRRect(rc, _fill(const Color(0x33FFFFFF)));
-          canvas.drawRRect(rc, _stroke(col, 3.5));
+          canvas.drawRRect(rc, _hs(col, 3.5));
         }
-        canvas.drawLine(const Offset(98, 62), const Offset(102, 62), _stroke(col, 3.5));
+        canvas.drawLine(const Offset(98, 62), const Offset(102, 62), _hs(col, 3.5));
         break;
       case 'monocle':
         canvas.drawCircle(r, 15, _fill(const Color(0x33FFFFFF)));
-        canvas.drawCircle(r, 15, _stroke(const Color(0xFFFFB300), 3.5));
+        canvas.drawCircle(r, 15, _hs(const Color(0xFFFFB300), 3.5));
         canvas.drawPath(
             Path()
               ..moveTo(130, 76)
               ..quadraticBezierTo(142, 100, 138, 120),
-            _stroke(const Color(0xFFFFB300), 2));
+            _hs(const Color(0xFFFFB300), 2));
         break;
       default:
         break;
     }
-  }
-
-  void _shirt(Canvas canvas, Rect body, Color fe) {
-    final id = look.shirt;
-    if (id == null || id == 'scarf') return;
-    canvas.save();
-    canvas.clipPath(Path()..addOval(body));
-    switch (id) {
-      case 'tee':
-        canvas.drawRect(const Rect.fromLTWH(10, 114, 180, 100), _fill(const Color(0xFF29B6F6)));
-        canvas.drawOval(Rect.fromCenter(center: const Offset(100, 112), width: 46, height: 24), _fill(fe));
-        break;
-      case 'hoodie':
-        canvas.drawRect(const Rect.fromLTWH(10, 110, 180, 100), _fill(const Color(0xFFFF8A65)));
-        canvas.drawOval(Rect.fromCenter(center: const Offset(100, 110), width: 56, height: 28), _fill(const Color(0xFFF4511E)));
-        canvas.drawOval(Rect.fromCenter(center: const Offset(100, 111), width: 40, height: 20), _fill(fe));
-        canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(74, 150, 52, 24), const Radius.circular(8)), _fill(const Color(0xFFF4511E)));
-        canvas.drawLine(const Offset(90, 120), const Offset(90, 138), _stroke(Colors.white, 3));
-        canvas.drawLine(const Offset(110, 120), const Offset(110, 138), _stroke(Colors.white, 3));
-        break;
-      case 'suit':
-        canvas.drawRect(const Rect.fromLTWH(10, 112, 180, 100), _fill(const Color(0xFF37474F)));
-        canvas.drawPath(
-            Path()
-              ..moveTo(82, 112)
-              ..lineTo(118, 112)
-              ..lineTo(100, 156)
-              ..close(),
-            _fill(Colors.white));
-        canvas.drawPath(
-            Path()
-              ..moveTo(100, 120)
-              ..lineTo(80, 111)
-              ..lineTo(80, 129)
-              ..close(),
-            _fill(const Color(0xFFE53935)));
-        canvas.drawPath(
-            Path()
-              ..moveTo(100, 120)
-              ..lineTo(120, 111)
-              ..lineTo(120, 129)
-              ..close(),
-            _fill(const Color(0xFFE53935)));
-        canvas.drawCircle(const Offset(100, 120), 4.5, _fill(const Color(0xFFB71C1C)));
-        break;
-      case 'jersey':
-        canvas.drawRect(const Rect.fromLTWH(10, 114, 180, 100), _fill(const Color(0xFF43A047)));
-        canvas.drawRect(const Rect.fromLTWH(10, 140, 180, 8), _fill(Colors.white));
-        canvas.drawRect(const Rect.fromLTWH(10, 156, 180, 8), _fill(Colors.white));
-        canvas.drawOval(Rect.fromCenter(center: const Offset(100, 112), width: 46, height: 24), _fill(fe));
-        break;
-      default:
-        break;
-    }
-    canvas.restore();
-  }
-
-  void _scarf(Canvas canvas) {
-    const red = Color(0xFFE53935);
-    canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(112, 118, 20, 44), const Radius.circular(8)), _fill(const Color(0xFFC62828)));
-    canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(52, 104, 96, 22), const Radius.circular(11)), _fill(red));
-    canvas.drawLine(const Offset(70, 106), const Offset(70, 124), _stroke(const Color(0xFFFFCDD2), 3));
-    canvas.drawLine(const Offset(130, 106), const Offset(130, 124), _stroke(const Color(0xFFFFCDD2), 3));
   }
 
   void _weapon(Canvas canvas) {
     final id = look.weapon;
     if (id == null) return;
-    final hand = Offset(100 + (56 + look.muscle * 2.5) + 8, 150);
     canvas.save();
-    canvas.translate(hand.dx, hand.dy);
-    canvas.rotate(-0.22);
+    canvas.translate(1062, 800); // the raised wing tip on the right of the picture
+    canvas.scale(5.5);
+    canvas.rotate(0.16);
     const wood = Color(0xFF8D6E63);
     const steel = Color(0xFFCFD8DC);
     const steelDark = Color(0xFF607D8B);
@@ -577,7 +661,7 @@ class DuckPainter extends CustomPainter {
         canvas.drawLine(const Offset(11, -52), const Offset(11, -70), tp);
         break;
       case 'dumbbell':
-        canvas.rotate(0.22);
+        canvas.rotate(-0.16);
         canvas.translate(0, -14);
         canvas.drawLine(const Offset(-17, 0), const Offset(17, 0), _stroke(steelDark, 5));
         for (final x in [-27.0, 17.0]) {
@@ -599,10 +683,10 @@ class DuckPainter extends CustomPainter {
           ..quadraticBezierTo(142, 10, 140, 50)
           ..close();
         canvas.drawPath(dome, _fill(const Color(0xFF1E88E5)));
-        canvas.drawPath(dome, _stroke(const Color(0xFF0D47A1), 3));
+        canvas.drawPath(dome, _hs(const Color(0xFF0D47A1), 3));
         final brim = Rect.fromCenter(center: const Offset(100, 50), width: 104, height: 14);
         canvas.drawOval(brim, _fill(const Color(0xFF1565C0)));
-        canvas.drawOval(brim, _stroke(const Color(0xFF0D47A1), 3));
+        canvas.drawOval(brim, _hs(const Color(0xFF0D47A1), 3));
         canvas.drawCircle(const Offset(100, 10), 4, _fill(const Color(0xFF0D47A1)));
         break;
       case 'beanie':
@@ -612,12 +696,12 @@ class DuckPainter extends CustomPainter {
           ..quadraticBezierTo(144, 12, 142, 52)
           ..close();
         canvas.drawPath(dome, _fill(const Color(0xFFE53935)));
-        canvas.drawPath(dome, _stroke(const Color(0xFFB71C1C), 3));
+        canvas.drawPath(dome, _hs(const Color(0xFFB71C1C), 3));
         final band = RRect.fromRectAndRadius(const Rect.fromLTWH(56, 40, 88, 15), const Radius.circular(7));
         canvas.drawRRect(band, _fill(const Color(0xFFC62828)));
-        canvas.drawRRect(band, _stroke(const Color(0xFFB71C1C), 2.5));
+        canvas.drawRRect(band, _hs(const Color(0xFFB71C1C), 2.5));
         canvas.drawCircle(const Offset(100, 8), 9, _fill(Colors.white));
-        canvas.drawCircle(const Offset(100, 8), 9, _stroke(const Color(0xFFCFD8DC), 2.5));
+        canvas.drawCircle(const Offset(100, 8), 9, _hs(const Color(0xFFCFD8DC), 2.5));
         break;
       case 'crown':
         final p = Path()
@@ -630,7 +714,7 @@ class DuckPainter extends CustomPainter {
           ..lineTo(136, 46)
           ..close();
         canvas.drawPath(p, _fill(const Color(0xFFFFC107)));
-        canvas.drawPath(p, _stroke(const Color(0xFFFF8F00), 3));
+        canvas.drawPath(p, _hs(const Color(0xFFFF8F00), 3));
         canvas.drawCircle(const Offset(100, 34), 4.5, _fill(const Color(0xFFE53935)));
         canvas.drawCircle(const Offset(78, 38), 3.5, _fill(const Color(0xFF29B6F6)));
         canvas.drawCircle(const Offset(122, 38), 3.5, _fill(const Color(0xFF29B6F6)));
@@ -638,14 +722,14 @@ class DuckPainter extends CustomPainter {
       case 'wizard':
         final cone = Path()
           ..moveTo(62, 48)
-          ..quadraticBezierTo(92, 20, 108, -16)
+          ..quadraticBezierTo(92, 24, 106, -2)
           ..quadraticBezierTo(122, 20, 138, 48)
           ..close();
         canvas.drawPath(cone, _fill(const Color(0xFF7E57C2)));
-        canvas.drawPath(cone, _stroke(const Color(0xFF4527A0), 3));
+        canvas.drawPath(cone, _hs(const Color(0xFF4527A0), 3));
         final brim = Rect.fromCenter(center: const Offset(100, 48), width: 112, height: 16);
         canvas.drawOval(brim, _fill(const Color(0xFF5E35B1)));
-        canvas.drawOval(brim, _stroke(const Color(0xFF4527A0), 3));
+        canvas.drawOval(brim, _hs(const Color(0xFF4527A0), 3));
         canvas.drawCircle(const Offset(94, 26), 3.2, _fill(const Color(0xFFFFEE58)));
         canvas.drawCircle(const Offset(108, 8), 2.6, _fill(const Color(0xFFFFEE58)));
         canvas.drawCircle(const Offset(110, 34), 2.2, _fill(const Color(0xFFFFEE58)));
@@ -659,7 +743,7 @@ class DuckPainter extends CustomPainter {
         break;
       case 'chef':
         final white = _fill(Colors.white);
-        final edge = _stroke(const Color(0xFFCFD8DC), 3);
+        final edge = _hs(const Color(0xFFCFD8DC), 3);
         for (final c in [const Offset(78, 24), const Offset(122, 24), const Offset(100, 12)]) {
           canvas.drawCircle(c, 19, white);
         }
@@ -676,23 +760,23 @@ class DuckPainter extends CustomPainter {
       case 'party':
         final cone = Path()
           ..moveTo(72, 48)
-          ..lineTo(100, -10)
+          ..lineTo(100, 2)
           ..lineTo(128, 48)
           ..close();
         canvas.drawPath(cone, _fill(const Color(0xFFEC407A)));
-        canvas.drawPath(cone, _stroke(const Color(0xFFC2185B), 3));
+        canvas.drawPath(cone, _hs(const Color(0xFFC2185B), 3));
         canvas.drawOval(Rect.fromCenter(center: const Offset(100, 48), width: 56, height: 10), _fill(const Color(0xFFC2185B)));
         canvas.drawCircle(const Offset(94, 28), 3.2, _fill(const Color(0xFFFFEE58)));
         canvas.drawCircle(const Offset(108, 16), 3, _fill(const Color(0xFF80DEEA)));
         canvas.drawCircle(const Offset(106, 38), 3, _fill(const Color(0xFFFFEE58)));
-        canvas.drawCircle(const Offset(100, -10), 6, _fill(const Color(0xFFFFEE58)));
+        canvas.drawCircle(const Offset(100, 2), 6, _fill(const Color(0xFFFFEE58)));
         break;
       case 'phones':
-        canvas.drawArc(Rect.fromCenter(center: const Offset(100, 72), width: 96, height: 96), pi, pi, false, _stroke(const Color(0xFF455A64), 7));
+        canvas.drawArc(Rect.fromCenter(center: const Offset(100, 72), width: 96, height: 96), pi, pi, false, _hs(const Color(0xFF455A64), 7));
         for (final x in [38.0, 144.0]) {
           final cup = RRect.fromRectAndRadius(Rect.fromLTWH(x, 58, 18, 34), const Radius.circular(8));
           canvas.drawRRect(cup, _fill(const Color(0xFFFF5252)));
-          canvas.drawRRect(cup, _stroke(const Color(0xFFB71C1C), 3));
+          canvas.drawRRect(cup, _hs(const Color(0xFFB71C1C), 3));
         }
         break;
       default:

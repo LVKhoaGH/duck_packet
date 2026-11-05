@@ -21,6 +21,7 @@ class BackupService {
         'saved': DateTime.now().toIso8601String(),
         'stats': Map<String, dynamic>.from(Hive.box('stats').toMap().map((k, v) => MapEntry('$k', v))),
         'packs': Hive.box('course').get('packs'),
+        'folders': Hive.box('course').get('folders'),
       });
 
   /// Returns a short message for the user, or null if cancelled.
@@ -73,10 +74,17 @@ class BackupService {
       await cbox.put('active', m['course']);
     }
 
+    if (m['folders'] is String) {
+      await cbox.put('folders', m['folders']);
+    } else {
+      await cbox.delete('folders');
+    }
+
     ref.invalidate(statsProvider);
     ref.invalidate(extrasProvider);
     ref.invalidate(studyProvider);
     ref.invalidate(packsProvider);
+    ref.invalidate(foldersProvider);
     return 'Progress restored';
   }
 }

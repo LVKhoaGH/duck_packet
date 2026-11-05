@@ -15,7 +15,7 @@ class ImportService {
 
   /// Pick one or many .json / .zip files. Every JSON becomes one pack.
   /// Returns null if cancelled. A bad file is reported but does not stop the others.
-  Future<ImportReport?> importFiles() async {
+  Future<ImportReport?> importFiles({String folder = ''}) async {
     final res = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['json', 'zip'],
@@ -36,7 +36,7 @@ class ImportService {
           for (final e in ZipDecoder().decodeBytes(bytes).files) {
             if (e.isFile && e.name.toLowerCase().endsWith('.json')) {
               any = true;
-              _addOne(rep, e.name.split('/').last, e.content as List<int>);
+              _addOne(rep, e.name.split('/').last, e.content as List<int>, folder);
             }
           }
           if (!any) rep.failed.add('${f.name}: no .json file inside the zip');
@@ -44,13 +44,13 @@ class ImportService {
           rep.failed.add('${f.name}: not a valid zip');
         }
       } else {
-        _addOne(rep, f.name, bytes);
+        _addOne(rep, f.name, bytes, folder);
       }
     }
     return rep;
   }
 
-  void _addOne(ImportReport rep, String fileName, List<int> bytes) {
+  void _addOne(ImportReport rep, String fileName, List<int> bytes, String folder) {
     final name = fileName.replaceAll(RegExp(r'\.json$', caseSensitive: false), '');
     try {
       var text = utf8.decode(bytes, allowMalformed: true);
@@ -60,7 +60,7 @@ class ImportService {
         rep.failed.add('$fileName: the top level must be an object { ... }');
         return;
       }
-      final err = ref.read(packsProvider.notifier).add(name, Map<String, dynamic>.from(j));
+      final err = ref.read(packsProvider.notifier).add(name, Map<String, dynamic>.from(j), folder: folder);
       if (err == null) {
         rep.ok.add(fileName);
       } else {

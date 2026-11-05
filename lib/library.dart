@@ -8,11 +8,15 @@ class Pack {
   final String id, name;
   final bool enabled;
   final Map<String, dynamic> data;
-  Pack({required this.id, required this.name, required this.enabled, required this.data});
+
+  /// Id of the folder this file sits in; '' = not in a folder. Stored by the app, never inside the user's JSON.
+  final String folder;
+  Pack({required this.id, required this.name, required this.enabled, required this.data, this.folder = ''});
 
   late final Course course = Course.fromJson(data);
 
-  Pack copy({bool? enabled}) => Pack(id: id, name: name, enabled: enabled ?? this.enabled, data: data);
+  Pack copy({bool? enabled, String? folder}) =>
+      Pack(id: id, name: name, enabled: enabled ?? this.enabled, data: data, folder: folder ?? this.folder);
 
   int get nodeCount => course.chapters.fold(0, (a, c) => a + c.nodes.length);
   int get questionCount => course.allNodes.fold(0, (a, n) => a + n.questions.length);
@@ -20,11 +24,12 @@ class Pack {
   Set<String> get chapterIds => course.chapters.map((c) => c.id).toSet();
   Set<String> get nodeIds => course.allNodes.map((n) => n.id).toSet();
 
-  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'enabled': enabled, 'data': data};
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'enabled': enabled, 'folder': folder, 'data': data};
   factory Pack.fromJson(Map<String, dynamic> j) => Pack(
         id: '${j['id']}',
         name: '${j['name']}',
         enabled: j['enabled'] != false,
+        folder: '${j['folder'] ?? ''}',
         data: Map<String, dynamic>.from(j['data'] as Map),
       );
 }
@@ -66,7 +71,7 @@ class PackNotifier extends Notifier<List<Pack>> {
   }
 
   /// Adds a file (or replaces the pack with the same name). Returns an error text, or null on success.
-  String? add(String name, Map<String, dynamic> data) {
+  String? add(String name, Map<String, dynamic> data, {String folder = ''}) {
     final errs = validatePack(data);
     if (errs.isNotEmpty) {
       return errs.take(8).join('\n') + (errs.length > 8 ? '\n... and ${errs.length - 8} more' : '');
@@ -77,6 +82,7 @@ class PackNotifier extends Notifier<List<Pack>> {
       name: name,
       enabled: at >= 0 ? state[at].enabled : true,
       data: data,
+      folder: at >= 0 ? state[at].folder : folder,
     );
     final usedCh = <String>{}, usedNodes = <String>{};
     for (var i = 0; i < state.length; i++) {
@@ -112,23 +118,137 @@ class PackNotifier extends Notifier<List<Pack>> {
     _persist(state);
   }
 
+  /// Moves a file up/down among the files of the same folder.
   void move(String id, int delta) {
     final i = state.indexWhere((p) => p.id == id);
-    final j = i + delta;
-    if (i < 0 || j < 0 || j >= state.length) return;
+    if (i < 0) return;
+    final same = <int>[for (var k = 0; k < state.length; k++) if (state[k].folder == state[i].folder) k];
+    final pos = same.indexOf(i);
+    final to = pos + delta;
+    if (to < 0 || to >= same.length) return;
     final l = [...state];
-    final p = l.removeAt(i);
-    l.insert(j, p);
+    final a = same[pos], b = same[to];
+    final t = l[a];
+    l[a] = l[b];
+    l[b] = t;
     state = l;
     _persist(l);
+  }
+
+  /// Puts a file into a folder ('' = take it out of any folder). It goes to the end of that folder.
+  void moveTo(String id, String folder) {
+    final i = state.indexWhere((p) => p.id == id);
+    if (i < 0 || state[i].folder == folder) return;
+    final l = [...state];
+    final p = l.removeAt(i).copy(folder: folder);
+    l.add(p);
+    state = l;
+    _persist(l);
+  }
+
+  void setEnabledIn(String folder, bool on) {
+    state = [for (final p in state) p.folder == folder && p.enabled != on ? p.copy(enabled: on) : p];
+    _persist(state);
+  }
+
+  void removeIn(String folder) {
+    state = state.where((p) => p.folder != folder).toList();
+    _persist(state);
+  }
+
+  /// Takes every file out of the folder (used when a folder is deleted but its files are kept).
+  void ungroup(String folder) {
+    state = [for (final p in state) p.folder == folder ? p.copy(folder: '') : p];
+    _persist(state);
   }
 }
 
 final packsProvider = NotifierProvider<PackNotifier, List<Pack>>(PackNotifier.new);
 
+// ───────────────────────── folders ─────────────────────────
+/// A folder that groups several imported files. Purely organisational; the JSON files are untouched.
+class PackFolder {
+  final String id, name;
+  final bool open;
+  const PackFolder({required this.id, required this.name, this.open = true});
+
+  PackFolder copy({String? name, bool? open}) => PackFolder(id: id, name: name ?? this.name, open: open ?? this.open);
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'open': open};
+  factory PackFolder.fromJson(Map<String, dynamic> j) => PackFolder(id: '${j['id']}', name: '${j['name']}', open: j['open'] != false);
+}
+
+/// Folder list, stored in Hive box 'course', key 'folders'.
+class FolderNotifier extends Notifier<List<PackFolder>> {
+  Box get _box => Hive.box('course');
+
+  void _persist(List<PackFolder> l) => _box.put('folders', jsonEncode(l.map((f) => f.toJson()).toList()));
+
+  @override
+  List<PackFolder> build() {
+    final out = <PackFolder>[];
+    final raw = _box.get('folders');
+    if (raw is String && raw.isNotEmpty) {
+      try {
+        for (final e in jsonDecode(raw) as List) {
+          try {
+            out.add(PackFolder.fromJson(Map<String, dynamic>.from(e as Map)));
+          } catch (_) {}
+        }
+      } catch (_) {}
+    }
+    return out;
+  }
+
+  String create(String name) {
+    final id = 'f${DateTime.now().microsecondsSinceEpoch}';
+    state = [...state, PackFolder(id: id, name: name)];
+    _persist(state);
+    return id;
+  }
+
+  void rename(String id, String name) {
+    state = [for (final f in state) f.id == id ? f.copy(name: name) : f];
+    _persist(state);
+  }
+
+  void toggleOpen(String id) {
+    state = [for (final f in state) f.id == id ? f.copy(open: !f.open) : f];
+    _persist(state);
+  }
+
+  void remove(String id) {
+    state = state.where((f) => f.id != id).toList();
+    _persist(state);
+  }
+
+  void move(String id, int delta) {
+    final i = state.indexWhere((f) => f.id == id);
+    final j = i + delta;
+    if (i < 0 || j < 0 || j >= state.length) return;
+    final l = [...state];
+    final f = l.removeAt(i);
+    l.insert(j, f);
+    state = l;
+    _persist(l);
+  }
+}
+
+final foldersProvider = NotifierProvider<FolderNotifier, List<PackFolder>>(FolderNotifier.new);
+
+/// Display / play order: folders top to bottom (files in list order inside each), then files not in a folder.
+List<Pack> orderedPacks(List<Pack> packs, List<PackFolder> folders) {
+  final ids = {for (final f in folders) f.id};
+  final out = <Pack>[];
+  for (final f in folders) {
+    out.addAll(packs.where((p) => p.folder == f.id));
+  }
+  out.addAll(packs.where((p) => !ids.contains(p.folder)));
+  return out;
+}
+
 /// Chapters of all enabled packs, in list order. Null when nothing is enabled (the app is "empty").
-Course? mergeCourse(List<Pack> packs) {
-  final on = packs.where((p) => p.enabled).toList();
+Course? mergeCourse(List<Pack> packs, [List<PackFolder> folders = const []]) {
+  final on = orderedPacks(packs, folders).where((p) => p.enabled).toList();
   if (on.isEmpty) return null;
   final seen = <String>{};
   final gl = <GlossaryItem>[];
@@ -142,7 +262,8 @@ Course? mergeCourse(List<Pack> packs) {
 }
 
 /// Same type the rest of the app already uses (`.when`, `.valueOrNull`).
-final courseProvider = Provider<AsyncValue<Course?>>((ref) => AsyncData(mergeCourse(ref.watch(packsProvider))));
+final courseProvider =
+    Provider<AsyncValue<Course?>>((ref) => AsyncData(mergeCourse(ref.watch(packsProvider), ref.watch(foldersProvider))));
 
 // ───────────────────────── validation ─────────────────────────
 String _s(dynamic v) => v == null ? '' : '$v';

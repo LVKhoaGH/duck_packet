@@ -293,7 +293,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(children: [
+        child: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 720), child: Column(children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 10, 16, 4),
             child: Row(children: [
@@ -391,7 +391,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
               ),
             ]),
           ),
-        ]),
+        ]))),
       ),
     );
   }

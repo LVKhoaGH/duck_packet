@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'duck.dart';
 import 'game_session_screen.dart';
 import 'glossary_screen.dart';
 import 'models.dart';
@@ -98,7 +99,7 @@ class PracticeTab extends ConsumerWidget {
 
     return ListView(padding: const EdgeInsets.fromLTRB(16, 16, 16, 32), children: [
       Row(children: [
-        Image.asset('assets/mascot/duck_idle.png', height: 64, errorBuilder: (_, __, ___) => const SizedBox(height: 64, width: 64)),
+        const DuckView(size: 58),
         const SizedBox(width: 12),
         const Expanded(child: Text('Practice', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.ink))),
       ]),

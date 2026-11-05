@@ -30,6 +30,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _tab = 1; // 0 Learn, 1 Map, 2 Practice, 3 Profile
   final PageController _pc = PageController(initialPage: 1);
+  final GlobalKey _pagesKey = GlobalKey(); // keeps tab state when the layout switches phone <-> wide
 
   @override
   void initState() {
@@ -62,42 +63,124 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _openLibrary() => Navigator.push(context, slideUpRoute(const LibraryScreen()));
 
+  Widget _pages(AsyncValue<Course?> courseAsync, Course? course) => KeyedSubtree(
+        key: _pagesKey,
+        child: PageView(
+          controller: _pc,
+          onPageChanged: (i) => setState(() => _tab = i),
+          children: [
+            _KeepAlive(child: LearnTab(course: course, onGoMap: () => _goTab(1))),
+            _KeepAlive(
+              child: courseAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, _) => Center(child: Text('Error: $e')),
+                data: (c) => c == null ? _EmptyState(onImport: _openLibrary) : _MapView(course: c),
+              ),
+            ),
+            _KeepAlive(child: PracticeTab(course: course)),
+            _KeepAlive(child: ProfileTab(course: course, onImport: _openLibrary)),
+          ],
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     final courseAsync = ref.watch(courseProvider);
     final stats = ref.watch(statsProvider);
     final course = courseAsync.valueOrNull;
+    final label = course?.id.split('_').first.toUpperCase() ?? 'DUCK';
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        bottom: false,
-        child: Column(children: [
-          _TopBar(label: course?.id.split('_').first.toUpperCase() ?? 'DUCK', stats: stats),
-          Expanded(
-            child: PageView(
-              controller: _pc,
-              onPageChanged: (i) => setState(() => _tab = i),
-              children: [
-                _KeepAlive(child: LearnTab(course: course, onGoMap: () => _goTab(1))),
-                _KeepAlive(
-                  child: courseAsync.when(
-                    loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (e, _) => Center(child: Text('Error: $e')),
-                    data: (c) => c == null ? _EmptyState(onImport: _openLibrary) : _MapView(course: c),
+    return LayoutBuilder(builder: (context, c) {
+      final wide = c.maxWidth >= 800;
+      if (!wide) {
+        // Phone / portrait: top bar, swipeable tabs, bottom navigation.
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: SafeArea(
+            bottom: false,
+            child: Column(children: [
+              _TopBar(label: label, stats: stats),
+              Expanded(child: _pages(courseAsync, course)),
+            ]),
+          ),
+          bottomNavigationBar: _BottomNav(index: _tab, onTap: _goTab),
+        );
+      }
+      // Laptop / landscape: side rail on the left, content centred (max 760 px).
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Row(children: [
+            _SideNav(index: _tab, onTap: _goTab),
+            Container(width: 2, color: AppColors.line),
+            Expanded(
+              child: Column(children: [
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 760),
+                    child: _TopBar(label: label, stats: stats),
                   ),
                 ),
-                _KeepAlive(child: PracticeTab(course: course)),
-                _KeepAlive(child: ProfileTab(course: course, onImport: _openLibrary)),
-              ],
+                Expanded(
+                  child: Center(
+                    child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 760), child: _pages(courseAsync, course)),
+                  ),
+                ),
+              ]),
+            ),
+          ]),
+        ),
+      );
+    });
+  }
+}
+
+/// Navigation rail used on wide windows (laptop). Same four tabs as the bottom bar.
+class _SideNav extends StatelessWidget {
+  final int index;
+  final ValueChanged<int> onTap;
+  const _SideNav({required this.index, required this.onTap});
+
+  static const _icons = [Icons.menu_book_rounded, Icons.map_rounded, Icons.fitness_center_rounded, Icons.person_rounded];
+  static const _labels = ['Learn', 'Map', 'Practice', 'Profile'];
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 200,
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(12, 18, 12, 12),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        const Padding(
+          padding: EdgeInsets.fromLTRB(8, 0, 8, 18),
+          child: Text('DuckPacket', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.primary)),
+        ),
+        for (var i = 0; i < 4; i++)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => onTap(i),
+              child: Container(
+                height: 52,
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                decoration: BoxDecoration(
+                  color: i == index ? AppColors.tint : Colors.transparent,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: i == index ? AppColors.primary : Colors.transparent, width: 2),
+                ),
+                child: Row(children: [
+                  Icon(_icons[i], size: 28, color: i == index ? AppColors.primary : AppColors.locked),
+                  const SizedBox(width: 12),
+                  Text(_labels[i],
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: i == index ? AppColors.primary : AppColors.lockedShadow)),
+                ]),
+              ),
             ),
           ),
-        ]),
-      ),
-      bottomNavigationBar: _BottomNav(
-        index: _tab,
-        onTap: _goTab,
-      ),
+        const Spacer(),
+        const Center(child: DuckView(size: 96)),
+      ]),
     );
   }
 }

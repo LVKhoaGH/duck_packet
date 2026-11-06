@@ -6,12 +6,19 @@ class PairItem {
 }
 
 class Question {
-  final String type; // reorder | match_pairs | fill_code
+  /// reorder | match_pairs | fill_code | multiple_choice | categorize | multi_select | lab
+  final String type;
   final String prompt, explanation;
   final List<String> items, options;
   final List<int> correctOrder;
   final List<PairItem> pairs;
   final String template, correctAnswer;
+
+  /// multi_select: every correct option ("Choose two" = 2 entries).
+  final List<String> correctAnswers;
+
+  /// lab: the whole "lab" object, kept raw so new lab fields never break old files.
+  final Map<String, dynamic> lab;
 
   Question({
     required this.type,
@@ -23,6 +30,8 @@ class Question {
     this.pairs = const [],
     this.template = '',
     this.correctAnswer = '',
+    this.correctAnswers = const [],
+    this.lab = const <String, dynamic>{},
   });
 
   factory Question.fromJson(Map<String, dynamic> j) => Question(
@@ -35,6 +44,8 @@ class Question {
         pairs: (j['pairs'] as List? ?? []).map((e) => PairItem.fromJson(Map<String, dynamic>.from(e))).toList(),
         template: j['template'] ?? '',
         correctAnswer: j['correct_answer'] ?? '',
+        correctAnswers: (j['correct_answers'] as List? ?? []).map((e) => '$e').toList(),
+        lab: j['lab'] is Map ? Map<String, dynamic>.from(j['lab'] as Map) : const <String, dynamic>{},
       );
 
   Map<String, dynamic> toJson() => {
@@ -47,6 +58,8 @@ class Question {
         'pairs': pairs.map((e) => e.toJson()).toList(),
         'template': template,
         'correct_answer': correctAnswer,
+        'correct_answers': correctAnswers,
+        'lab': lab,
       };
 }
 

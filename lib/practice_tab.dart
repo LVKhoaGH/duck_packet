@@ -47,7 +47,8 @@ class PracticeTab extends ConsumerWidget {
       if (r.wrong) wrongQs.add(qr.q);
       if (r.enrolled && r.due <= today) dueQs.add(qr.q);
     });
-    final mixPool = <Question>[for (final n in c.allNodes) if (done.contains(n.id)) ...n.questions];
+    final mixPool = <Question>[for (final n in c.allNodes) if (done.contains(n.id)) ...n.questions.where((q) => q.type != 'lab')];
+    final labPool = <Question>[for (final n in c.allNodes) for (final q in n.questions) if (q.type == 'lab') q];
 
     final domains = domainStats(c);
     DomainStat? weakest;
@@ -138,6 +139,16 @@ class PracticeTab extends ConsumerWidget {
         () => Navigator.push(context, slideUpRoute(GlossaryScreen(items: c.glossary))),
       ),
 
+      tile(
+        Icons.terminal_rounded,
+        AppColors.terminalBg,
+        'Labs',
+        labPool.isEmpty ? 'No labs in this course yet' : 'Hands-on CLI scenarios',
+        labPool.length,
+        labPool.isEmpty
+            ? null
+            : () => _start(context, 'Labs', (labPool.toList()..shuffle()).take(3).toList(), SessionMode.practice),
+      ),
       const SizedBox(height: 14),
       const Text('Domain mastery', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.ink)),
       const SizedBox(height: 4),

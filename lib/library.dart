@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'models.dart';
+import 'cli_engine.dart';
 
 /// One imported JSON file. Several packs are merged into the course you play.
 class Pack {
@@ -388,7 +389,18 @@ void _checkQuestion(List<String> e, String at, dynamic q) {
       final lefts = pairs.map((p) => _s(p['left'])).toList();
       if (lefts.toSet().length != lefts.length) e.add('$at: categorize "left" terms must all be different');
     }
+  } else if (type == 'multi_select') {
+    final ans = _l(q['correct_answers']).map((x) => '$x').toList();
+    if (options.length < 3) e.add('$at: multi_select needs 3+ options');
+    if (ans.length < 2) e.add('$at: multi_select needs "correct_answers" with 2+ entries (for 1 answer use multiple_choice)');
+    if (ans.length >= options.length) e.add('$at: multi_select must have fewer correct answers than options');
+    if (ans.toSet().length != ans.length) e.add('$at: correct_answers must all be different');
+    for (final a in ans) {
+      if (!options.contains(a)) e.add('$at: correct answer "$a" is not in options');
+    }
+  } else if (type == 'lab') {
+    e.addAll(validateLab(q['lab'], at));
   } else {
-    e.add('$at: unknown type "$type" (use reorder, match_pairs, fill_code, multiple_choice, categorize)');
+    e.add('$at: unknown type "$type" (use reorder, match_pairs, fill_code, multiple_choice, categorize, multi_select, lab)');
   }
 }

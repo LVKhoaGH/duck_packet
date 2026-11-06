@@ -5,6 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'bag.dart';
 import 'duck.dart';
+import 'lab_screen.dart';
+import 'multi_select_question.dart';
+import 'cli_engine.dart';
 import 'extras.dart';
 import 'history.dart';
 import 'models.dart';
@@ -69,6 +72,10 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
         return 'Choose the correct answer';
       case 'categorize':
         return 'Sort into the right group';
+      case 'multi_select':
+        return 'Select all that apply';
+      case 'lab':
+        return 'Complete the lab';
       default:
         return 'Complete the code';
     }
@@ -88,6 +95,10 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
         return groups
             .map((gr) => '$gr: ${q.pairs.where((p) => p.right == gr).map((p) => p.left).join(', ')}')
             .join('\n');
+      case 'multi_select':
+        return q.correctAnswers.join('\n');
+      case 'lab':
+        return labSolutionText(q.lab);
       default:
         return q.correctAnswer;
     }
@@ -340,6 +351,10 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
                         MultipleChoiceQuestion(q: q, onAnswer: _onAnswer)
                       else if (q.type == 'categorize')
                         CategorizeQuestion(q: q, onAnswer: _onAnswer)
+                      else if (q.type == 'multi_select')
+                        MultiSelectQuestion(q: q, onAnswer: _onAnswer)
+                      else if (q.type == 'lab')
+                        LabQuestion(q: q, onAnswer: _onAnswer)
                       else
                         Text('Unsupported question type: ${q.type}'),
                     ]),

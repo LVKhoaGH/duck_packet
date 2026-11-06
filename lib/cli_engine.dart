@@ -976,7 +976,8 @@ class LabSession {
   }
 
   // ---- conditions / grading ----
-  bool cond(Map<String, dynamic> c, LabDev cur) {
+  /// [scopeIn]: the "in" block of a parent condition; children inherit it unless they set their own.
+  bool cond(Map<String, dynamic> c, LabDev cur, [String? scopeIn]) {
     LabDev? found = cur;
     if (c['device'] != null) {
       found = null;
@@ -986,9 +987,9 @@ class LabSession {
     }
     if (found == null) return false;
     final LabDev dv = found;
-    final List<CfgBlock>? inb = c['in'] == null
-        ? null
-        : dv.cfg.where((b) => labWild(normHead('${c['in']}'), b.head)).toList();
+    final String? inStr = c['in'] != null ? '${c['in']}' : scopeIn;
+    final List<CfgBlock>? inb =
+        inStr == null ? null : dv.cfg.where((b) => labWild(normHead(inStr), b.head)).toList();
     bool lineIn(String pat) {
       final scope = inb;
       if (scope == null) return dv.cfg.any((b) => labWild(pat, b.head));
@@ -1011,14 +1012,14 @@ class LabSession {
     final all = c['all'];
     if (all is List) {
       for (final x in all) {
-        if (x is! Map || !cond(Map<String, dynamic>.from(x), dv)) return false;
+        if (x is! Map || !cond(Map<String, dynamic>.from(x), dv, inStr)) return false;
       }
     }
     final any = c['any'];
     if (any is List && any.isNotEmpty) {
       var ok = false;
       for (final x in any) {
-        if (x is Map && cond(Map<String, dynamic>.from(x), dv)) {
+        if (x is Map && cond(Map<String, dynamic>.from(x), dv, inStr)) {
           ok = true;
           break;
         }
@@ -1026,7 +1027,7 @@ class LabSession {
       if (!ok) return false;
     }
     final not = c['not'];
-    if (not is Map && cond(Map<String, dynamic>.from(not), dv)) return false;
+    if (not is Map && cond(Map<String, dynamic>.from(not), dv, inStr)) return false;
     return true;
   }
 

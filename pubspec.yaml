@@ -27,6 +27,7 @@ flutter:
     - assets/audio/
     - assets/icons/
     - assets/mascot/
+    - assets/mascot/moods/
   fonts:
     - family: Nunito
       fonts:

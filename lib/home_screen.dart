@@ -20,6 +20,7 @@ import 'study.dart';
 import 'tabs.dart';
 import 'theme.dart';
 import 'widgets.dart';
+import 'duck_mood.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -43,6 +44,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(used == 1 ? 'Streak Freeze used. Your streak is safe!' : 'Streak Freezes used. Your streak is safe!')));
       }
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) showWelcomeIfNeeded(context);
+   });
   }
 
   @override

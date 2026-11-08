@@ -1,22 +1,16 @@
-DUCKPACKET v3  (AI không có Flutter SDK. Code CHƯA biên dịch. Dừng hẳn app rồi chạy lại, dán log thật nếu lỗi.)
+DUCKPACKET v4  (AI không có Flutter SDK / Android SDK. Chưa biên dịch. Dán log thật nếu lỗi.)
+Giải nén ĐÈ lên duck_packet/ (sau khi đã đè v3). Gồm:
+  lib/study.dart            luật mở khóa mới
+  lib/home_screen.dart      Map mở bài đầu mọi chương + gửi dữ liệu sang widget
+  lib/duck_mood.dart        công thức đổi mặt vịt đơn giản (để widget dùng chung)
+  lib/widget_sync.dart      MỚI
+  android/app/src/main/AndroidManifest.xml                         ĐÈ (thêm receiver widget)
+  android/app/src/main/kotlin/com/example/duck_packet/MainActivity.kt          ĐÈ
+  android/app/src/main/kotlin/com/example/duck_packet/DuckWidgetProvider.kt    MỚI
+  android/app/src/main/res/layout|xml|drawable|drawable-nodpi/...             MỚI
 
-GIẢI NÉN ĐÈ vào duck_packet/ (giữ nguyên thư mục):
-  .github/workflows/build-apk.yml   ĐÈ  (sửa lỗi build APK: ép compileSdk 36)
-  pubspec.yaml                      giống bản trước (đã có http)
-  lib/ai_service.dart               ĐÈ  nhiều key, nhiều nhà cung cấp, xoay vòng
-  lib/ai_chat.dart                  ĐÈ  quản lý key + chat
-  lib/game_tab.dart                 MỚI tab Game (Coming soon)
-  lib/home_screen.dart              ĐÈ  5 tab: Learn, Map, Practice, Game, Profile
-  lib/question_extras.dart          MỚI 3 dạng bài: show_output, route_predict, topology_drag
-  lib/models.dart                   ĐÈ  (thêm raw; correct_answer nhận cả số)
-  lib/library.dart                  ĐÈ  (validator 3 dạng mới)
-  lib/game_session_screen.dart      ĐÈ
-  lib/exam_screen.dart              ĐÈ  thi thử hỗ trợ multi_select, lab (lab lên đầu), 3 dạng mới
-  lib/settings_screen.dart          giống bản trước
-  lib/sample_course.dart            ĐÈ  JSON mẫu đủ 10 dạng
-
-Nhớ đây là bản vá trên file bạn upload gần nhất. Sửa tay sau đó sẽ bị ghi đè.
+Thêm widget: giữ lâu màn hình chính điện thoại -> Widgets -> DuckPacket.
 
 git add .
-git commit -m "v3: 5 tabs, 3 new question types, exam support, multi-key AI, APK fix"
+git commit -m "Unlock first stage of every chapter, Android home widget"
 git push origin main

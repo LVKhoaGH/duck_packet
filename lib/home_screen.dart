@@ -23,6 +23,7 @@ import 'widgets.dart';
 import 'duck_mood.dart';
 import 'ai_chat.dart';
 import 'game_tab.dart';
+import 'widget_sync.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -38,6 +39,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    ref.listenManual(statsProvider, (prev, next) => syncHomeWidget(next));
+    WidgetsBinding.instance.addPostFrameCallback((_) => syncHomeWidget(ref.read(statsProvider)));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final box = Hive.box('stats');
       final used = (box.get('x_freezeUsed', defaultValue: 0) as num).toInt();
@@ -498,10 +501,15 @@ class _MapViewState extends ConsumerState<_MapView> {
     final best = ref.watch(studyProvider).best;
     final chests = ref.watch(bagProvider).chests;
     final stages = stageIds(course);
-    final unlocked = <String>{
-      for (var i = 0; i < stages.length; i++)
-        if (i == 0 || done.contains(stages[i - 1])) stages[i],
-    };
+    // First stage of every chapter is open; inside a chapter: in order.
+    final unlocked = <String>{};
+    for (final ch in course.chapters) {
+      if (ch.nodes.isEmpty) continue;
+      final seq = [for (final n in ch.nodes) n.id, bossId(ch)];
+      for (var i = 0; i < seq.length; i++) {
+        if (i == 0 || done.contains(seq[i - 1])) unlocked.add(seq[i]);
+      }
+    }
     String? currentId;
     for (final s in stages) {
       if (!done.contains(s)) {

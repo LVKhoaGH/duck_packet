@@ -173,11 +173,15 @@ List<String> stageIds(Course c) => [
         if (ch.nodes.isNotEmpty) ...[for (final n in ch.nodes) n.id, bossId(ch)],
     ];
 
+/// First stage of EVERY chapter is open; inside a chapter you go in order (node, node, ..., boss).
 bool stageUnlocked(Course c, Set<String> done, String id) {
-  final s = stageIds(c);
-  final i = s.indexOf(id);
-  if (i < 0) return true;
-  return i == 0 || done.contains(s[i - 1]);
+  for (final ch in c.chapters) {
+    final seq = [for (final n in ch.nodes) n.id, bossId(ch)];
+    final i = seq.indexOf(id);
+    if (i < 0) continue;
+    return i == 0 || done.contains(seq[i - 1]);
+  }
+  return true;
 }
 
 class DomainStat {

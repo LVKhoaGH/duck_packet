@@ -1,8 +1,6 @@
 // duck_mood.dart  (FILE MỚI)
 // Vịt đổi mặt theo thời điểm: lâu không vào -> lo lắng / giận / khóc ...
 // Dùng 15 ảnh trong assets/mascot/moods/. Không đụng tới duck.dart (hệ thống vịt mặc đồ).
-import 'dart:math';
-
 import 'package:flutter/material.dart' hide Text;
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -63,10 +61,13 @@ const int _slotMs = 8 * 3600 * 1000; // mỗi 8 giờ đổi một mặt
 int _slotOf(DateTime now) =>
     (now.millisecondsSinceEpoch + now.timeZoneOffset.inMilliseconds) ~/ _slotMs;
 
+// Công thức đơn giản để widget Android (Kotlin) tính ra CÙNG mặt vịt với app.
+int _slotHash(int slot) => (((slot * 2654435761) % 4294967296) ~/ 256) % DuckFace.values.length;
+
 int _faceIndexForSlot(int slot) {
   final n = DuckFace.values.length;
-  final cur = Random(slot * 7919 + 13).nextInt(n);
-  final prev = Random((slot - 1) * 7919 + 13).nextInt(n);
+  final cur = _slotHash(slot);
+  final prev = _slotHash(slot - 1);
   return cur == prev ? (cur + 1) % n : cur; // không bao giờ trùng khung trước
 }
 

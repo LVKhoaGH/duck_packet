@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'duck.dart';
+import 'exam_screen.dart';
 import 'game_session_screen.dart';
 import 'glossary_screen.dart';
 import 'models.dart';
@@ -51,6 +52,7 @@ class PracticeTab extends ConsumerWidget {
     final labPool = <Question>[for (final n in c.allNodes) for (final q in n.questions) if (q.type == 'lab') q];
 
     final domains = domainStats(c);
+    final totalQ = domains.fold<int>(0, (a, d) => a + d.qs.length);
     DomainStat? weakest;
     for (final d in domains) {
       if (d.attempted(study.recs) == 0) continue;
@@ -129,6 +131,14 @@ class PracticeTab extends ConsumerWidget {
         mixPool.length >= 3 ? '10 random questions from beaten monsters' : 'Beat a monster to unlock',
         null,
         mixPool.length < 3 ? null : () => _start(context, 'Quick mix', (mixPool.toList()..shuffle()).take(10).toList(), SessionMode.practice),
+      ),
+      tile(
+        Icons.assignment_rounded,
+        AppColors.streak,
+        'Mock exam',
+        totalQ >= 3 ? 'Timed full exam, or train one domain / chapter' : 'Import more questions to unlock',
+        null,
+        totalQ < 3 ? null : () => Navigator.push(context, slideUpRoute(ExamScreen(course: c))),
       ),
       tile(
         Icons.menu_book_rounded,

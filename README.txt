@@ -1,14 +1,15 @@
-DUCKPACKET v5 (thay cho v4)  AI không có Flutter/Android SDK. Chưa biên dịch. Dán log thật nếu lỗi.
-Giải nén ĐÈ lên duck_packet/ (sau v3).
+DuckPacket v6 - Mock exam (giai nen de len thu muc duck_packet/)
 
-Dart:   lib/study.dart, home_screen.dart, duck_mood.dart, widget_sync.dart, settings_screen.dart
-Android: AndroidManifest.xml, MainActivity.kt, DuckData.kt, DuckViews.kt, DuckWidgetProvider.kt, DuckWidgets.kt,
-         res/layout, res/xml, res/drawable, res/drawable-nodpi
+DE (2 file):
+  lib/exam_screen.dart
+  lib/practice_tab.dart
 
-5 widget (giữ lâu màn hình chính -> Widgets -> DuckPacket):
-  Streak (4x2)  Term of the day (4x2)  Review (3x2)  Exam countdown (3x2)  Mini (1x1)
-Ngày thi: Settings -> Exam date.
+Khong doi: study.dart va cac file khac.
 
-git add .
-git commit -m "Five Android widgets, exam date setting"
-git push origin main
+Noi dung:
+- Practice hub co nut "Mock exam".
+- Setup: Scope (Full exam / 1 domain / 1 chapter), so cau tuy chinh (slider + 30/60/100), thoi gian tuy chinh (+-5 phut, nut Auto, cong tat Timer).
+- Full exam: 100 cau / 120 phut mac dinh, theo ty trong domain, dau khi >= 82.5%.
+- Domain/chapter: chi lay cau trong pham vi, khong co dau/rot.
+- Thi thu KHONG cong XP, khong dung streak, khong tieu boost (van ghi SRS/Mistakes).
+- Chua bien dich. Dung han app roi chay lai, dan log that neu loi.

@@ -25,16 +25,31 @@ jobs:
           channel: stable
           cache: true
 
+      # Sửa lỗi "requires compile against version 36": ép mọi plugin Android dùng compileSdk 36.
+      - name: Force compileSdk 36 for all plugins
+        run: |
+          mkdir -p ~/.gradle/init.d
+          cat > ~/.gradle/init.d/force-compile-sdk.gradle <<'EOT'
+          allprojects {
+            afterEvaluate { p ->
+              def a = p.extensions.findByName('android')
+              if (a != null) {
+                try { a.compileSdk = 36 } catch (Throwable t) { a.compileSdkVersion(36) }
+              }
+            }
+          }
+          EOT
+
       - run: flutter pub get
       - run: flutter build apk --release
 
-      # Tải về ở trang Actions -> chọn lần chạy -> mục Artifacts
+      # Tải ở trang Actions -> chọn lần chạy -> mục Artifacts
       - uses: actions/upload-artifact@v4
         with:
           name: duckpacket-apk
           path: build/app/outputs/flutter-apk/app-release.apk
 
-      # Chỉ khi push tag dạng v1.0.1: đính APK vào trang Releases (link tải cố định)
+      # Push tag dạng v1.0.1 -> APK nằm ở trang Releases (link tải cố định)
       - name: Publish release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2

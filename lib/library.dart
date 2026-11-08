@@ -400,7 +400,72 @@ void _checkQuestion(List<String> e, String at, dynamic q) {
     }
   } else if (type == 'lab') {
     e.addAll(validateLab(q['lab'], at));
+  } else if (type == 'show_output') {
+    if (_s(q['output']).trim().isEmpty) e.add('$at: show_output needs a non-empty "output" (the text of the show command)');
+    if (options.length < 2) e.add('$at: show_output needs 2+ options');
+    if (!options.contains(answer)) e.add('$at: correct_answer "$answer" is not in options');
+  } else if (type == 'route_predict') {
+    _checkTopology(e, at, q['topology'], needSlots: false);
+    if (answer.trim().isEmpty) e.add('$at: route_predict needs "correct_answer" (a number, written as text is fine)');
+    if (options.isNotEmpty && !options.contains(answer)) e.add('$at: correct_answer "$answer" is not in options');
+  } else if (type == 'topology_drag') {
+    _checkTopology(e, at, q['topology'], needSlots: true);
+    final labels = _l(q['labels']).map((x) => '$x').toList();
+    final ans = q['answers'];
+    final slots = q['topology'] is Map ? _l((q['topology'] as Map)['slots']) : const [];
+    if (ans is! Map) {
+      e.add('$at: topology_drag needs "answers" like {"s1": "Area 0"}');
+    } else {
+      final need = <String, int>{};
+      for (final s in slots) {
+        if (s is! Map) continue;
+        final id = _s(s['id']);
+        if (!ans.containsKey(id)) {
+          e.add('$at: "answers" has no entry for slot "$id"');
+        } else {
+          need[_s(ans[id])] = (need[_s(ans[id])] ?? 0) + 1;
+        }
+      }
+      need.forEach((lab, n) {
+        if (labels.where((x) => x == lab).length < n) e.add('$at: "labels" must contain "$lab" $n time(s)');
+      });
+    }
+    if (labels.length < slots.length) e.add('$at: "labels" needs at least as many labels as slots');
   } else {
-    e.add('$at: unknown type "$type" (use reorder, match_pairs, fill_code, multiple_choice, categorize, multi_select, lab)');
+    e.add('$at: unknown type "$type" (use reorder, match_pairs, fill_code, multiple_choice, categorize, multi_select, lab, show_output, route_predict, topology_drag)');
+  }
+}
+
+void _checkTopology(List<String> e, String at, dynamic topo, {required bool needSlots}) {
+  if (topo is! Map) {
+    e.add('$at: needs a "topology" object with nodes and links');
+    return;
+  }
+  final nodes = _l(topo['nodes']);
+  final ids = <String>{};
+  if (nodes.length < 2) e.add('$at: topology needs 2+ nodes');
+  for (final n in nodes) {
+    if (n is! Map || _s(n['id']).isEmpty || n['x'] is! num || n['y'] is! num) {
+      e.add('$at: every node needs "id", numeric "x" and "y" (0..100)');
+      continue;
+    }
+    if (!ids.add(_s(n['id']))) e.add('$at: duplicate node id "${_s(n['id'])}"');
+  }
+  for (final l in _l(topo['links'])) {
+    if (l is! Map || !ids.contains(_s(l['a'])) || !ids.contains(_s(l['b']))) {
+      e.add('$at: every link needs "a" and "b" that match node ids');
+    }
+  }
+  if (needSlots) {
+    final slots = _l(topo['slots']);
+    final sid = <String>{};
+    if (slots.isEmpty) e.add('$at: topology_drag needs "slots" in the topology');
+    for (final s in slots) {
+      if (s is! Map || _s(s['id']).isEmpty || s['x'] is! num || s['y'] is! num) {
+        e.add('$at: every slot needs "id", numeric "x" and "y"');
+        continue;
+      }
+      if (!sid.add(_s(s['id']))) e.add('$at: duplicate slot id "${_s(s['id'])}"');
+    }
   }
 }

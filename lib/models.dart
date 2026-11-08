@@ -6,7 +6,7 @@ class PairItem {
 }
 
 class Question {
-  /// reorder | match_pairs | fill_code | multiple_choice | categorize | multi_select | lab
+  /// reorder | match_pairs | fill_code | multiple_choice | categorize | multi_select | lab | show_output | route_predict | topology_drag
   final String type;
   final String prompt, explanation;
   final List<String> items, options;
@@ -20,6 +20,9 @@ class Question {
   /// lab: the whole "lab" object, kept raw so new lab fields never break old files.
   final Map<String, dynamic> lab;
 
+  /// The whole raw JSON of the question: show_output / route_predict / topology_drag read their extra fields here.
+  final Map<String, dynamic> raw;
+
   Question({
     required this.type,
     required this.prompt,
@@ -32,6 +35,7 @@ class Question {
     this.correctAnswer = '',
     this.correctAnswers = const [],
     this.lab = const <String, dynamic>{},
+    this.raw = const <String, dynamic>{},
   });
 
   factory Question.fromJson(Map<String, dynamic> j) => Question(
@@ -43,12 +47,14 @@ class Question {
         correctOrder: List<int>.from(j['correct_order'] ?? []),
         pairs: (j['pairs'] as List? ?? []).map((e) => PairItem.fromJson(Map<String, dynamic>.from(e))).toList(),
         template: j['template'] ?? '',
-        correctAnswer: j['correct_answer'] ?? '',
+        correctAnswer: '${j['correct_answer'] ?? ''}',
         correctAnswers: (j['correct_answers'] as List? ?? []).map((e) => '$e').toList(),
         lab: j['lab'] is Map ? Map<String, dynamic>.from(j['lab'] as Map) : const <String, dynamic>{},
+        raw: Map<String, dynamic>.from(j),
       );
 
   Map<String, dynamic> toJson() => {
+        ...raw,
         'type': type,
         'prompt': prompt,
         'explanation': explanation,

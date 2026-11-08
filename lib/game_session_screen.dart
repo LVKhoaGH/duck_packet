@@ -3,10 +3,12 @@ import 'package:flutter/material.dart' hide Text;
 import 'i18n.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'ai_chat.dart';
 import 'bag.dart';
 import 'duck.dart';
 import 'lab_screen.dart';
 import 'multi_select_question.dart';
+import 'question_extras.dart';
 import 'cli_engine.dart';
 import 'extras.dart';
 import 'history.dart';
@@ -76,6 +78,12 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
         return 'Select all that apply';
       case 'lab':
         return 'Complete the lab';
+      case 'show_output':
+        return 'Read the output';
+      case 'route_predict':
+        return 'Predict the route';
+      case 'topology_drag':
+        return 'Drag labels onto the diagram';
       default:
         return 'Complete the code';
     }
@@ -99,6 +107,8 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
         return q.correctAnswers.join('\n');
       case 'lab':
         return labSolutionText(q.lab);
+      case 'topology_drag':
+        return extraAnswerText(q);
       default:
         return q.correctAnswer;
     }
@@ -180,6 +190,10 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
     setState(() => _finished = true);
   }
 
+  String _aiContext(Question q, bool ok) =>
+      'Question: ${q.prompt}\nCorrect answer: ${_answerText(q)}\nExplanation: ${q.explanation}\n'
+      'The student answered ${ok ? "correctly" : "incorrectly"}.';
+
   Widget _sheet(BuildContext ctx, Question q, bool ok) {
     final dark = ok ? AppColors.successShadow : AppColors.errorShadow;
     final maxH = MediaQuery.of(ctx).size.height * 0.5;
@@ -225,7 +239,17 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
                 ]),
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 6),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () => showAiSheet(ctx, contextText: _aiContext(q, ok)),
+                icon: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 18),
+                label: const Text('Ask AI about this',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+              ),
+            ),
+            const SizedBox(height: 8),
             Button3D(
               label: ok ? 'Continue' : 'Got it',
               color: Colors.white,
@@ -355,6 +379,12 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
                         MultiSelectQuestion(q: q, onAnswer: _onAnswer)
                       else if (q.type == 'lab')
                         LabQuestion(q: q, onAnswer: _onAnswer)
+                      else if (q.type == 'show_output')
+                        ShowOutputQuestion(q: q, onAnswer: _onAnswer)
+                      else if (q.type == 'route_predict')
+                        RoutePredictQuestion(q: q, onAnswer: _onAnswer)
+                      else if (q.type == 'topology_drag')
+                        TopologyDragQuestion(q: q, onAnswer: _onAnswer)
                       else
                         Text('Unsupported question type: ${q.type}'),
                     ]),

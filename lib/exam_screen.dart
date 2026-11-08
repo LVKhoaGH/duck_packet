@@ -4,6 +4,10 @@ import 'package:flutter/material.dart' hide Text;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'bag.dart';
+import 'cli_engine.dart';
+import 'lab_screen.dart';
+import 'multi_select_question.dart';
+import 'question_extras.dart';
 import 'duck.dart';
 import 'extras.dart';
 import 'game_session_screen.dart';
@@ -65,7 +69,8 @@ List<_ExamItem> _buildExam(Course c, int n) {
     picked.removeAt(rnd.nextInt(picked.length));
   }
   picked.shuffle(rnd);
-  return picked;
+  // Like the real exam: simulation labs come first.
+  return [...picked.where((x) => x.q.type == 'lab'), ...picked.where((x) => x.q.type != 'lab')];
 }
 
 String _instruction(Question q) {
@@ -78,6 +83,16 @@ String _instruction(Question q) {
       return 'Choose the correct answer';
     case 'categorize':
       return 'Sort into the right group';
+    case 'multi_select':
+      return 'Select all that apply';
+    case 'lab':
+      return 'Complete the lab';
+    case 'show_output':
+      return 'Read the output';
+    case 'route_predict':
+      return 'Predict the route';
+    case 'topology_drag':
+      return 'Drag labels onto the diagram';
     default:
       return 'Complete the code';
   }
@@ -95,6 +110,12 @@ String _answerText(Question q) {
         if (!groups.contains(p.right)) groups.add(p.right);
       }
       return groups.map((gr) => '$gr: ${q.pairs.where((p) => p.right == gr).map((p) => p.left).join(', ')}').join('\n');
+    case 'multi_select':
+      return q.correctAnswers.join('\n');
+    case 'lab':
+      return labSolutionText(q.lab);
+    case 'topology_drag':
+      return extraAnswerText(q);
     default:
       return q.correctAnswer;
   }
@@ -360,6 +381,16 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
                   MultipleChoiceQuestion(q: q, onAnswer: _onAnswer)
                 else if (q.type == 'categorize')
                   CategorizeQuestion(q: q, onAnswer: _onAnswer)
+                else if (q.type == 'multi_select')
+                  MultiSelectQuestion(q: q, onAnswer: _onAnswer)
+                else if (q.type == 'lab')
+                  LabQuestion(q: q, onAnswer: _onAnswer)
+                else if (q.type == 'show_output')
+                  ShowOutputQuestion(q: q, onAnswer: _onAnswer)
+                else if (q.type == 'route_predict')
+                  RoutePredictQuestion(q: q, onAnswer: _onAnswer)
+                else if (q.type == 'topology_drag')
+                  TopologyDragQuestion(q: q, onAnswer: _onAnswer)
                 else
                   Text('Unsupported question type: ${q.type}'),
               ]),

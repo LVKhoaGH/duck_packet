@@ -11,7 +11,7 @@ const String kSampleJson = r'''
       "nodes": [
         {
           "node_id": "node_demo_all",
-          "node_title": "OSPF demo (7 dạng bài)",
+          "node_title": "OSPF demo (10 dạng bài)",
           "icon": "router.svg",
           "lesson": [
             {
@@ -93,6 +93,61 @@ const String kSampleJson = r'''
                 {"left": "Local Preference", "right": "BGP"}
               ],
               "explanation": "LSA và DR/BDR thuộc OSPF; DUAL và feasible successor thuộc EIGRP; AS Path và Local Preference là thuộc tính BGP."
+            },
+            {
+              "type": "show_output",
+              "prompt": "Dựa vào output show ip ospf neighbor trên R2, router nào đang là BDR của segment này?",
+              "output": "R2#show ip ospf neighbor\n\nNeighbor ID     Pri   State           Dead Time   Address         Interface\n10.1.1.1          1   FULL/BDR        00:00:35    192.168.1.1     GigabitEthernet0/0",
+              "options": ["R1 (10.1.1.1)", "R2 (router đang gõ lệnh)", "Cả hai là DR", "Không có BDR"],
+              "correct_answer": "R1 (10.1.1.1)",
+              "explanation": "Cột State cho biết vai trò của NEIGHBOR: 10.1.1.1 là FULL/BDR nên R1 là BDR. Vì mạng broadcast có DR và BDR, R2 (router đang gõ lệnh) là DR."
+            },
+            {
+              "type": "route_predict",
+              "prompt": "Mỗi link ghi cost OSPF. Link R1-R2 đang đứt. Cost từ R1 đến mạng sau R4 bây giờ là bao nhiêu?",
+              "topology": {
+                "ratio": 0.62,
+                "nodes": [
+                  {"id": "R1", "label": "R1", "kind": "router", "x": 10, "y": 50},
+                  {"id": "R2", "label": "R2", "kind": "router", "x": 45, "y": 18},
+                  {"id": "R3", "label": "R3", "kind": "router", "x": 45, "y": 82},
+                  {"id": "R4", "label": "R4", "kind": "router", "x": 88, "y": 50}
+                ],
+                "links": [
+                  {"a": "R1", "b": "R2", "label": "10", "down": true},
+                  {"a": "R2", "b": "R4", "label": "10"},
+                  {"a": "R1", "b": "R3", "label": "20"},
+                  {"a": "R3", "b": "R4", "label": "44"}
+                ]
+              },
+              "correct_answer": "64",
+              "explanation": "Khi R1-R2 đứt, đường còn lại là R1-R3-R4 với cost 20 + 44 = 64. OSPF cộng cost của các link đi ra (outgoing) dọc đường."
+            },
+            {
+              "type": "topology_drag",
+              "prompt": "Kéo các nhãn vào đúng ô trên sơ đồ: vùng giữa hai ABR và router nối ra Internet.",
+              "topology": {
+                "ratio": 0.5,
+                "nodes": [
+                  {"id": "A", "label": "R1", "kind": "router", "x": 12, "y": 70},
+                  {"id": "B", "label": "R2", "kind": "router", "x": 50, "y": 70},
+                  {"id": "C", "label": "R3", "kind": "router", "x": 88, "y": 70},
+                  {"id": "I", "label": "Internet", "kind": "cloud", "x": 88, "y": 18}
+                ],
+                "links": [
+                  {"a": "A", "b": "B", "label": ""},
+                  {"a": "B", "b": "C", "label": ""},
+                  {"a": "C", "b": "I", "label": ""}
+                ],
+                "slots": [
+                  {"id": "s1", "x": 31, "y": 36},
+                  {"id": "s2", "x": 69, "y": 36},
+                  {"id": "s3", "x": 50, "y": 18}
+                ]
+              },
+              "labels": ["Area 0", "Area 1", "ASBR"],
+              "answers": {"s1": "Area 1", "s2": "Area 0", "s3": "ASBR"},
+              "explanation": "Mẫu: ô 1 là Area 1, ô 2 là Area 0 (backbone), ô 3 là ASBR vì R3 nối ra ngoài miền OSPF. Hãy sửa theo sơ đồ của bạn."
             },
             {
               "type": "lab",

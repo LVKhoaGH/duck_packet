@@ -21,6 +21,8 @@ import 'tabs.dart';
 import 'theme.dart';
 import 'widgets.dart';
 import 'duck_mood.dart';
+import 'ai_chat.dart';
+import 'game_tab.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -82,6 +84,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             _KeepAlive(child: PracticeTab(course: course)),
+            const _KeepAlive(child: GameTab()),
             _KeepAlive(child: ProfileTab(course: course, onImport: _openLibrary)),
           ],
         ),
@@ -100,20 +103,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         // Phone / portrait: top bar, swipeable tabs, bottom navigation.
         return Scaffold(
           backgroundColor: Colors.white,
-          body: SafeArea(
-            bottom: false,
-            child: Column(children: [
-              _TopBar(label: label, stats: stats),
-              Expanded(child: _pages(courseAsync, course)),
-            ]),
-          ),
+          body: Stack(fit: StackFit.expand, children: [
+            SafeArea(
+              bottom: false,
+              child: Column(children: [
+                _TopBar(label: label, stats: stats),
+                Expanded(child: _pages(courseAsync, course)),
+              ]),
+            ),
+            const AiFab(),
+          ]),
           bottomNavigationBar: _BottomNav(index: _tab, onTap: _goTab),
         );
       }
       // Laptop / landscape: side rail on the left, content centred (max 760 px).
       return Scaffold(
         backgroundColor: Colors.white,
-        body: SafeArea(
+        body: Stack(fit: StackFit.expand, children: [
+          SafeArea(
           child: Row(children: [
             _SideNav(index: _tab, onTap: _goTab),
             Container(width: 2, color: AppColors.line),
@@ -134,6 +141,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ]),
         ),
+          const AiFab(right: 24, bottom: 24),
+        ]),
       );
     });
   }
@@ -145,8 +154,8 @@ class _SideNav extends StatelessWidget {
   final ValueChanged<int> onTap;
   const _SideNav({required this.index, required this.onTap});
 
-  static const _icons = [Icons.menu_book_rounded, Icons.map_rounded, Icons.fitness_center_rounded, Icons.person_rounded];
-  static const _labels = ['Learn', 'Map', 'Practice', 'Profile'];
+  static const _icons = [Icons.menu_book_rounded, Icons.map_rounded, Icons.fitness_center_rounded, Icons.sports_esports_rounded, Icons.person_rounded];
+  static const _labels = ['Learn', 'Map', 'Practice', 'Game', 'Profile'];
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +168,7 @@ class _SideNav extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(8, 0, 8, 18),
           child: Text('DuckPacket', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.primary)),
         ),
-        for (var i = 0; i < 4; i++)
+        for (var i = 0; i < _labels.length; i++)
           Padding(
             padding: const EdgeInsets.only(bottom: 6),
             child: GestureDetector(
@@ -260,7 +269,7 @@ class _BottomNav extends StatelessWidget {
   final int index;
   final ValueChanged<int> onTap;
   const _BottomNav({required this.index, required this.onTap});
-  static const _icons = [Icons.menu_book_rounded, Icons.map_rounded, Icons.fitness_center_rounded, Icons.person_rounded];
+  static const _icons = [Icons.menu_book_rounded, Icons.map_rounded, Icons.fitness_center_rounded, Icons.sports_esports_rounded, Icons.person_rounded];
 
   @override
   Widget build(BuildContext context) => Container(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'ai_chat.dart';
 import 'extras.dart';
 import 'i18n.dart';
 import 'settings.dart';
@@ -81,6 +82,22 @@ class SettingsScreen extends ConsumerWidget {
                   if (g != kGoalOptions.last) const SizedBox(width: 10),
                 ],
               ]),
+              _head('AI assistant'),
+              PressScale(
+                onTap: () => showAiSheet(context),
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(14, 14, 10, 14),
+                  decoration: duoCard(border: AppColors.line),
+                  child: Row(children: [
+                    const Icon(Icons.auto_awesome_rounded, color: AppColors.primary),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                        child: Text('Gemini API key & chat',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink))),
+                    const Icon(Icons.chevron_right_rounded, color: Colors.black38),
+                  ]),
+                ),
+              ),
             ]),
           ),
         ]),

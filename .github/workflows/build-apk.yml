@@ -41,7 +41,15 @@ jobs:
           EOT
 
       - run: flutter pub get
-      - run: flutter build apk --release
+      # Thử lại tối đa 3 lần: github.com thỉnh thoảng trả lỗi 502 khi Gradle tải về.
+      - name: Build APK
+        run: |
+          for i in 1 2 3; do
+            flutter build apk --release && exit 0
+            echo "Build failed (attempt $i), retrying in 40s..."
+            sleep 40
+          done
+          exit 1
 
       # Tải ở trang Actions -> chọn lần chạy -> mục Artifacts
       - uses: actions/upload-artifact@v4

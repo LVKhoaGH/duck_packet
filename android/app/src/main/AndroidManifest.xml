@@ -27,6 +27,7 @@
         </activity>
         <receiver
             android:name=".DuckWidgetProvider"
+            android:label="DuckPacket - Streak"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
@@ -34,6 +35,50 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/duck_widget_info"/>
+        </receiver>
+        <receiver
+            android:name=".DuckTermWidget"
+            android:label="DuckPacket - Term of the day"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/duck_term_info"/>
+        </receiver>
+        <receiver
+            android:name=".DuckReviewWidget"
+            android:label="DuckPacket - Review"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/duck_review_info"/>
+        </receiver>
+        <receiver
+            android:name=".DuckExamWidget"
+            android:label="DuckPacket - Exam countdown"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/duck_exam_info"/>
+        </receiver>
+        <receiver
+            android:name=".DuckMiniWidget"
+            android:label="DuckPacket - Mini"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/duck_mini_info"/>
         </receiver>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

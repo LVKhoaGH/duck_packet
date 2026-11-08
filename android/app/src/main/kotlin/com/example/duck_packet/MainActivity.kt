@@ -10,12 +10,11 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "duckpacket/widget")
             .setMethodCallHandler { call, result ->
                 if (call.method == "update") {
-                    val streak = call.argument<Int>("streak") ?: 0
-                    val lastDay = call.argument<String>("lastDay") ?: ""
-                    val freezes = call.argument<Int>("freezes") ?: 0
-                    val days = call.argument<String>("days") ?: ""
-                    DuckWidgetProvider.save(this, streak, lastDay, freezes, days)
-                    DuckWidgetProvider.refreshAll(this)
+                    val args = call.arguments as? Map<*, *>
+                    if (args != null) {
+                        DuckData.save(this, args)
+                        DuckData.refreshAll(this)
+                    }
                     result.success(null)
                 } else {
                     result.notImplemented()

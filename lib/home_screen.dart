@@ -39,8 +39,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    ref.listenManual(statsProvider, (prev, next) => syncHomeWidget(next));
-    WidgetsBinding.instance.addPostFrameCallback((_) => syncHomeWidget(ref.read(statsProvider)));
+    ref.listenManual(statsProvider, (prev, next) => syncHomeWidget(ref));
+    ref.listenManual(studyProvider, (prev, next) => syncHomeWidget(ref));
+    ref.listenManual(courseProvider, (prev, next) => syncHomeWidget(ref));
+    WidgetsBinding.instance.addPostFrameCallback((_) => syncHomeWidget(ref));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final box = Hive.box('stats');
       final used = (box.get('x_freezeUsed', defaultValue: 0) as num).toInt();

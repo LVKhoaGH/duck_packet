@@ -1,16 +1,14 @@
-DUCKPACKET v4  (AI không có Flutter SDK / Android SDK. Chưa biên dịch. Dán log thật nếu lỗi.)
-Giải nén ĐÈ lên duck_packet/ (sau khi đã đè v3). Gồm:
-  lib/study.dart            luật mở khóa mới
-  lib/home_screen.dart      Map mở bài đầu mọi chương + gửi dữ liệu sang widget
-  lib/duck_mood.dart        công thức đổi mặt vịt đơn giản (để widget dùng chung)
-  lib/widget_sync.dart      MỚI
-  android/app/src/main/AndroidManifest.xml                         ĐÈ (thêm receiver widget)
-  android/app/src/main/kotlin/com/example/duck_packet/MainActivity.kt          ĐÈ
-  android/app/src/main/kotlin/com/example/duck_packet/DuckWidgetProvider.kt    MỚI
-  android/app/src/main/res/layout|xml|drawable|drawable-nodpi/...             MỚI
+DUCKPACKET v5 (thay cho v4)  AI không có Flutter/Android SDK. Chưa biên dịch. Dán log thật nếu lỗi.
+Giải nén ĐÈ lên duck_packet/ (sau v3).
 
-Thêm widget: giữ lâu màn hình chính điện thoại -> Widgets -> DuckPacket.
+Dart:   lib/study.dart, home_screen.dart, duck_mood.dart, widget_sync.dart, settings_screen.dart
+Android: AndroidManifest.xml, MainActivity.kt, DuckData.kt, DuckViews.kt, DuckWidgetProvider.kt, DuckWidgets.kt,
+         res/layout, res/xml, res/drawable, res/drawable-nodpi
+
+5 widget (giữ lâu màn hình chính -> Widgets -> DuckPacket):
+  Streak (4x2)  Term of the day (4x2)  Review (3x2)  Exam countdown (3x2)  Mini (1x1)
+Ngày thi: Settings -> Exam date.
 
 git add .
-git commit -m "Unlock first stage of every chapter, Android home widget"
+git commit -m "Five Android widgets, exam date setting"
 git push origin main

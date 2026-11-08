@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'ai_chat.dart';
+import 'providers.dart' show dayKey;
+import 'widget_sync.dart';
 import 'extras.dart';
 import 'i18n.dart';
 import 'settings.dart';
@@ -82,6 +84,40 @@ class SettingsScreen extends ConsumerWidget {
                   if (g != kGoalOptions.last) const SizedBox(width: 10),
                 ],
               ]),
+              _head('Exam date'),
+              PressScale(
+                onTap: () async {
+                  final now = DateTime.now();
+                  final first = DateTime(now.year, now.month, now.day);
+                  final cur = DateTime.tryParse(ref.read(examDateProvider));
+                  final d = await showDatePicker(
+                    context: context,
+                    initialDate: (cur != null && !cur.isBefore(first)) ? cur : first.add(const Duration(days: 30)),
+                    firstDate: first,
+                    lastDate: first.add(const Duration(days: 1095)),
+                  );
+                  if (d != null) await setExamDate(ref, dayKey(d));
+                },
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(14, 6, 6, 6),
+                  decoration: duoCard(border: AppColors.line),
+                  child: Row(children: [
+                    const Icon(Icons.event_rounded, color: AppColors.primary),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(ref.watch(examDateProvider).isEmpty ? 'Not set' : ref.watch(examDateProvider),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                    ),
+                    if (ref.watch(examDateProvider).isNotEmpty)
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded, color: Colors.black38),
+                        onPressed: () => setExamDate(ref, ''),
+                      )
+                    else
+                      const Padding(padding: EdgeInsets.all(8), child: Icon(Icons.chevron_right_rounded, color: Colors.black38)),
+                  ]),
+                ),
+              ),
               _head('AI assistant'),
               PressScale(
                 onTap: () => showAiSheet(context),

@@ -1,0 +1,4497 @@
+{
+  "course_id": "encor_350_401",
+  "course_title": "CCNP Enterprise ENCOR (350-401)",
+  "chapters": [
+    {
+      "chapter_id": "chap_04_diagnostics",
+      "chapter_title": "4.0 Network Assurance – 4.1 Ping, Traceroute và Debug",
+      "nodes": [
+        {
+          "node_id": "node_d4_ping",
+          "node_title": "Ping và Extended Ping",
+          "icon": "ping.svg",
+          "lesson": [
+            {
+              "type": "text",
+              "title": "Ping hoạt động thế nào",
+              "body": "Ping gửi ICMP Echo Request (type 8) và chờ Echo Reply (type 0) để kiểm tra khả năng tới đích và đo RTT.",
+              "bullets": [
+                "Cisco mặc định gửi 5 gói, 100 byte, timeout 2 giây",
+                "Gói đầu thường mất (.!!!!) do router phải ARP next-hop hoặc đích",
+                "Thành công = có đường đi VÀ có đường về",
+                "Ping từ router mặc định lấy IP nguồn là interface ra"
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "Ký hiệu kết quả",
+              "headers": [
+                "Ký hiệu",
+                "Ý nghĩa"
+              ],
+              "rows": [
+                [
+                  "!",
+                  "Nhận Echo Reply"
+                ],
+                [
+                  ".",
+                  "Timeout, không nhận trả lời"
+                ],
+                [
+                  "U",
+                  "Destination unreachable (ICMP type 3)"
+                ],
+                [
+                  "M",
+                  "Could not fragment (gói lớn hơn MTU, có DF-bit)"
+                ],
+                [
+                  "Q",
+                  "Source quench (đích quá tải)"
+                ],
+                [
+                  "&",
+                  "Packet lifetime (TTL) exceeded"
+                ],
+                [
+                  "?",
+                  "Loại gói không xác định"
+                ]
+              ]
+            },
+            {
+              "type": "code",
+              "title": "Extended ping một dòng",
+              "code": "R1# ping 10.4.4.4 source Loopback0\nR1# ping 10.4.4.4 size 1500 df-bit\nR1# ping 10.4.4.4 repeat 1000 timeout 1\nR1# ping 10.4.4.4 tos 184\nR1# ping vrf BLUE 10.4.4.4\nR1# ping ipv6 2001:db8::4",
+              "note": "Các tùy chọn có thể kết hợp."
+            },
+            {
+              "type": "code",
+              "title": "Extended ping tương tác",
+              "code": "R1# ping\nProtocol [ip]:\nTarget IP address: 10.4.4.4\nRepeat count [5]: 100\nDatagram size [100]: 1400\nExtended commands [n]: y\nSource address or interface: Loopback0\nType of service [0]: 184\nSet DF bit in IP header? [no]: yes\nSweep range of sizes [n]: y",
+              "note": "Gõ 'ping' không tham số để vào chế độ hỏi đáp."
+            },
+            {
+              "type": "compare",
+              "title": "Tùy chọn extended ping và mục đích",
+              "headers": [
+                "Tùy chọn",
+                "Trả lời câu hỏi"
+              ],
+              "rows": [
+                [
+                  "source",
+                  "Đích có route NGƯỢC về mạng nguồn cụ thể (LAN, loopback) không?"
+                ],
+                [
+                  "size + df-bit",
+                  "MTU tối đa của đường đi là bao nhiêu? (tunnel, VXLAN)"
+                ],
+                [
+                  "sweep",
+                  "Thử dải kích thước để tìm điểm gãy MTU"
+                ],
+                [
+                  "repeat",
+                  "Có mất gói không liên tục không?"
+                ],
+                [
+                  "tos",
+                  "QoS/policy theo marking có hoạt động không?"
+                ]
+              ]
+            },
+            {
+              "type": "flow",
+              "title": "Chẩn đoán bằng ping",
+              "steps": [
+                {
+                  "who": "Ping từ interface ra thành công",
+                  "do": "Có đường tới đích"
+                },
+                {
+                  "who": "Ping source LAN thất bại",
+                  "do": "Đích thiếu route về mạng LAN, hoặc ACL/NAT"
+                },
+                {
+                  "who": "Ping size 1500 df-bit trả M",
+                  "do": "MTU đường đi nhỏ hơn 1500"
+                },
+                {
+                  "who": "Kết luận",
+                  "do": "Sửa route về hoặc MTU/MSS"
+                }
+              ]
+            },
+            {
+              "type": "tip",
+              "title": "Mẹo thi",
+              "body": "M = vấn đề MTU với DF-bit. U = unreachable (thường ACL hoặc không có route). tos 184 = DSCP 46 (EF) × 4."
+            },
+            {
+              "type": "warn",
+              "title": "Ping không phải ứng dụng",
+              "body": "ACL có thể cho ICMP nhưng chặn TCP 443; firewall có thể chặn ICMP dù dịch vụ chạy tốt. Ping chỉ là một dữ kiện."
+            }
+          ],
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Ký hiệu 'M' trong ping nghĩa là gì?",
+              "options": [
+                "Timeout",
+                "Unreachable",
+                "Could not fragment – gói lớn hơn MTU và có DF-bit",
+                "TTL exceeded"
+              ],
+              "correct_answer": "Could not fragment – gói lớn hơn MTU và có DF-bit",
+              "explanation": "Vấn đề MTU."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Vì sao gói ping đầu tiên thường mất?",
+              "options": [
+                "Do ACL",
+                "Do CEF tắt",
+                "Do STP",
+                "Router đang chờ ARP"
+              ],
+              "correct_answer": "Router đang chờ ARP",
+              "explanation": "ARP resolve."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Mục đích của tùy chọn source khi ping?",
+              "options": [
+                "Tăng kích thước gói",
+                "Kiểm tra đường về tới một mạng nguồn cụ thể",
+                "Đặt DSCP",
+                "Lặp nhiều lần"
+              ],
+              "correct_answer": "Kiểm tra đường về tới một mạng nguồn cụ thể",
+              "explanation": "Route ngược."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Giá trị tos 184 tương ứng DSCP nào?",
+              "options": [
+                "EF (46)",
+                "AF41",
+                "CS3",
+                "Default"
+              ],
+              "correct_answer": "EF (46)",
+              "explanation": "46 × 4 = 184."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Ký hiệu 'U' thường do đâu?",
+              "options": [
+                "Timeout",
+                "MTU",
+                "Source quench",
+                "Router trả ICMP unreachable (không route hoặc ACL)"
+              ],
+              "correct_answer": "Router trả ICMP unreachable (không route hoặc ACL)",
+              "explanation": "ICMP type 3."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Tùy chọn nào giúp tìm điểm gãy MTU?",
+              "options": [
+                "repeat",
+                "timeout",
+                "sweep kèm df-bit",
+                "tos"
+              ],
+              "correct_answer": "sweep kèm df-bit",
+              "explanation": "Thử dải kích thước."
+            },
+            {
+              "type": "fill_code",
+              "prompt": "Ping thử MTU 1500 không phân mảnh:",
+              "template": "R1# ping 10.4.4.4 size 1500 [BLANK]",
+              "options": [
+                "no-frag",
+                "mtu",
+                "validate",
+                "df-bit"
+              ],
+              "correct_answer": "df-bit",
+              "explanation": "df-bit."
+            },
+            {
+              "type": "reorder",
+              "prompt": "Sắp xếp quy trình chẩn đoán kết nối bằng ping:",
+              "items": [
+                "Ping interface của chính router",
+                "Ping next-hop",
+                "Ping đích từ interface ra",
+                "Ping đích với source LAN",
+                "Ping với size lớn và df-bit"
+              ],
+              "correct_order": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "explanation": "Từ gần tới xa."
+            },
+            {
+              "type": "match_pairs",
+              "prompt": "Ghép ký hiệu với ý nghĩa:",
+              "pairs": [
+                {
+                  "left": "!",
+                  "right": "Thành công"
+                },
+                {
+                  "left": ".",
+                  "right": "Timeout"
+                },
+                {
+                  "left": "U",
+                  "right": "Unreachable"
+                },
+                {
+                  "left": "&",
+                  "right": "TTL exceeded"
+                }
+              ],
+              "explanation": "Output ping."
+            }
+          ]
+        },
+        {
+          "node_id": "node_d4_traceroute",
+          "node_title": "Traceroute",
+          "icon": "traceroute.svg",
+          "lesson": [
+            {
+              "type": "text",
+              "title": "Nguyên lý traceroute",
+              "body": "Lợi dụng TTL: mỗi router giảm TTL 1, khi TTL về 0 router drop gói và gửi ICMP Time Exceeded – để lộ địa chỉ của nó.",
+              "bullets": [
+                "Cisco IOS: gửi UDP probe tới port cao (bắt đầu 33434), 3 probe mỗi TTL",
+                "Windows tracert: dùng ICMP Echo",
+                "Linux traceroute: UDP mặc định, có tùy chọn ICMP/TCP",
+                "Đích cuối trả ICMP Port Unreachable (UDP) hoặc Echo Reply (ICMP) → kết thúc"
+              ]
+            },
+            {
+              "type": "flow",
+              "title": "Diễn biến traceroute",
+              "steps": [
+                {
+                  "who": "TTL = 1",
+                  "do": "Router hop 1 trả ICMP Time Exceeded → biết IP hop 1"
+                },
+                {
+                  "who": "TTL = 2",
+                  "do": "Hop 2 trả Time Exceeded"
+                },
+                {
+                  "who": "TTL = n",
+                  "do": "Tiếp tục tăng TTL"
+                },
+                {
+                  "who": "Tới đích",
+                  "do": "Đích trả ICMP Port Unreachable → dừng"
+                }
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "Ký hiệu trong output Cisco",
+              "headers": [
+                "Ký hiệu",
+                "Ý nghĩa"
+              ],
+              "rows": [
+                [
+                  "Thời gian (ms)",
+                  "RTT của từng probe"
+                ],
+                [
+                  "*",
+                  "Probe timeout"
+                ],
+                [
+                  "!H",
+                  "Host unreachable"
+                ],
+                [
+                  "!N",
+                  "Network unreachable"
+                ],
+                [
+                  "!P",
+                  "Protocol unreachable"
+                ],
+                [
+                  "!A",
+                  "Administratively prohibited (ACL)"
+                ],
+                [
+                  "Q",
+                  "Source quench"
+                ]
+              ]
+            },
+            {
+              "type": "code",
+              "title": "Traceroute và tùy chọn",
+              "code": "R1# traceroute 10.4.4.4\nR1# traceroute 10.4.4.4 source Loopback0 numeric\nR1# traceroute 10.4.4.4 probe 1 timeout 1 ttl 1 15\nR1# traceroute vrf BLUE 10.4.4.4\nR1# traceroute\n! chế độ extended tương tác",
+              "note": "numeric bỏ phân giải DNS giúp nhanh hơn."
+            },
+            {
+              "type": "compare",
+              "title": "Đọc kết quả bất thường",
+              "headers": [
+                "Quan sát",
+                "Giải thích"
+              ],
+              "rows": [
+                [
+                  "Một hop toàn * nhưng hop sau vẫn trả lời",
+                  "Router đó không sinh/giới hạn ICMP, không phải lỗi"
+                ],
+                [
+                  "* từ hop n tới cuối",
+                  "Traffic bị chặn hoặc mất route sau hop n"
+                ],
+                [
+                  "Lặp lại cùng hai IP",
+                  "Routing loop"
+                ],
+                [
+                  "Đường đi khác nhau giữa các probe",
+                  "ECMP/per-packet load balancing"
+                ],
+                [
+                  "!A",
+                  "ACL chặn"
+                ]
+              ]
+            },
+            {
+              "type": "text",
+              "title": "Hạn chế",
+              "body": "Traceroute chỉ cho thấy đường ĐI, không phải đường về; đường về có thể khác (asymmetric).",
+              "bullets": [
+                "ICMP bị rate-limit trên router (CoPP) → RTT các hop giữa không phản ánh độ trễ thực",
+                "MPLS core có thể ẩn hop (no mpls ip propagate-ttl)",
+                "Firewall thường chặn UDP traceroute"
+              ]
+            },
+            {
+              "type": "tip",
+              "title": "Mẹo thi",
+              "body": "Cisco traceroute = UDP. Kết thúc khi nhận Port Unreachable. * không nhất thiết là lỗi."
+            },
+            {
+              "type": "warn",
+              "title": "RTT hop giữa",
+              "body": "RTT cao ở một hop giữa nhưng hop sau thấp hơn → router đó chỉ xử lý ICMP chậm (control plane), không phải tắc nghẽn đường truyền."
+            }
+          ],
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Traceroute Cisco IOS gửi loại gói nào?",
+              "options": [
+                "ICMP Echo với TTL cố định",
+                "TCP SYN",
+                "ARP",
+                "UDP với TTL tăng dần"
+              ],
+              "correct_answer": "UDP với TTL tăng dần",
+              "explanation": "Port bắt đầu 33434."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Router trung gian trả loại ICMP nào?",
+              "options": [
+                "Time Exceeded",
+                "Echo Reply",
+                "Port Unreachable",
+                "Redirect"
+              ],
+              "correct_answer": "Time Exceeded",
+              "explanation": "TTL hết."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Đích cuối trả gì để kết thúc traceroute UDP?",
+              "options": [
+                "Time Exceeded",
+                "Echo Reply",
+                "ICMP Port Unreachable",
+                "TCP RST"
+              ],
+              "correct_answer": "ICMP Port Unreachable",
+              "explanation": "Port không mở."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Kết quả lặp lại xen kẽ hai IP nhiều hop cho thấy gì?",
+              "options": [
+                "Routing loop",
+                "ECMP",
+                "ACL chặn",
+                "MTU sai"
+              ],
+              "correct_answer": "Routing loop",
+              "explanation": "Gói đi vòng."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Ký hiệu !A nghĩa là gì?",
+              "options": [
+                "Host unreachable",
+                "Timeout",
+                "Administratively prohibited (ACL)",
+                "Network unreachable"
+              ],
+              "correct_answer": "Administratively prohibited (ACL)",
+              "explanation": "Bị chặn bởi policy."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Windows tracert dùng loại gói nào?",
+              "options": [
+                "ICMP Echo",
+                "UDP",
+                "TCP",
+                "GRE"
+              ],
+              "correct_answer": "ICMP Echo",
+              "explanation": "Khác Cisco."
+            },
+            {
+              "type": "fill_code",
+              "prompt": "Traceroute không phân giải DNS:",
+              "template": "R1# traceroute 10.4.4.4 [BLANK]",
+              "options": [
+                "nodns",
+                "fast",
+                "numeric",
+                "ip"
+              ],
+              "correct_answer": "numeric",
+              "explanation": "Bỏ tra tên."
+            },
+            {
+              "type": "reorder",
+              "prompt": "Sắp xếp diễn biến traceroute:",
+              "items": [
+                "Gửi probe TTL 1",
+                "Hop 1 trả Time Exceeded",
+                "Tăng TTL, gửi tiếp",
+                "Đích trả Port Unreachable"
+              ],
+              "correct_order": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "explanation": "TTL tăng dần."
+            },
+            {
+              "type": "match_pairs",
+              "prompt": "Ghép ký hiệu traceroute với ý nghĩa:",
+              "pairs": [
+                {
+                  "left": "*",
+                  "right": "Probe timeout"
+                },
+                {
+                  "left": "!H",
+                  "right": "Host unreachable"
+                },
+                {
+                  "left": "!N",
+                  "right": "Network unreachable"
+                },
+                {
+                  "left": "!A",
+                  "right": "Bị ACL chặn"
+                }
+              ],
+              "explanation": "Output."
+            },
+            {
+              "type": "categorize",
+              "prompt": "Quan sát này có phải lỗi thực sự?",
+              "pairs": [
+                {
+                  "left": "Một hop * nhưng hop sau trả lời",
+                  "right": "Không phải lỗi"
+                },
+                {
+                  "left": "RTT hop giữa cao, hop sau thấp",
+                  "right": "Không phải lỗi"
+                },
+                {
+                  "left": "* từ hop 5 tới hết",
+                  "right": "Có vấn đề"
+                },
+                {
+                  "left": "Lặp hai IP liên tục",
+                  "right": "Có vấn đề"
+                }
+              ],
+              "explanation": "Đọc traceroute."
+            }
+          ]
+        },
+        {
+          "node_id": "node_d4_debugging",
+          "node_title": "Debugging và Conditional Debug",
+          "icon": "bug.svg",
+          "lesson": [
+            {
+              "type": "text",
+              "title": "Debug",
+              "body": "Lệnh debug in thông tin thời gian thực về tiến trình nội bộ: bản tin giao thức, gói tin, sự kiện. Mạnh nhưng nguy hiểm.",
+              "bullets": [
+                "Chạy ở mức ưu tiên cao, có thể chiếm CPU",
+                "Mặc định hiển thị trên console (logging console debugging)",
+                "Phiên SSH cần terminal monitor",
+                "Tắt: undebug all / no debug all / u all"
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "Rủi ro và biện pháp",
+              "headers": [
+                "Rủi ro",
+                "Biện pháp"
+              ],
+              "rows": [
+                [
+                  "CPU 100%, mất adjacency",
+                  "Dùng debug hẹp, conditional debug, ACL"
+                ],
+                [
+                  "Console 9600 baud nghẽn",
+                  "no logging console, dùng logging buffered"
+                ],
+                [
+                  "debug ip packet trên router tải cao",
+                  "Luôn kèm ACL: debug ip packet 100 detail"
+                ],
+                [
+                  "Quên tắt debug",
+                  "Đặt sẵn undebug all, hoặc dùng EEM timer tự tắt"
+                ]
+              ]
+            },
+            {
+              "type": "code",
+              "title": "Quy trình debug an toàn",
+              "code": "R1(config)# no logging console\nR1(config)# logging buffered 128000 debugging\nR1(config)# service timestamps debug datetime msec localtime\nR1# terminal monitor\nR1# show processes cpu sorted | exclude 0.00\nR1# debug ip ospf adj\nR1# show logging\nR1# undebug all",
+              "note": "show logging đọc output từ buffer thay vì console."
+            },
+            {
+              "type": "text",
+              "title": "Conditional debugging",
+              "body": "Giới hạn output debug chỉ cho traffic/đối tượng khớp điều kiện.",
+              "bullets": [
+                "debug condition interface Gi0/1",
+                "debug condition ip 10.1.1.10",
+                "debug condition mac-address 0011.2233.4455",
+                "debug condition username / vlan (tùy nền tảng)",
+                "Mọi debug đang bật chỉ in sự kiện khớp điều kiện"
+              ]
+            },
+            {
+              "type": "code",
+              "title": "Conditional debug",
+              "code": "R1# debug condition interface GigabitEthernet0/1\nR1# debug condition ip 10.1.1.10\nR1# debug ip packet detail\nR1# show debug condition\nR1# show debugging\nR1# undebug all\nR1# no debug condition all",
+              "note": "Có thể kết hợp nhiều điều kiện."
+            },
+            {
+              "type": "compare",
+              "title": "Debug hữu ích cho thi",
+              "headers": [
+                "Lệnh",
+                "Dùng khi"
+              ],
+              "rows": [
+                [
+                  "debug ip ospf adj",
+                  "OSPF kẹt ExStart, mismatch tham số"
+                ],
+                [
+                  "debug ip ospf hello",
+                  "Không thấy láng giềng, sai timer/area"
+                ],
+                [
+                  "debug eigrp packets",
+                  "Láng giềng EIGRP flap"
+                ],
+                [
+                  "debug ip bgp updates",
+                  "Route BGP không nhận/gửi"
+                ],
+                [
+                  "debug ip nat",
+                  "NAT không dịch"
+                ],
+                [
+                  "debug crypto isakmp / ikev2",
+                  "VPN không lên"
+                ],
+                [
+                  "debug ip dhcp server packet",
+                  "Client không nhận IP"
+                ]
+              ]
+            },
+            {
+              "type": "tip",
+              "title": "Mẹo thi",
+              "body": "Thấy debug trên SSH cần terminal monitor. Conditional debug lọc theo interface/IP/MAC. debug chỉ thấy gói process-switched."
+            }
+          ],
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Lệnh nào cần để thấy debug trên phiên SSH?",
+              "options": [
+                "logging console",
+                "terminal monitor",
+                "show debugging",
+                "debug all"
+              ],
+              "correct_answer": "terminal monitor",
+              "explanation": "Debug mặc định ra console."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Mục đích của conditional debugging?",
+              "options": [
+                "Bật mọi debug",
+                "Chỉ in sự kiện khớp interface/IP/MAC để giảm tải",
+                "Gửi debug tới syslog",
+                "Tự tắt router"
+              ],
+              "correct_answer": "Chỉ in sự kiện khớp interface/IP/MAC để giảm tải",
+              "explanation": "Lọc output."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Vì sao nên tắt logging console khi debug?",
+              "options": [
+                "Để bảo mật",
+                "Vì debug không ra console",
+                "Để lưu startup",
+                "Console tốc độ thấp dễ nghẽn và tăng CPU"
+              ],
+              "correct_answer": "Console tốc độ thấp dễ nghẽn và tăng CPU",
+              "explanation": "Dùng buffer thay thế."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "debug ip packet không thấy gói đi bằng CEF vì sao?",
+              "options": [
+                "Vì CEF tắt",
+                "Vì ACL",
+                "Vì cần IPv6",
+                "Chỉ gói process-switched được debug"
+              ],
+              "correct_answer": "Chỉ gói process-switched được debug",
+              "explanation": "CEF xử lý phần cứng."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Lệnh nào xóa mọi điều kiện debug?",
+              "options": [
+                "no debug condition all",
+                "undebug all",
+                "clear logging",
+                "no terminal monitor"
+              ],
+              "correct_answer": "no debug condition all",
+              "explanation": "Xóa điều kiện riêng."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Debug nào phù hợp khi OSPF kẹt ExStart?",
+              "options": [
+                "debug ip nat",
+                "debug crypto isakmp",
+                "debug ip bgp",
+                "debug ip ospf adj"
+              ],
+              "correct_answer": "debug ip ospf adj",
+              "explanation": "Thấy lỗi MTU."
+            },
+            {
+              "type": "fill_code",
+              "prompt": "Giới hạn debug theo IP:",
+              "template": "R1# debug condition [BLANK] 10.1.1.10",
+              "options": [
+                "host",
+                "address",
+                "ip",
+                "source"
+              ],
+              "correct_answer": "ip",
+              "explanation": "debug condition ip."
+            },
+            {
+              "type": "reorder",
+              "prompt": "Sắp xếp quy trình debug an toàn:",
+              "items": [
+                "Kiểm tra CPU hiện tại",
+                "Tắt logging console, bật logging buffered",
+                "Đặt debug condition",
+                "Bật debug cụ thể",
+                "Đọc show logging",
+                "undebug all"
+              ],
+              "correct_order": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5
+              ],
+              "explanation": "Chuẩn bị → thực hiện → tắt."
+            },
+            {
+              "type": "match_pairs",
+              "prompt": "Ghép debug với tình huống:",
+              "pairs": [
+                {
+                  "left": "debug ip ospf hello",
+                  "right": "Không thấy láng giềng OSPF"
+                },
+                {
+                  "left": "debug ip nat",
+                  "right": "NAT không dịch"
+                },
+                {
+                  "left": "debug crypto ikev2",
+                  "right": "VPN IKEv2 không lên"
+                },
+                {
+                  "left": "debug ip dhcp server packet",
+                  "right": "Client không nhận IP"
+                }
+              ],
+              "explanation": "Chọn debug."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": "chap_04_span",
+      "chapter_title": "4.0 Network Assurance – 4.1 SPAN, RSPAN, ERSPAN",
+      "nodes": [
+        {
+          "node_id": "node_d4_local_span",
+          "node_title": "Local SPAN",
+          "icon": "mirror.svg",
+          "lesson": [
+            {
+              "type": "text",
+              "title": "Switched Port Analyzer",
+              "body": "Switch chỉ gửi frame unicast ra cổng đích, nên máy phân tích cắm vào cổng bất kỳ không thấy traffic của người khác. SPAN sao chép traffic từ nguồn tới cổng đích để phân tích.",
+              "bullets": [
+                "Dùng cho Wireshark, IDS/IPS, công cụ giám sát hiệu năng, ghi âm VoIP",
+                "Không ảnh hưởng luồng gốc",
+                "Local SPAN: nguồn và đích trên cùng switch (hoặc cùng stack)"
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "Thành phần session SPAN",
+              "headers": [
+                "Thành phần",
+                "Mô tả"
+              ],
+              "rows": [
+                [
+                  "Source port",
+                  "Cổng cần giám sát, chọn chiều rx, tx hoặc both"
+                ],
+                [
+                  "Source VLAN (VSPAN)",
+                  "Giám sát mọi cổng trong VLAN (chỉ rx trên nhiều nền tảng)"
+                ],
+                [
+                  "Destination port",
+                  "Cổng gắn analyzer; ngừng hoạt động như cổng thường"
+                ],
+                [
+                  "Filter",
+                  "Lọc VLAN trên trunk nguồn, hoặc ACL (FSPAN)"
+                ]
+              ]
+            },
+            {
+              "type": "code",
+              "title": "Cấu hình local SPAN",
+              "code": "SW1(config)# monitor session 1 source interface Gi1/0/1 - 2 both\nSW1(config)# monitor session 1 source vlan 10 rx\nSW1(config)# monitor session 1 filter vlan 10,20\nSW1(config)# monitor session 1 destination interface Gi1/0/24 encapsulation replicate\nSW1# show monitor session 1\nSW1# show monitor session all",
+              "note": "Mặc định cổng đích không nhận traffic vào; ingress cho phép analyzer gửi gói (ví dụ IPS reset)."
+            },
+            {
+              "type": "compare",
+              "title": "Hạn chế cổng đích",
+              "headers": [
+                "Đặc điểm",
+                "Giải thích"
+              ],
+              "rows": [
+                [
+                  "Không tham gia STP",
+                  "Cổng đích không gửi/nhận BPDU"
+                ],
+                [
+                  "Không học MAC",
+                  "Mặc định không nhận traffic người dùng"
+                ],
+                [
+                  "Không thể là source của session khác",
+                  "Một cổng một vai trò"
+                ],
+                [
+                  "Mất cấu hình cũ",
+                  "VLAN, trunk không hoạt động khi là đích"
+                ],
+                [
+                  "encapsulation replicate",
+                  "Giữ tag 802.1Q/CDP/BPDU trong bản sao"
+                ]
+              ]
+            },
+            {
+              "type": "flow",
+              "title": "Thiết kế SPAN đúng dung lượng",
+              "steps": [
+                {
+                  "who": "Nguồn",
+                  "do": "Gi1/0/1–4 (4 × 1 Gbps), chọn both"
+                },
+                {
+                  "who": "Tổng tiềm năng",
+                  "do": "Tới 8 Gbps (4 × rx + 4 × tx)"
+                },
+                {
+                  "who": "Đích",
+                  "do": "Gi1/0/24 chỉ 1 Gbps"
+                },
+                {
+                  "who": "Kết quả",
+                  "do": "Oversubscription: gói mirror bị drop, phân tích sai"
+                },
+                {
+                  "who": "Giải pháp",
+                  "do": "Giảm nguồn, chỉ rx, hoặc dùng đích 10 Gbps"
+                }
+              ]
+            },
+            {
+              "type": "tip",
+              "title": "Mẹo thi",
+              "body": "Local SPAN: source + destination cùng switch. Chiều rx/tx/both. Cổng đích không chạy STP, không học MAC."
+            },
+            {
+              "type": "warn",
+              "title": "Oversubscription",
+              "body": "SPAN có độ ưu tiên thấp hơn traffic thật; khi đích quá tải, bản sao bị drop âm thầm. Không dựa vào SPAN để đếm chính xác tỷ lệ mất gói."
+            }
+          ],
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Local SPAN yêu cầu gì về vị trí nguồn và đích?",
+              "options": [
+                "Khác switch qua VLAN",
+                "Cùng switch (hoặc stack)",
+                "Qua mạng L3",
+                "Không yêu cầu"
+              ],
+              "correct_answer": "Cùng switch (hoặc stack)",
+              "explanation": "Local."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Tùy chọn 'both' nghĩa là gì?",
+              "options": [
+                "Mirror hai VLAN",
+                "Mirror cả traffic nhận và gửi",
+                "Hai cổng đích",
+                "Hai session"
+              ],
+              "correct_answer": "Mirror cả traffic nhận và gửi",
+              "explanation": "rx + tx."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Cổng đích SPAN có đặc điểm gì?",
+              "options": [
+                "Không tham gia STP, không học MAC",
+                "Vẫn là trunk bình thường",
+                "Làm root port",
+                "Gửi BPDU"
+              ],
+              "correct_answer": "Không tham gia STP, không học MAC",
+              "explanation": "Chỉ cho analyzer."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Vì sao bản mirror có thể bị mất?",
+              "options": [
+                "Tổng traffic nguồn vượt băng thông cổng đích",
+                "Do STP",
+                "Do VTP",
+                "Do ACL nguồn"
+              ],
+              "correct_answer": "Tổng traffic nguồn vượt băng thông cổng đích",
+              "explanation": "Oversubscription."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "encapsulation replicate có tác dụng gì?",
+              "options": [
+                "Mã hóa bản sao",
+                "Gửi qua GRE",
+                "Tăng tốc độ",
+                "Giữ tag 802.1Q và frame L2 control trong bản sao"
+              ],
+              "correct_answer": "Giữ tag 802.1Q và frame L2 control trong bản sao",
+              "explanation": "Bản sao nguyên dạng."
+            },
+            {
+              "type": "fill_code",
+              "prompt": "Khai báo cổng đích SPAN:",
+              "template": "SW1(config)# monitor session 1 [BLANK] interface Gi1/0/24",
+              "options": [
+                "source",
+                "filter",
+                "destination",
+                "monitor"
+              ],
+              "correct_answer": "destination",
+              "explanation": "destination interface."
+            },
+            {
+              "type": "reorder",
+              "prompt": "Sắp xếp các bước cấu hình local SPAN:",
+              "items": [
+                "Chọn cổng/VLAN nguồn và chiều",
+                "Thêm filter VLAN nếu cần",
+                "Khai báo cổng đích",
+                "Kiểm tra show monitor session"
+              ],
+              "correct_order": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "explanation": "Thứ tự hợp lý."
+            },
+            {
+              "type": "match_pairs",
+              "prompt": "Ghép thành phần với mô tả:",
+              "pairs": [
+                {
+                  "left": "Source port",
+                  "right": "Cổng cần giám sát"
+                },
+                {
+                  "left": "Source VLAN",
+                  "right": "Mọi cổng trong VLAN"
+                },
+                {
+                  "left": "Destination port",
+                  "right": "Cổng gắn analyzer"
+                },
+                {
+                  "left": "Filter vlan",
+                  "right": "Giới hạn VLAN trên trunk nguồn"
+                }
+              ],
+              "explanation": "SPAN session."
+            },
+            {
+              "type": "categorize",
+              "prompt": "Chiều mirror nào?",
+              "pairs": [
+                {
+                  "left": "Chỉ traffic switch nhận trên cổng",
+                  "right": "rx"
+                },
+                {
+                  "left": "Chỉ traffic switch gửi ra cổng",
+                  "right": "tx"
+                },
+                {
+                  "left": "Cả hai chiều",
+                  "right": "both"
+                }
+              ],
+              "explanation": "rx/tx/both."
+            }
+          ]
+        },
+        {
+          "node_id": "node_d4_rspan",
+          "node_title": "Remote SPAN (RSPAN)",
+          "icon": "rspan.svg",
+          "lesson": [
+            {
+              "type": "text",
+              "title": "RSPAN",
+              "body": "Mirror traffic từ switch nguồn tới analyzer trên switch khác, vận chuyển qua một VLAN L2 chuyên dụng (RSPAN VLAN).",
+              "bullets": [
+                "Phù hợp campus: analyzer đặt tập trung ở core/data center",
+                "RSPAN VLAN phải được tạo với lệnh remote-span trên MỌI switch trên đường đi",
+                "Trunk giữa các switch phải cho phép RSPAN VLAN",
+                "Không học MAC trong RSPAN VLAN, traffic được flood"
+              ]
+            },
+            {
+              "type": "flow",
+              "title": "Luồng RSPAN",
+              "steps": [
+                {
+                  "who": "Switch nguồn SW1",
+                  "do": "Mirror Gi1/0/1 vào RSPAN VLAN 100"
+                },
+                {
+                  "who": "Trunk",
+                  "do": "Frame mirror đi qua SW2 (switch trung gian) trong VLAN 100"
+                },
+                {
+                  "who": "Switch đích SW3",
+                  "do": "Nhận VLAN 100 làm nguồn session"
+                },
+                {
+                  "who": "SW3",
+                  "do": "Gửi frame ra cổng đích Gi1/0/24 tới analyzer"
+                }
+              ]
+            },
+            {
+              "type": "code",
+              "title": "Switch nguồn",
+              "code": "SW1(config)# vlan 100\nSW1(config-vlan)# name RSPAN\nSW1(config-vlan)# remote-span\nSW1(config)# monitor session 1 source interface Gi1/0/1 both\nSW1(config)# monitor session 1 destination remote vlan 100",
+              "note": "Đích là remote vlan thay vì interface."
+            },
+            {
+              "type": "code",
+              "title": "Switch trung gian và switch đích",
+              "code": "SW2(config)# vlan 100\nSW2(config-vlan)# remote-span\nSW3(config)# vlan 100\nSW3(config-vlan)# remote-span\nSW3(config)# monitor session 1 source remote vlan 100\nSW3(config)# monitor session 1 destination interface Gi1/0/24\nSW3# show monitor session 1",
+              "note": "Switch trung gian chỉ cần VLAN remote-span và trunk."
+            },
+            {
+              "type": "compare",
+              "title": "Local SPAN vs RSPAN",
+              "headers": [
+                "Tiêu chí",
+                "Local SPAN",
+                "RSPAN"
+              ],
+              "rows": [
+                [
+                  "Phạm vi",
+                  "Một switch",
+                  "Nhiều switch trong cùng miền L2"
+                ],
+                [
+                  "Vận chuyển",
+                  "Nội bộ",
+                  "RSPAN VLAN qua trunk"
+                ],
+                [
+                  "Cấu hình",
+                  "Một session",
+                  "Session ở nguồn và đích, VLAN ở mọi switch"
+                ],
+                [
+                  "Ảnh hưởng mạng",
+                  "Không",
+                  "Tiêu tốn băng thông trunk"
+                ]
+              ]
+            },
+            {
+              "type": "text",
+              "title": "Lưu ý thiết kế",
+              "body": "RSPAN dùng băng thông thật trên trunk.",
+              "bullets": [
+                "Mirror nhiều cổng có thể làm nghẽn uplink sản xuất",
+                "Không dùng RSPAN VLAN cho traffic người dùng",
+                "Không qua được router (L3) – cần ERSPAN",
+                "VTPv1/v2 mang được thuộc tính remote-span cho VLAN normal-range"
+              ]
+            },
+            {
+              "type": "tip",
+              "title": "Mẹo thi",
+              "body": "remote-span phải có trên mọi switch, kể cả trung gian. Nguồn: destination remote vlan. Đích: source remote vlan."
+            },
+            {
+              "type": "warn",
+              "title": "Quên VLAN ở switch trung gian",
+              "body": "Switch trung gian thiếu VLAN 100 hoặc trunk không cho phép VLAN 100 → frame mirror bị drop, analyzer không nhận gì."
+            }
+          ],
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "RSPAN vận chuyển traffic mirror bằng gì?",
+              "options": [
+                "GRE",
+                "VLAN chuyên dụng cấu hình remote-span",
+                "CAPWAP",
+                "EtherChannel"
+              ],
+              "correct_answer": "VLAN chuyên dụng cấu hình remote-span",
+              "explanation": "L2 qua trunk."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Lệnh remote-span cần cấu hình ở đâu?",
+              "options": [
+                "Trên mọi switch trên đường đi",
+                "Chỉ switch nguồn",
+                "Chỉ switch đích",
+                "Chỉ root bridge"
+              ],
+              "correct_answer": "Trên mọi switch trên đường đi",
+              "explanation": "Kể cả trung gian."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Trên switch nguồn, đích của session RSPAN là gì?",
+              "options": [
+                "interface analyzer",
+                "remote vlan",
+                "IP address",
+                "erspan-id"
+              ],
+              "correct_answer": "remote vlan",
+              "explanation": "destination remote vlan."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Hạn chế chính của RSPAN?",
+              "options": [
+                "Không hỗ trợ trunk",
+                "Chỉ mirror một cổng",
+                "Không qua được mạng L3",
+                "Cần GRE"
+              ],
+              "correct_answer": "Không qua được mạng L3",
+              "explanation": "Chỉ L2."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Rủi ro khi mirror nhiều cổng qua RSPAN?",
+              "options": [
+                "Tạo loop STP",
+                "Làm nghẽn trunk sản xuất",
+                "Mất VLAN",
+                "Reload switch"
+              ],
+              "correct_answer": "Làm nghẽn trunk sản xuất",
+              "explanation": "Dùng băng thông thật."
+            },
+            {
+              "type": "fill_code",
+              "prompt": "Đánh dấu VLAN 100 là RSPAN VLAN:",
+              "template": "SW1(config-vlan)# [BLANK]",
+              "options": [
+                "rspan",
+                "mirror",
+                "remote-span",
+                "private-vlan"
+              ],
+              "correct_answer": "remote-span",
+              "explanation": "remote-span."
+            },
+            {
+              "type": "reorder",
+              "prompt": "Sắp xếp các bước cấu hình RSPAN:",
+              "items": [
+                "Tạo VLAN remote-span trên mọi switch",
+                "Cho phép VLAN trên trunk",
+                "Switch nguồn: source interface, destination remote vlan",
+                "Switch đích: source remote vlan, destination interface"
+              ],
+              "correct_order": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "explanation": "Thứ tự đúng."
+            },
+            {
+              "type": "match_pairs",
+              "prompt": "Ghép lệnh với switch cấu hình:",
+              "pairs": [
+                {
+                  "left": "destination remote vlan 100",
+                  "right": "Switch nguồn"
+                },
+                {
+                  "left": "source remote vlan 100",
+                  "right": "Switch đích"
+                },
+                {
+                  "left": "Chỉ vlan 100 remote-span",
+                  "right": "Switch trung gian"
+                }
+              ],
+              "explanation": "Vai trò switch."
+            },
+            {
+              "type": "categorize",
+              "prompt": "Local SPAN hay RSPAN?",
+              "pairs": [
+                {
+                  "left": "Analyzer cùng switch",
+                  "right": "Local SPAN"
+                },
+                {
+                  "left": "Không tốn băng thông trunk",
+                  "right": "Local SPAN"
+                },
+                {
+                  "left": "Analyzer ở switch khác cùng miền L2",
+                  "right": "RSPAN"
+                },
+                {
+                  "left": "Cần VLAN remote-span",
+                  "right": "RSPAN"
+                }
+              ],
+              "explanation": "So sánh."
+            }
+          ]
+        },
+        {
+          "node_id": "node_d4_erspan",
+          "node_title": "Encapsulated Remote SPAN (ERSPAN)",
+          "icon": "erspan.svg",
+          "lesson": [
+            {
+              "type": "text",
+              "title": "ERSPAN",
+              "body": "Đóng gói traffic mirror trong GRE để vận chuyển qua mạng IP định tuyến (L3), tới analyzer ở bất kỳ đâu.",
+              "bullets": [
+                "GRE protocol type 0x88BE (ERSPAN Type II), 0x22EB (Type III)",
+                "Header ERSPAN chứa session ID (erspan-id), VLAN gốc, index cổng",
+                "Hỗ trợ trên Catalyst 9000, router IOS XE (ASR/ISR/C8000), Nexus",
+                "Đích có thể là switch ERSPAN destination hoặc trực tiếp máy phân tích (Wireshark giải mã được ERSPAN)"
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "SPAN vs RSPAN vs ERSPAN",
+              "headers": [
+                "Tiêu chí",
+                "SPAN",
+                "RSPAN",
+                "ERSPAN"
+              ],
+              "rows": [
+                [
+                  "Phạm vi",
+                  "Một switch",
+                  "Miền L2",
+                  "Qua L3"
+                ],
+                [
+                  "Vận chuyển",
+                  "Nội bộ",
+                  "RSPAN VLAN",
+                  "GRE/IP"
+                ],
+                [
+                  "Cấu hình mạng trung gian",
+                  "Không",
+                  "VLAN trên mọi switch",
+                  "Không (chỉ cần IP reachability)"
+                ],
+                [
+                  "Overhead",
+                  "Không",
+                  "Không",
+                  "GRE + ERSPAN header (~50 byte)"
+                ]
+              ]
+            },
+            {
+              "type": "code",
+              "title": "ERSPAN source (Catalyst 9000/IOS XE)",
+              "code": "SW1(config)# monitor session 1 type erspan-source\nSW1(config-mon-erspan-src)# source interface Gi1/0/1 both\nSW1(config-mon-erspan-src)# filter vlan 10\nSW1(config-mon-erspan-src)# no shutdown\nSW1(config-mon-erspan-src)# destination\nSW1(config-mon-erspan-src-dst)# erspan-id 10\nSW1(config-mon-erspan-src-dst)# ip address 10.99.99.10\nSW1(config-mon-erspan-src-dst)# origin ip address 10.1.1.1",
+              "note": "origin ip là IP nguồn của gói GRE."
+            },
+            {
+              "type": "code",
+              "title": "ERSPAN destination",
+              "code": "SW9(config)# monitor session 2 type erspan-destination\nSW9(config-mon-erspan-dst)# destination interface Gi1/0/24\nSW9(config-mon-erspan-dst)# no shutdown\nSW9(config-mon-erspan-dst)# source\nSW9(config-mon-erspan-dst-src)# erspan-id 10\nSW9(config-mon-erspan-dst-src)# ip address 10.99.99.10\nSW9# show monitor session 2",
+              "note": "erspan-id phải khớp hai đầu."
+            },
+            {
+              "type": "flow",
+              "title": "Luồng ERSPAN",
+              "steps": [
+                {
+                  "who": "Switch nguồn",
+                  "do": "Sao chép frame từ Gi1/0/1"
+                },
+                {
+                  "who": "Switch nguồn",
+                  "do": "Thêm header ERSPAN + GRE + IP (10.1.1.1 → 10.99.99.10)"
+                },
+                {
+                  "who": "Mạng L3",
+                  "do": "Định tuyến như gói IP thường"
+                },
+                {
+                  "who": "Đích",
+                  "do": "Bóc header, gửi frame gốc ra cổng analyzer (hoặc analyzer tự giải mã)"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "title": "Lưu ý vận hành",
+              "body": "ERSPAN dùng băng thông và có thể bị phân mảnh.",
+              "bullets": [
+                "Frame 1500 + overhead → có thể vượt MTU, cần MTU lớn hoặc chấp nhận cắt (truncate)",
+                "Traffic mirror đi trên mạng sản xuất → cân nhắc QoS thấp",
+                "Bảo mật: dữ liệu mirror không mã hóa khi đi qua mạng"
+              ]
+            },
+            {
+              "type": "tip",
+              "title": "Mẹo thi",
+              "body": "ERSPAN = GRE, đi qua L3, cần erspan-id khớp và IP đích. RSPAN = VLAN L2."
+            },
+            {
+              "type": "warn",
+              "title": "Không bật no shutdown",
+              "body": "Session ERSPAN mặc định ở trạng thái shutdown; quên no shutdown thì không có traffic mirror nào được gửi."
+            }
+          ],
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Công nghệ mirror nào đi qua được mạng L3?",
+              "options": [
+                "Local SPAN",
+                "RSPAN",
+                "VSPAN",
+                "ERSPAN"
+              ],
+              "correct_answer": "ERSPAN",
+              "explanation": "Đóng gói GRE."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "ERSPAN Type II dùng GRE protocol type nào?",
+              "options": [
+                "0x0800",
+                "0x8100",
+                "0x88BE",
+                "0x8909"
+              ],
+              "correct_answer": "0x88BE",
+              "explanation": "ERSPAN."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Giá trị nào phải khớp giữa ERSPAN source và destination?",
+              "options": [
+                "VLAN nguồn",
+                "Số session",
+                "Tên session",
+                "erspan-id"
+              ],
+              "correct_answer": "erspan-id",
+              "explanation": "Session ID."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "origin ip address trong ERSPAN source là gì?",
+              "options": [
+                "IP của analyzer",
+                "IP nguồn của gói GRE",
+                "IP cổng nguồn",
+                "IP gateway"
+              ],
+              "correct_answer": "IP nguồn của gói GRE",
+              "explanation": "Đầu tunnel."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Session ERSPAN mặc định ở trạng thái nào?",
+              "options": [
+                "Active",
+                "Shutdown",
+                "Monitor",
+                "Error"
+              ],
+              "correct_answer": "Shutdown",
+              "explanation": "Cần no shutdown."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Mạng trung gian cần gì để ERSPAN hoạt động?",
+              "options": [
+                "Chỉ cần định tuyến IP tới đích",
+                "VLAN remote-span",
+                "Trunk",
+                "STP"
+              ],
+              "correct_answer": "Chỉ cần định tuyến IP tới đích",
+              "explanation": "Không cấu hình đặc biệt."
+            },
+            {
+              "type": "fill_code",
+              "prompt": "Tạo session ERSPAN nguồn:",
+              "template": "SW1(config)# monitor session 1 type [BLANK]",
+              "options": [
+                "erspan-destination",
+                "rspan",
+                "erspan-source",
+                "remote"
+              ],
+              "correct_answer": "erspan-source",
+              "explanation": "type erspan-source."
+            },
+            {
+              "type": "reorder",
+              "prompt": "Sắp xếp luồng ERSPAN:",
+              "items": [
+                "Sao chép frame tại cổng nguồn",
+                "Đóng gói ERSPAN + GRE + IP",
+                "Định tuyến qua mạng L3",
+                "Đích bóc header gửi tới analyzer"
+              ],
+              "correct_order": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "explanation": "Từ nguồn tới analyzer."
+            },
+            {
+              "type": "categorize",
+              "prompt": "Thuộc loại SPAN nào?",
+              "pairs": [
+                {
+                  "left": "Cùng switch",
+                  "right": "Local SPAN"
+                },
+                {
+                  "left": "Dùng VLAN remote-span",
+                  "right": "RSPAN"
+                },
+                {
+                  "left": "Dùng erspan-id",
+                  "right": "ERSPAN"
+                },
+                {
+                  "left": "Đóng gói GRE",
+                  "right": "ERSPAN"
+                }
+              ],
+              "explanation": "Ba loại."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": "chap_04_snmp_syslog",
+      "chapter_title": "4.0 Network Assurance – 4.2 SNMP và Syslog",
+      "nodes": [
+        {
+          "node_id": "node_d4_snmp",
+          "node_title": "SNMP: Kiến trúc và Thao tác",
+          "icon": "snmp.svg",
+          "lesson": [
+            {
+              "type": "compare",
+              "title": "Thành phần SNMP",
+              "headers": [
+                "Thành phần",
+                "Vai trò"
+              ],
+              "rows": [
+                [
+                  "NMS / Manager",
+                  "Hệ thống giám sát gửi request, nhận notification"
+                ],
+                [
+                  "Agent",
+                  "Tiến trình trên thiết bị trả lời request, sinh trap"
+                ],
+                [
+                  "MIB",
+                  "Management Information Base – cơ sở dữ liệu phân cấp các đối tượng"
+                ],
+                [
+                  "OID",
+                  "Object Identifier – định danh số của đối tượng, dạng cây"
+                ]
+              ]
+            },
+            {
+              "type": "text",
+              "title": "MIB và OID",
+              "body": "OID là đường dẫn trong cây toàn cầu.",
+              "bullets": [
+                "1.3.6.1 = iso.org.dod.internet",
+                "1.3.6.1.2.1 = mib-2 (MIB chuẩn)",
+                "1.3.6.1.2.1.1.5.0 = sysName",
+                "1.3.6.1.2.1.2.2.1.10 = ifInOctets (bộ đếm byte vào)",
+                "1.3.6.1.4.1.9 = enterprises.cisco (MIB riêng Cisco)"
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "Thao tác SNMP",
+              "headers": [
+                "Thao tác",
+                "Chiều",
+                "Port",
+                "Ghi chú"
+              ],
+              "rows": [
+                [
+                  "Get",
+                  "NMS → Agent",
+                  "UDP 161",
+                  "Đọc một OID"
+                ],
+                [
+                  "GetNext",
+                  "NMS → Agent",
+                  "UDP 161",
+                  "Đọc OID kế tiếp (walk)"
+                ],
+                [
+                  "GetBulk",
+                  "NMS → Agent",
+                  "UDP 161",
+                  "Đọc nhiều OID một lần (v2c+)"
+                ],
+                [
+                  "Set",
+                  "NMS → Agent",
+                  "UDP 161",
+                  "Ghi giá trị"
+                ],
+                [
+                  "Trap",
+                  "Agent → NMS",
+                  "UDP 162",
+                  "Không xác nhận"
+                ],
+                [
+                  "Inform",
+                  "Agent → NMS",
+                  "UDP 162",
+                  "Có xác nhận (v2c+)"
+                ]
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "Các phiên bản",
+              "headers": [
+                "Phiên bản",
+                "Bảo mật",
+                "Đặc điểm"
+              ],
+              "rows": [
+                [
+                  "SNMPv1",
+                  "Community string clear-text",
+                  "Counter 32-bit"
+                ],
+                [
+                  "SNMPv2c",
+                  "Community string clear-text",
+                  "GetBulk, Inform, counter 64-bit"
+                ],
+                [
+                  "SNMPv3",
+                  "User-based, xác thực và mã hóa",
+                  "Khuyến nghị"
+                ]
+              ]
+            },
+            {
+              "type": "flow",
+              "title": "Polling vs Notification",
+              "steps": [
+                {
+                  "who": "Polling",
+                  "do": "NMS hỏi định kỳ (ví dụ 5 phút) các OID như ifInOctets"
+                },
+                {
+                  "who": "NMS",
+                  "do": "Tính utilization từ chênh lệch counter giữa hai lần poll"
+                },
+                {
+                  "who": "Notification",
+                  "do": "Sự kiện xảy ra (link down) → agent gửi trap/inform ngay"
+                },
+                {
+                  "who": "Kết hợp",
+                  "do": "Poll cho xu hướng, trap cho sự kiện tức thời"
+                }
+              ]
+            },
+            {
+              "type": "code",
+              "title": "SNMPv2c (chỉ đọc, giới hạn bằng ACL)",
+              "code": "R1(config)# ip access-list standard NMS\nR1(config-std-nacl)# permit 10.1.1.50\nR1(config)# snmp-server community R3adOnly RO NMS\nR1(config)# snmp-server location HCM-DC1\nR1(config)# snmp-server contact noc@corp.local\nR1(config)# snmp-server host 10.1.1.50 version 2c R3adOnly\nR1(config)# snmp-server enable traps linkdown linkup\nR1# show snmp community",
+              "note": "Community RO kèm ACL hạn chế nguồn."
+            },
+            {
+              "type": "tip",
+              "title": "Mẹo thi",
+              "body": "Agent nghe UDP 161, NMS nhận trap/inform UDP 162. Inform có xác nhận, trap không. GetBulk và Inform từ v2c."
+            },
+            {
+              "type": "warn",
+              "title": "Community RW",
+              "body": "Community RW trên v2c gửi clear-text; kẻ bắt được gói có thể đổi cấu hình (ví dụ tải config qua TFTP). Tránh RW hoặc dùng SNMPv3."
+            }
+          ],
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "SNMP agent lắng nghe port nào?",
+              "options": [
+                "UDP 162",
+                "TCP 161",
+                "UDP 161",
+                "UDP 514"
+              ],
+              "correct_answer": "UDP 161",
+              "explanation": "162 cho notification."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Khác biệt giữa Trap và Inform?",
+              "options": [
+                "Trap được mã hóa",
+                "Inform do NMS gửi",
+                "Trap chỉ có ở v3",
+                "Inform yêu cầu NMS xác nhận, Trap thì không"
+              ],
+              "correct_answer": "Inform yêu cầu NMS xác nhận, Trap thì không",
+              "explanation": "Inform tin cậy hơn."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "OID dùng để làm gì?",
+              "options": [
+                "Mã hóa gói",
+                "Định danh duy nhất một đối tượng trong MIB",
+                "Xác thực user",
+                "Chọn port"
+              ],
+              "correct_answer": "Định danh duy nhất một đối tượng trong MIB",
+              "explanation": "Object Identifier."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Thao tác nào đọc nhiều OID trong một request?",
+              "options": [
+                "Get",
+                "GetBulk",
+                "GetNext",
+                "Set"
+              ],
+              "correct_answer": "GetBulk",
+              "explanation": "Từ v2c."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Nhánh OID nào chứa MIB riêng của Cisco?",
+              "options": [
+                "1.3.6.1.4.1.9",
+                "1.3.6.1.2.1",
+                "1.3.6.1.6",
+                "1.3.6.1.1"
+              ],
+              "correct_answer": "1.3.6.1.4.1.9",
+              "explanation": "enterprises.cisco."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Ưu điểm của counter 64-bit (v2c) so với 32-bit?",
+              "options": [
+                "Không bị tràn nhanh trên link tốc độ cao",
+                "Mã hóa",
+                "Ít băng thông",
+                "Không cần MIB"
+              ],
+              "correct_answer": "Không bị tràn nhanh trên link tốc độ cao",
+              "explanation": "32-bit tràn sau vài giây ở 10G."
+            },
+            {
+              "type": "fill_code",
+              "prompt": "Tạo community chỉ đọc giới hạn bằng ACL NMS:",
+              "template": "R1(config)# snmp-server community R3adOnly [BLANK] NMS",
+              "options": [
+                "RW",
+                "read",
+                "view",
+                "RO"
+              ],
+              "correct_answer": "RO",
+              "explanation": "RO = read-only."
+            },
+            {
+              "type": "match_pairs",
+              "prompt": "Ghép thao tác với chiều/port:",
+              "pairs": [
+                {
+                  "left": "Get",
+                  "right": "NMS tới agent, UDP 161"
+                },
+                {
+                  "left": "Set",
+                  "right": "NMS ghi giá trị, UDP 161"
+                },
+                {
+                  "left": "Trap",
+                  "right": "Agent tới NMS, không xác nhận"
+                },
+                {
+                  "left": "Inform",
+                  "right": "Agent tới NMS, có xác nhận"
+                }
+              ],
+              "explanation": "Thao tác SNMP."
+            },
+            {
+              "type": "categorize",
+              "prompt": "Port nào được dùng?",
+              "pairs": [
+                {
+                  "left": "Get",
+                  "right": "UDP 161"
+                },
+                {
+                  "left": "GetBulk",
+                  "right": "UDP 161"
+                },
+                {
+                  "left": "Set",
+                  "right": "UDP 161"
+                },
+                {
+                  "left": "Trap",
+                  "right": "UDP 162"
+                },
+                {
+                  "left": "Inform",
+                  "right": "UDP 162"
+                }
+              ],
+              "explanation": "161 vs 162."
+            }
+          ]
+        },
+        {
+          "node_id": "node_d4_snmpv3",
+          "node_title": "SNMPv3: Bảo mật và Cấu hình",
+          "icon": "snmpv3.svg",
+          "lesson": [
+            {
+              "type": "text",
+              "title": "SNMPv3",
+              "body": "Thay community string bằng mô hình bảo mật theo user (USM) và kiểm soát truy cập theo view (VACM).",
+              "bullets": [
+                "User thuộc group; group quyết định security level và view",
+                "View định nghĩa nhánh OID được phép đọc/ghi/notify",
+                "Xác thực: HMAC-MD5, HMAC-SHA (SHA-1, SHA-2 trên IOS XE mới)",
+                "Mã hóa: DES, 3DES, AES-128/192/256"
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "Ba security level",
+              "headers": [
+                "Level",
+                "Xác thực",
+                "Mã hóa",
+                "Từ khóa IOS"
+              ],
+              "rows": [
+                [
+                  "noAuthNoPriv",
+                  "Chỉ username",
+                  "Không",
+                  "noauth"
+                ],
+                [
+                  "authNoPriv",
+                  "HMAC-MD5/SHA",
+                  "Không",
+                  "auth"
+                ],
+                [
+                  "authPriv",
+                  "HMAC-MD5/SHA",
+                  "DES/3DES/AES",
+                  "priv"
+                ]
+              ]
+            },
+            {
+              "type": "flow",
+              "title": "Cấu trúc cấu hình SNMPv3",
+              "steps": [
+                {
+                  "who": "View",
+                  "do": "Chọn nhánh OID (ví dụ iso included)"
+                },
+                {
+                  "who": "Group",
+                  "do": "Gắn security level + read/write/notify view"
+                },
+                {
+                  "who": "User",
+                  "do": "Gắn vào group, khai báo mật khẩu auth và priv"
+                },
+                {
+                  "who": "Host",
+                  "do": "Đích nhận trap/inform với user và level"
+                }
+              ]
+            },
+            {
+              "type": "code",
+              "title": "SNMPv3 authPriv",
+              "code": "R1(config)# snmp-server view NOC-VIEW iso included\nR1(config)# snmp-server view NOC-VIEW 1.3.6.1.6.3 excluded\nR1(config)# snmp-server group NOC-GRP v3 priv read NOC-VIEW access NMS\nR1(config)# snmp-server user noc1 NOC-GRP v3 auth sha AuthP@ss123 priv aes 128 PrivP@ss123\nR1(config)# snmp-server host 10.1.1.50 informs version 3 priv noc1\nR1(config)# snmp-server enable traps\nR1# show snmp user\nR1# show snmp group",
+              "note": "User SNMPv3 không hiển thị trong running-config vì lý do bảo mật."
+            },
+            {
+              "type": "compare",
+              "title": "So sánh bảo mật các phiên bản",
+              "headers": [
+                "Tiêu chí",
+                "v1/v2c",
+                "v3"
+              ],
+              "rows": [
+                [
+                  "Định danh",
+                  "Community string",
+                  "Username"
+                ],
+                [
+                  "Xác thực",
+                  "Không (community clear-text)",
+                  "HMAC"
+                ],
+                [
+                  "Mã hóa",
+                  "Không",
+                  "AES/DES"
+                ],
+                [
+                  "Kiểm soát OID",
+                  "Hạn chế (view gắn community)",
+                  "View theo group"
+                ],
+                [
+                  "Chống replay",
+                  "Không",
+                  "Có (engine ID, time window)"
+                ]
+              ]
+            },
+            {
+              "type": "text",
+              "title": "Engine ID",
+              "body": "Mỗi SNMP engine có engineID duy nhất (mặc định sinh từ MAC). Khóa auth/priv của user được 'localize' theo engineID.",
+              "bullets": [
+                "Đổi engineID làm user hiện có mất hiệu lực, phải cấu hình lại user",
+                "Inform cần biết engineID của NMS",
+                "Xem: show snmp engineID"
+              ]
+            },
+            {
+              "type": "tip",
+              "title": "Mẹo thi",
+              "body": "priv = authPriv (auth + mã hóa). auth = authNoPriv. noauth = noAuthNoPriv. Chỉ v3 có mã hóa."
+            },
+            {
+              "type": "warn",
+              "title": "Level không khớp",
+              "body": "Group cấu hình priv nhưng NMS kết nối authNoPriv → bị từ chối. Security level của user/host phải ≥ level của group."
+            }
+          ],
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Security level nào vừa xác thực vừa mã hóa?",
+              "options": [
+                "authNoPriv",
+                "noAuthNoPriv",
+                "community RW",
+                "authPriv"
+              ],
+              "correct_answer": "authPriv",
+              "explanation": "priv."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Thuật toán mã hóa nào SNMPv3 hỗ trợ?",
+              "options": [
+                "HMAC-SHA",
+                "MD5",
+                "AES",
+                "SHA-256"
+              ],
+              "correct_answer": "AES",
+              "explanation": "HMAC dùng xác thực."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Thành phần nào định nghĩa nhánh OID được phép truy cập?",
+              "options": [
+                "Group",
+                "View",
+                "User",
+                "Community"
+              ],
+              "correct_answer": "View",
+              "explanation": "VACM."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Vì sao user SNMPv3 không hiện trong running-config?",
+              "options": [
+                "Vì chưa lưu",
+                "Vì lỗi phần mềm",
+                "Lý do bảo mật, mật khẩu được localize",
+                "Vì dùng v2c"
+              ],
+              "correct_answer": "Lý do bảo mật, mật khẩu được localize",
+              "explanation": "show snmp user."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Đổi engineID ảnh hưởng gì?",
+              "options": [
+                "User hiện có mất hiệu lực, phải tạo lại",
+                "Không ảnh hưởng",
+                "Reset community",
+                "Tắt trap"
+              ],
+              "correct_answer": "User hiện có mất hiệu lực, phải tạo lại",
+              "explanation": "Khóa gắn engineID."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Từ khóa 'auth' trong snmp-server group tương ứng level nào?",
+              "options": [
+                "authPriv",
+                "noAuthNoPriv",
+                "authNoPriv",
+                "privOnly"
+              ],
+              "correct_answer": "authNoPriv",
+              "explanation": "Chỉ xác thực."
+            },
+            {
+              "type": "fill_code",
+              "prompt": "Tạo group SNMPv3 yêu cầu mã hóa:",
+              "template": "R1(config)# snmp-server group NOC-GRP v3 [BLANK] read NOC-VIEW",
+              "options": [
+                "auth",
+                "priv",
+                "noauth",
+                "encrypt"
+              ],
+              "correct_answer": "priv",
+              "explanation": "priv = authPriv."
+            },
+            {
+              "type": "reorder",
+              "prompt": "Sắp xếp các bước cấu hình SNMPv3:",
+              "items": [
+                "snmp-server view",
+                "snmp-server group",
+                "snmp-server user",
+                "snmp-server host"
+              ],
+              "correct_order": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "explanation": "View → group → user → host."
+            },
+            {
+              "type": "match_pairs",
+              "prompt": "Ghép level với từ khóa IOS:",
+              "pairs": [
+                {
+                  "left": "noAuthNoPriv",
+                  "right": "noauth"
+                },
+                {
+                  "left": "authNoPriv",
+                  "right": "auth"
+                },
+                {
+                  "left": "authPriv",
+                  "right": "priv"
+                }
+              ],
+              "explanation": "Security level."
+            },
+            {
+              "type": "categorize",
+              "prompt": "v1/v2c hay v3?",
+              "pairs": [
+                {
+                  "left": "Community string",
+                  "right": "v1/v2c"
+                },
+                {
+                  "left": "Không mã hóa",
+                  "right": "v1/v2c"
+                },
+                {
+                  "left": "Username và group",
+                  "right": "v3"
+                },
+                {
+                  "left": "Chống replay bằng engine ID",
+                  "right": "v3"
+                }
+              ],
+              "explanation": "Đặc điểm."
+            }
+          ]
+        },
+        {
+          "node_id": "node_d4_syslog",
+          "node_title": "Syslog",
+          "icon": "log.svg",
+          "lesson": [
+            {
+              "type": "compare",
+              "title": "Mức độ syslog",
+              "headers": [
+                "Level",
+                "Tên",
+                "Ví dụ"
+              ],
+              "rows": [
+                [
+                  "0",
+                  "Emergency",
+                  "Hệ thống không dùng được"
+                ],
+                [
+                  "1",
+                  "Alert",
+                  "Cần xử lý ngay (nhiệt độ)"
+                ],
+                [
+                  "2",
+                  "Critical",
+                  "Lỗi nghiêm trọng phần cứng"
+                ],
+                [
+                  "3",
+                  "Error",
+                  "Interface lỗi (LINK-3-UPDOWN)"
+                ],
+                [
+                  "4",
+                  "Warning",
+                  "Cảnh báo cấu hình"
+                ],
+                [
+                  "5",
+                  "Notification",
+                  "Line protocol up/down (LINEPROTO-5-UPDOWN)"
+                ],
+                [
+                  "6",
+                  "Informational",
+                  "ACL log, thông tin chung"
+                ],
+                [
+                  "7",
+                  "Debugging",
+                  "Output debug"
+                ]
+              ]
+            },
+            {
+              "type": "text",
+              "title": "Quy tắc chọn mức",
+              "body": "Cấu hình mức N nghĩa là nhận mức N và mọi mức nghiêm trọng hơn (số nhỏ hơn).",
+              "bullets": [
+                "logging trap warnings → level 0–4",
+                "logging buffered informational → level 0–6",
+                "Mẹo nhớ: Every Awesome Cisco Engineer Will Need Ice cream Daily"
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "Đích log",
+              "headers": [
+                "Đích",
+                "Lệnh",
+                "Ghi chú"
+              ],
+              "rows": [
+                [
+                  "Console",
+                  "logging console <level>",
+                  "Mặc định debugging, có thể làm chậm thiết bị"
+                ],
+                [
+                  "VTY (SSH)",
+                  "logging monitor <level> + terminal monitor",
+                  "Theo phiên"
+                ],
+                [
+                  "RAM buffer",
+                  "logging buffered <size> <level>",
+                  "Mất khi reload"
+                ],
+                [
+                  "Syslog server",
+                  "logging host <ip> + logging trap <level>",
+                  "UDP 514 mặc định, có thể TCP/TLS"
+                ],
+                [
+                  "SNMP",
+                  "logging history <level> + traps",
+                  "Gửi dạng trap"
+                ]
+              ]
+            },
+            {
+              "type": "text",
+              "title": "Định dạng bản tin Cisco",
+              "body": "seq: timestamp: %FACILITY-SEVERITY-MNEMONIC: mô tả.",
+              "bullets": [
+                "Ví dụ: *Nov 4 10:15:30.123: %LINEPROTO-5-UPDOWN: Line protocol on Interface Gi0/1, changed state to down",
+                "FACILITY: nguồn (LINEPROTO, OSPF, SYS)",
+                "SEVERITY: 0–7",
+                "MNEMONIC: mã ngắn mô tả sự kiện"
+              ]
+            },
+            {
+              "type": "code",
+              "title": "Cấu hình syslog chuẩn",
+              "code": "R1(config)# service timestamps log datetime msec localtime show-timezone\nR1(config)# service sequence-numbers\nR1(config)# logging buffered 128000 informational\nR1(config)# logging console warnings\nR1(config)# logging monitor informational\nR1(config)# logging host 10.1.1.50\nR1(config)# logging host 10.1.1.51 transport tcp port 6514\nR1(config)# logging trap notifications\nR1(config)# logging source-interface Loopback0\nR1# show logging",
+              "note": "Timestamp chính xác cần NTP; logging source-interface giúp server nhận diện thiết bị."
+            },
+            {
+              "type": "flow",
+              "title": "Chọn mức trap hợp lý",
+              "steps": [
+                {
+                  "who": "Quá thấp (errors)",
+                  "do": "Bỏ lỡ sự kiện interface up/down (level 5)"
+                },
+                {
+                  "who": "Quá cao (debugging)",
+                  "do": "Server ngập log, tốn băng thông"
+                },
+                {
+                  "who": "Khuyến nghị",
+                  "do": "notifications hoặc informational cho server"
+                },
+                {
+                  "who": "Buffer",
+                  "do": "informational để xử lý sự cố tại chỗ"
+                }
+              ]
+            },
+            {
+              "type": "tip",
+              "title": "Mẹo thi",
+              "body": "0 Emergency … 7 Debugging. Server mặc định UDP 514. logging trap đặt mức gửi tới server."
+            },
+            {
+              "type": "warn",
+              "title": "Không timestamp/NTP",
+              "body": "Log không có thời gian chính xác gần như vô dụng khi tương quan sự cố giữa nhiều thiết bị."
+            }
+          ],
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Severity level 4 là gì?",
+              "options": [
+                "Warning",
+                "Error",
+                "Notification",
+                "Critical"
+              ],
+              "correct_answer": "Warning",
+              "explanation": "0–7."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "logging trap errors gửi các mức nào tới server?",
+              "options": [
+                "Chỉ level 3",
+                "Level 3 đến 7",
+                "Mọi mức",
+                "Level 0 đến 3"
+              ],
+              "correct_answer": "Level 0 đến 3",
+              "explanation": "Mức đó và nghiêm trọng hơn."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Bản tin %LINEPROTO-5-UPDOWN có severity nào?",
+              "options": [
+                "3 – Error",
+                "6 – Informational",
+                "1 – Alert",
+                "5 – Notification"
+              ],
+              "correct_answer": "5 – Notification",
+              "explanation": "Số giữa bản tin."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Syslog server mặc định dùng port nào?",
+              "options": [
+                "UDP 162",
+                "UDP 514",
+                "TCP 49",
+                "UDP 123"
+              ],
+              "correct_answer": "UDP 514",
+              "explanation": "Syslog truyền thống."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Log trong buffer mất khi nào?",
+              "options": [
+                "Sau 24 giờ",
+                "Khi đầy console",
+                "Không bao giờ",
+                "Khi thiết bị reload"
+              ],
+              "correct_answer": "Khi thiết bị reload",
+              "explanation": "RAM."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Lệnh nào giúp log có thời gian tới mili-giây?",
+              "options": [
+                "logging buffered",
+                "service timestamps log datetime msec",
+                "clock set",
+                "ntp master"
+              ],
+              "correct_answer": "service timestamps log datetime msec",
+              "explanation": "Timestamp."
+            },
+            {
+              "type": "fill_code",
+              "prompt": "Gửi log tới syslog server:",
+              "template": "R1(config)# logging [BLANK] 10.1.1.50",
+              "options": [
+                "host",
+                "server",
+                "trap",
+                "destination"
+              ],
+              "correct_answer": "host",
+              "explanation": "logging host."
+            },
+            {
+              "type": "reorder",
+              "prompt": "Sắp xếp severity từ nghiêm trọng nhất:",
+              "items": [
+                "Emergency",
+                "Alert",
+                "Critical",
+                "Error",
+                "Warning",
+                "Notification",
+                "Informational",
+                "Debugging"
+              ],
+              "correct_order": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ],
+              "explanation": "0 → 7."
+            },
+            {
+              "type": "match_pairs",
+              "prompt": "Ghép level với tên:",
+              "pairs": [
+                {
+                  "left": "0",
+                  "right": "Emergency"
+                },
+                {
+                  "left": "3",
+                  "right": "Error"
+                },
+                {
+                  "left": "5",
+                  "right": "Notification"
+                },
+                {
+                  "left": "6",
+                  "right": "Informational"
+                },
+                {
+                  "left": "7",
+                  "right": "Debugging"
+                }
+              ],
+              "explanation": "Syslog severity."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": "chap_04_netflow_ipsla",
+      "chapter_title": "4.0 Network Assurance – 4.2 NetFlow và IP SLA",
+      "nodes": [
+        {
+          "node_id": "node_d4_netflow",
+          "node_title": "NetFlow truyền thống",
+          "icon": "flow.svg",
+          "lesson": [
+            {
+              "type": "text",
+              "title": "Flow là gì",
+              "body": "Chuỗi gói ĐƠN HƯỚNG có chung các trường khóa trong một khoảng thời gian. NetFlow ghi thống kê cho mỗi flow (byte, gói, thời điểm đầu/cuối, flags) và xuất tới collector.",
+              "bullets": [
+                "Trả lời: ai nói chuyện với ai, bao nhiêu, ứng dụng gì, khi nào",
+                "SNMP cho biết LƯỢNG traffic; NetFlow cho biết THÀNH PHẦN traffic",
+                "Ứng dụng: capacity planning, tính cước, phát hiện bất thường/DDoS, forensic bảo mật"
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "7 khóa NetFlow truyền thống",
+              "headers": [
+                "Khóa",
+                "Ví dụ"
+              ],
+              "rows": [
+                [
+                  "Source IP",
+                  "10.1.1.10"
+                ],
+                [
+                  "Destination IP",
+                  "172.16.5.5"
+                ],
+                [
+                  "Source port",
+                  "51000"
+                ],
+                [
+                  "Destination port",
+                  "443"
+                ],
+                [
+                  "Layer 3 protocol",
+                  "TCP (6)"
+                ],
+                [
+                  "ToS byte",
+                  "0"
+                ],
+                [
+                  "Input interface",
+                  "Gi0/1"
+                ]
+              ]
+            },
+            {
+              "type": "flow",
+              "title": "Vòng đời flow",
+              "steps": [
+                {
+                  "who": "Gói đầu",
+                  "do": "Không khớp entry nào → tạo flow mới trong cache"
+                },
+                {
+                  "who": "Gói sau cùng khóa",
+                  "do": "Cập nhật counter"
+                },
+                {
+                  "who": "Hết flow",
+                  "do": "Inactive timeout (15 s), active timeout (30 phút), TCP FIN/RST hoặc cache đầy"
+                },
+                {
+                  "who": "Export",
+                  "do": "Flow hết hạn được đóng gói gửi UDP tới collector"
+                },
+                {
+                  "who": "Collector",
+                  "do": "Lưu, tổng hợp, hiển thị báo cáo"
+                }
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "Phiên bản export",
+              "headers": [
+                "Phiên bản",
+                "Đặc điểm"
+              ],
+              "rows": [
+                [
+                  "v5",
+                  "Định dạng cố định, chỉ IPv4, phổ biến nhất trước đây"
+                ],
+                [
+                  "v9",
+                  "Dựa trên template, mở rộng: IPv6, MPLS, BGP next-hop"
+                ],
+                [
+                  "IPFIX (v10)",
+                  "Chuẩn IETF (RFC 7011) dựa trên v9, trường biến độ dài"
+                ]
+              ]
+            },
+            {
+              "type": "text",
+              "title": "Timer flow cache",
+              "body": "Hai timer quyết định khi nào flow được export.",
+              "bullets": [
+                "Inactive timeout (mặc định 15 giây): flow không có gói mới",
+                "Active timeout (mặc định 30 phút trên IOS cũ, 1800 s): flow dài vẫn được export định kỳ",
+                "Giảm active timeout (ví dụ 60 s) để báo cáo gần thời gian thực hơn"
+              ]
+            },
+            {
+              "type": "code",
+              "title": "NetFlow truyền thống (IOS cũ)",
+              "code": "R1(config)# interface Gi0/1\nR1(config-if)# ip flow ingress\nR1(config-if)# ip flow egress\nR1(config)# ip flow-export version 9\nR1(config)# ip flow-export destination 10.1.1.50 2055\nR1(config)# ip flow-export source Loopback0\nR1# show ip cache flow\nR1# show ip flow export",
+              "note": "Trên IOS XE hiện đại, cấu hình bằng Flexible NetFlow."
+            },
+            {
+              "type": "tip",
+              "title": "Mẹo thi",
+              "body": "Flow đơn hướng: một phiên TCP = 2 flow. 7 khóa: src/dst IP, src/dst port, protocol, ToS, input interface. Export UDP (thường 2055, 9995, 4739 IPFIX)."
+            },
+            {
+              "type": "warn",
+              "title": "Chỉ ingress",
+              "body": "Bật NetFlow chỉ ingress trên một interface không thấy traffic đi ra trên interface đó; nên bật ingress trên mọi interface hoặc cả hai chiều có cân nhắc trùng lặp."
+            }
+          ],
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Một phiên TCP giữa hai host tạo bao nhiêu flow?",
+              "options": [
+                "1",
+                "3",
+                "2",
+                "4"
+              ],
+              "correct_answer": "2",
+              "explanation": "Flow đơn hướng."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Trường nào KHÔNG thuộc 7 khóa NetFlow truyền thống?",
+              "options": [
+                "Source IP",
+                "ToS",
+                "Input interface",
+                "Destination MAC"
+              ],
+              "correct_answer": "Destination MAC",
+              "explanation": "7 khóa là L3/L4 + ToS + interface."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "NetFlow khác SNMP ở điểm nào?",
+              "options": [
+                "NetFlow chỉ đếm byte",
+                "SNMP phân tích ứng dụng",
+                "Không khác",
+                "NetFlow cho biết thành phần traffic (ai, ứng dụng nào)"
+              ],
+              "correct_answer": "NetFlow cho biết thành phần traffic (ai, ứng dụng nào)",
+              "explanation": "Visibility chi tiết."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Phiên bản export nào dựa trên template?",
+              "options": [
+                "v5",
+                "v1",
+                "v7",
+                "v9"
+              ],
+              "correct_answer": "v9",
+              "explanation": "v9 và IPFIX."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Inactive timeout mặc định?",
+              "options": [
+                "15 giây",
+                "30 phút",
+                "60 giây",
+                "5 phút"
+              ],
+              "correct_answer": "15 giây",
+              "explanation": "Flow không có gói mới."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "IPFIX được chuẩn hóa bởi ai?",
+              "options": [
+                "IEEE",
+                "Cisco",
+                "ETSI",
+                "IETF"
+              ],
+              "correct_answer": "IETF",
+              "explanation": "RFC 7011."
+            },
+            {
+              "type": "fill_code",
+              "prompt": "Bật NetFlow ingress trên interface (cú pháp cũ):",
+              "template": "R1(config-if)# ip flow [BLANK]",
+              "options": [
+                "ingress",
+                "monitor",
+                "input",
+                "export"
+              ],
+              "correct_answer": "ingress",
+              "explanation": "ip flow ingress."
+            },
+            {
+              "type": "reorder",
+              "prompt": "Sắp xếp vòng đời flow:",
+              "items": [
+                "Gói đầu tạo entry cache",
+                "Gói sau cập nhật counter",
+                "Flow hết hạn theo timeout",
+                "Export tới collector"
+              ],
+              "correct_order": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "explanation": "Từ gói đầu tới collector."
+            },
+            {
+              "type": "match_pairs",
+              "prompt": "Ghép phiên bản với đặc điểm:",
+              "pairs": [
+                {
+                  "left": "v5",
+                  "right": "Cố định, chỉ IPv4"
+                },
+                {
+                  "left": "v9",
+                  "right": "Template, hỗ trợ IPv6"
+                },
+                {
+                  "left": "IPFIX",
+                  "right": "Chuẩn IETF"
+                }
+              ],
+              "explanation": "Export format."
+            },
+            {
+              "type": "categorize",
+              "prompt": "Trường nào là khóa NetFlow truyền thống?",
+              "pairs": [
+                {
+                  "left": "Source IP",
+                  "right": "Khóa"
+                },
+                {
+                  "left": "Destination port",
+                  "right": "Khóa"
+                },
+                {
+                  "left": "ToS",
+                  "right": "Khóa"
+                },
+                {
+                  "left": "Byte count",
+                  "right": "Không phải khóa"
+                },
+                {
+                  "left": "Packet count",
+                  "right": "Không phải khóa"
+                }
+              ],
+              "explanation": "7-tuple."
+            }
+          ]
+        },
+        {
+          "node_id": "node_d4_fnf",
+          "node_title": "Flexible NetFlow",
+          "icon": "fnf.svg",
+          "lesson": [
+            {
+              "type": "text",
+              "title": "Flexible NetFlow",
+              "body": "FNF cho phép tự định nghĩa trường khóa và trường thu thập, gắn nhiều monitor khác nhau trên cùng interface cho mục đích khác nhau (bảo mật, ứng dụng, capacity).",
+              "bullets": [
+                "Kiến trúc module: record, exporter, monitor, sampler",
+                "Hỗ trợ IPv4, IPv6, MPLS, L2",
+                "Có record định sẵn (netflow ipv4 original-input) và record tùy biến"
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "Bốn khối FNF",
+              "headers": [
+                "Khối",
+                "Vai trò"
+              ],
+              "rows": [
+                [
+                  "Flow record",
+                  "match = trường khóa; collect = trường không khóa (counter, timestamp)"
+                ],
+                [
+                  "Flow exporter",
+                  "Đích collector, source, transport UDP port, export-protocol (v9/IPFIX)"
+                ],
+                [
+                  "Flow monitor",
+                  "Gắn record + exporter, quản lý cache (kích thước, timeout)"
+                ],
+                [
+                  "Flow sampler",
+                  "Lấy mẫu 1/N gói để giảm tải (deterministic/random)"
+                ]
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "Key vs Non-key fields",
+              "headers": [
+                "Loại",
+                "Lệnh",
+                "Ví dụ"
+              ],
+              "rows": [
+                [
+                  "Key",
+                  "match",
+                  "ipv4 source address, ipv4 destination address, transport destination-port, interface input"
+                ],
+                [
+                  "Non-key",
+                  "collect",
+                  "counter bytes long, counter packets long, timestamp sys-uptime first/last, transport tcp flags"
+                ]
+              ]
+            },
+            {
+              "type": "code",
+              "title": "Record và exporter",
+              "code": "flow record CUSTOM1\n description Top talkers theo IP và port dich\n match ipv4 source address\n match ipv4 destination address\n match transport destination-port\n match interface input\n collect counter bytes long\n collect counter packets long\n collect timestamp sys-uptime first\nflow exporter EXP1\n destination 10.1.1.50\n source Loopback0\n transport udp 2055\n export-protocol netflow-v9",
+              "note": "Record tùy biến chỉ thu những gì cần."
+            },
+            {
+              "type": "code",
+              "title": "Monitor, sampler và áp lên interface",
+              "code": "flow monitor MON1\n record CUSTOM1\n exporter EXP1\n cache timeout active 60\n cache timeout inactive 15\nsampler SAMP100\n mode random 1 out-of 100\ninterface Gi0/1\n ip flow monitor MON1 sampler SAMP100 input\n ip flow monitor MON1 output",
+              "note": "Một interface có thể gắn nhiều monitor."
+            },
+            {
+              "type": "flow",
+              "title": "Quy trình cấu hình",
+              "steps": [
+                {
+                  "who": "1",
+                  "do": "Tạo flow record (hoặc dùng record định sẵn)"
+                },
+                {
+                  "who": "2",
+                  "do": "Tạo flow exporter"
+                },
+                {
+                  "who": "3",
+                  "do": "Tạo flow monitor gắn record + exporter"
+                },
+                {
+                  "who": "4",
+                  "do": "(Tùy chọn) tạo sampler"
+                },
+                {
+                  "who": "5",
+                  "do": "Áp monitor lên interface theo chiều input/output"
+                }
+              ]
+            },
+            {
+              "type": "code",
+              "title": "Kiểm tra FNF",
+              "code": "R1# show flow record CUSTOM1\nR1# show flow exporter EXP1 statistics\nR1# show flow monitor MON1 cache format table\nR1# show flow interface Gi0/1",
+              "note": "show flow monitor cache cho thấy dữ liệu đang thu thập."
+            },
+            {
+              "type": "tip",
+              "title": "Mẹo thi",
+              "body": "match = key, collect = non-key. Monitor là thứ được gắn vào interface. Record và exporter phải có trước monitor."
+            }
+          ],
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Lệnh nào định nghĩa trường khóa trong flow record?",
+              "options": [
+                "collect",
+                "export",
+                "match",
+                "record"
+              ],
+              "correct_answer": "match",
+              "explanation": "match."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Khối nào được áp trực tiếp lên interface?",
+              "options": [
+                "Flow monitor",
+                "Flow record",
+                "Flow exporter",
+                "Flow sampler (đứng riêng)"
+              ],
+              "correct_answer": "Flow monitor",
+              "explanation": "ip flow monitor."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Flow exporter chứa thông tin gì?",
+              "options": [
+                "Trường khóa",
+                "Kích thước cache",
+                "Tỷ lệ lấy mẫu",
+                "Đích collector, port, giao thức export"
+              ],
+              "correct_answer": "Đích collector, port, giao thức export",
+              "explanation": "Exporter."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Sampler 'random 1 out-of 100' nghĩa là gì?",
+              "options": [
+                "100 flow mỗi giây",
+                "Export 1 lần mỗi 100 giây",
+                "Lấy ngẫu nhiên 1 gói trong mỗi 100 gói",
+                "Chỉ 100 byte"
+              ],
+              "correct_answer": "Lấy ngẫu nhiên 1 gói trong mỗi 100 gói",
+              "explanation": "Giảm tải."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "counter bytes long thuộc loại trường nào?",
+              "options": [
+                "Non-key (collect)",
+                "Key (match)",
+                "Exporter",
+                "Sampler"
+              ],
+              "correct_answer": "Non-key (collect)",
+              "explanation": "Dữ liệu thu thập."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Ưu điểm chính của FNF so với NetFlow truyền thống?",
+              "options": [
+                "Không cần collector",
+                "Tự định nghĩa khóa và nhiều monitor trên một interface",
+                "Không dùng UDP",
+                "Chỉ IPv4"
+              ],
+              "correct_answer": "Tự định nghĩa khóa và nhiều monitor trên một interface",
+              "explanation": "Linh hoạt."
+            },
+            {
+              "type": "fill_code",
+              "prompt": "Áp monitor cho traffic vào:",
+              "template": "R1(config-if)# ip flow monitor MON1 [BLANK]",
+              "options": [
+                "input",
+                "ingress",
+                "rx",
+                "both"
+              ],
+              "correct_answer": "input",
+              "explanation": "input hoặc output."
+            },
+            {
+              "type": "reorder",
+              "prompt": "Sắp xếp các bước cấu hình FNF:",
+              "items": [
+                "Tạo flow record",
+                "Tạo flow exporter",
+                "Tạo flow monitor",
+                "Áp monitor lên interface"
+              ],
+              "correct_order": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "explanation": "Thứ tự đúng."
+            },
+            {
+              "type": "match_pairs",
+              "prompt": "Ghép khối FNF với vai trò:",
+              "pairs": [
+                {
+                  "left": "Flow record",
+                  "right": "Định nghĩa match/collect"
+                },
+                {
+                  "left": "Flow exporter",
+                  "right": "Gửi dữ liệu tới collector"
+                },
+                {
+                  "left": "Flow monitor",
+                  "right": "Quản lý cache, gắn interface"
+                },
+                {
+                  "left": "Flow sampler",
+                  "right": "Lấy mẫu giảm tải"
+                }
+              ],
+              "explanation": "Bốn khối."
+            },
+            {
+              "type": "categorize",
+              "prompt": "Key hay non-key field?",
+              "pairs": [
+                {
+                  "left": "ipv4 source address",
+                  "right": "Key"
+                },
+                {
+                  "left": "transport destination-port",
+                  "right": "Key"
+                },
+                {
+                  "left": "interface input",
+                  "right": "Key"
+                },
+                {
+                  "left": "counter packets long",
+                  "right": "Non-key"
+                },
+                {
+                  "left": "timestamp sys-uptime first",
+                  "right": "Non-key"
+                }
+              ],
+              "explanation": "match vs collect."
+            }
+          ]
+        },
+        {
+          "node_id": "node_d4_ip_sla",
+          "node_title": "IP SLA",
+          "icon": "sla.svg",
+          "lesson": [
+            {
+              "type": "text",
+              "title": "IP SLA",
+              "body": "Router chủ động sinh traffic giả lập (probe) để đo hiệu năng mạng liên tục, không chờ người dùng phàn nàn.",
+              "bullets": [
+                "Đo: reachability, RTT, jitter, packet loss, delay một chiều, MOS/ICPIF cho voice",
+                "Đo theo ứng dụng: DNS, DHCP, HTTP, TCP connect",
+                "Kết quả: CLI, SNMP (CISCO-RTTMON-MIB), dùng cho object tracking"
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "Loại operation",
+              "headers": [
+                "Operation",
+                "Đo",
+                "Cần responder"
+              ],
+              "rows": [
+                [
+                  "icmp-echo",
+                  "Reachability, RTT",
+                  "Không"
+                ],
+                [
+                  "path-echo",
+                  "RTT từng hop",
+                  "Không"
+                ],
+                [
+                  "udp-echo",
+                  "RTT bằng UDP",
+                  "Có"
+                ],
+                [
+                  "udp-jitter",
+                  "Jitter, loss, delay một chiều, MOS",
+                  "Có"
+                ],
+                [
+                  "tcp-connect",
+                  "Thời gian bắt tay TCP",
+                  "Không bắt buộc"
+                ],
+                [
+                  "http",
+                  "DNS + TCP + HTTP GET",
+                  "Không"
+                ],
+                [
+                  "dns, dhcp",
+                  "Thời gian phân giải / cấp IP",
+                  "Không"
+                ]
+              ]
+            },
+            {
+              "type": "text",
+              "title": "IP SLA Responder",
+              "body": "Thiết bị Cisco ở đầu xa bật responder sẽ trả lời probe và chèn timestamp nhận/gửi.",
+              "bullets": [
+                "Loại bỏ thời gian xử lý trong thiết bị đích → kết quả chính xác hơn",
+                "Bắt buộc cho udp-jitter, udp-echo",
+                "Delay một chiều cần NTP đồng bộ hai đầu",
+                "Lệnh: ip sla responder"
+              ]
+            },
+            {
+              "type": "flow",
+              "title": "udp-jitter với responder",
+              "steps": [
+                {
+                  "who": "Sender",
+                  "do": "Gửi control message tới responder (UDP 1967) yêu cầu mở port"
+                },
+                {
+                  "who": "Responder",
+                  "do": "Mở port tạm thời, xác nhận"
+                },
+                {
+                  "who": "Sender",
+                  "do": "Gửi chuỗi gói kèm timestamp T1"
+                },
+                {
+                  "who": "Responder",
+                  "do": "Ghi T2 khi nhận, T3 khi trả lời"
+                },
+                {
+                  "who": "Sender",
+                  "do": "Ghi T4, tính RTT = (T4 − T1) − (T3 − T2), jitter, loss"
+                }
+              ]
+            },
+            {
+              "type": "code",
+              "title": "Cấu hình IP SLA",
+              "code": "R1(config)# ip sla 1\nR1(config-ip-sla)# icmp-echo 8.8.8.8 source-interface Gi0/0\nR1(config-ip-sla-echo)# frequency 10\nR1(config-ip-sla-echo)# threshold 500\nR1(config-ip-sla-echo)# timeout 1000\nR1(config)# ip sla 2\nR1(config-ip-sla)# udp-jitter 10.4.4.4 16384 codec g711alaw\nR1(config)# ip sla schedule 1 life forever start-time now\nR1(config)# ip sla schedule 2 life forever start-time now\nR4(config)# ip sla responder",
+              "note": "Operation chưa chạy cho tới khi có ip sla schedule."
+            },
+            {
+              "type": "code",
+              "title": "Kiểm tra IP SLA",
+              "code": "R1# show ip sla summary\nR1# show ip sla statistics 1\nLatest RTT: 12 milliseconds\nLatest operation return code: OK\nNumber of successes: 520\nNumber of failures: 2\nR1# show ip sla configuration 2",
+              "note": "Return code OK và Number of successes tăng là dấu hiệu tốt."
+            },
+            {
+              "type": "tip",
+              "title": "Mẹo thi",
+              "body": "udp-jitter cần responder. Thiếu ip sla schedule là lỗi kinh điển. Delay một chiều cần NTP."
+            },
+            {
+              "type": "warn",
+              "title": "Probe đi sai đường",
+              "body": "Không chỉ định source-interface, probe có thể đi theo default route qua link dự phòng → kết quả không phản ánh link cần giám sát."
+            }
+          ],
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Operation nào đo jitter và MOS cho voice?",
+              "options": [
+                "udp-jitter",
+                "icmp-echo",
+                "tcp-connect",
+                "dns"
+              ],
+              "correct_answer": "udp-jitter",
+              "explanation": "Cần responder."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Lệnh nào bật responder ở đầu xa?",
+              "options": [
+                "ip sla 1 responder",
+                "track responder",
+                "ip sla responder",
+                "ip sla enable"
+              ],
+              "correct_answer": "ip sla responder",
+              "explanation": "Trên thiết bị đích."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Vì sao IP SLA đã cấu hình nhưng không có kết quả?",
+              "options": [
+                "Thiếu NTP",
+                "Thiếu SNMP",
+                "Thiếu CEF",
+                "Thiếu ip sla schedule"
+              ],
+              "correct_answer": "Thiếu ip sla schedule",
+              "explanation": "Operation chưa chạy."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Đo delay một chiều cần điều kiện gì?",
+              "options": [
+                "Dùng icmp-echo",
+                "Không cần gì",
+                "Dùng TCP",
+                "Đồng hồ hai đầu đồng bộ (NTP)"
+              ],
+              "correct_answer": "Đồng hồ hai đầu đồng bộ (NTP)",
+              "explanation": "Timestamp tuyệt đối."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Responder cải thiện độ chính xác thế nào?",
+              "options": [
+                "Tăng tần suất probe",
+                "Mã hóa probe",
+                "Giảm kích thước gói",
+                "Trừ thời gian xử lý trong thiết bị đích bằng timestamp"
+              ],
+              "correct_answer": "Trừ thời gian xử lý trong thiết bị đích bằng timestamp",
+              "explanation": "T3 − T2."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Operation nào không cần responder?",
+              "options": [
+                "udp-jitter",
+                "udp-echo",
+                "Không có",
+                "icmp-echo"
+              ],
+              "correct_answer": "icmp-echo",
+              "explanation": "ICMP do mọi host trả lời."
+            },
+            {
+              "type": "fill_code",
+              "prompt": "Khởi chạy IP SLA 1 vô thời hạn ngay:",
+              "template": "R1(config)# ip sla [BLANK] 1 life forever start-time now",
+              "options": [
+                "schedule",
+                "start",
+                "run",
+                "enable"
+              ],
+              "correct_answer": "schedule",
+              "explanation": "ip sla schedule."
+            },
+            {
+              "type": "reorder",
+              "prompt": "Sắp xếp quá trình udp-jitter:",
+              "items": [
+                "Sender gửi control message",
+                "Responder mở port",
+                "Sender gửi gói kèm timestamp",
+                "Responder ghi T2 và T3",
+                "Sender tính RTT, jitter, loss"
+              ],
+              "correct_order": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "explanation": "Với responder."
+            },
+            {
+              "type": "match_pairs",
+              "prompt": "Ghép operation với phép đo:",
+              "pairs": [
+                {
+                  "left": "icmp-echo",
+                  "right": "Reachability và RTT"
+                },
+                {
+                  "left": "udp-jitter",
+                  "right": "Jitter, loss, MOS"
+                },
+                {
+                  "left": "tcp-connect",
+                  "right": "Thời gian bắt tay TCP"
+                },
+                {
+                  "left": "http",
+                  "right": "Thời gian tải trang"
+                }
+              ],
+              "explanation": "IP SLA."
+            },
+            {
+              "type": "categorize",
+              "prompt": "Operation cần responder hay không?",
+              "pairs": [
+                {
+                  "left": "udp-jitter",
+                  "right": "Cần responder"
+                },
+                {
+                  "left": "udp-echo",
+                  "right": "Cần responder"
+                },
+                {
+                  "left": "icmp-echo",
+                  "right": "Không cần"
+                },
+                {
+                  "left": "http",
+                  "right": "Không cần"
+                },
+                {
+                  "left": "dns",
+                  "right": "Không cần"
+                }
+              ],
+              "explanation": "Responder."
+            }
+          ]
+        },
+        {
+          "node_id": "node_d4_object_tracking",
+          "node_title": "Object Tracking với IP SLA",
+          "icon": "track.svg",
+          "lesson": [
+            {
+              "type": "text",
+              "title": "Object tracking",
+              "body": "Track object theo dõi trạng thái một đối tượng (interface, route, IP SLA) và chuyển thành Up/Down. Các tính năng khác phản ứng theo track.",
+              "bullets": [
+                "Static route: rút route khi track down",
+                "HSRP/VRRP/GLBP: giảm priority",
+                "PBR: verify-availability next-hop",
+                "EEM: kích hoạt applet"
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "Loại track object",
+              "headers": [
+                "Lệnh",
+                "Theo dõi"
+              ],
+              "rows": [
+                [
+                  "track 1 interface Gi0/0 line-protocol",
+                  "Trạng thái line protocol"
+                ],
+                [
+                  "track 2 interface Gi0/0 ip routing",
+                  "Interface có thể định tuyến IP"
+                ],
+                [
+                  "track 3 ip route 10.0.0.0/8 reachability",
+                  "Route có trong RIB"
+                ],
+                [
+                  "track 4 ip sla 1 reachability",
+                  "IP SLA thành công"
+                ],
+                [
+                  "track 5 ip sla 1 state",
+                  "Return code OK (kể cả ngưỡng threshold)"
+                ],
+                [
+                  "track 10 list boolean and/or",
+                  "Kết hợp nhiều track"
+                ]
+              ]
+            },
+            {
+              "type": "code",
+              "title": "Dual ISP với IP SLA tracking",
+              "code": "R1(config)# ip sla 1\nR1(config-ip-sla)# icmp-echo 8.8.8.8 source-interface Gi0/0\nR1(config-ip-sla-echo)# frequency 5\nR1(config)# ip sla schedule 1 life forever start-time now\nR1(config)# track 1 ip sla 1 reachability\nR1(config-track)# delay down 10 up 30\nR1(config)# ip route 0.0.0.0 0.0.0.0 203.0.113.1 track 1\nR1(config)# ip route 0.0.0.0 0.0.0.0 198.51.100.1 10",
+              "note": "Route chính có track; route dự phòng là floating static."
+            },
+            {
+              "type": "flow",
+              "title": "Chuỗi phản ứng khi ISP1 lỗi phía xa",
+              "steps": [
+                {
+                  "who": "IP SLA",
+                  "do": "Ping 8.8.8.8 qua Gi0/0 (ISP1) thất bại liên tục"
+                },
+                {
+                  "who": "Track 1",
+                  "do": "Sau delay down 10 s chuyển Down"
+                },
+                {
+                  "who": "Static route chính",
+                  "do": "Bị rút khỏi RIB"
+                },
+                {
+                  "who": "Floating static AD 10",
+                  "do": "Được cài, traffic sang ISP2"
+                },
+                {
+                  "who": "ISP1 phục hồi",
+                  "do": "Track Up sau 30 s, route chính quay lại"
+                }
+              ]
+            },
+            {
+              "type": "code",
+              "title": "HSRP theo track IP SLA",
+              "code": "R1(config)# interface Vlan10\nR1(config-if)# standby 10 priority 110\nR1(config-if)# standby 10 preempt\nR1(config-if)# standby 10 track 1 decrement 20\nR1# show track 1\nTrack 1\n  IP SLA 1 reachability\n  Reachability is Up\n  Tracked by: Static IP Routing 0, HSRP Vlan10 10",
+              "note": "Gateway chuyển sang router có Internet tốt."
+            },
+            {
+              "type": "text",
+              "title": "Delay chống flap",
+              "body": "Link chập chờn làm track lên xuống liên tục → route/HSRP flap.",
+              "bullets": [
+                "delay down <s>: chờ trước khi báo Down",
+                "delay up <s>: chờ trước khi báo Up (ổn định rồi mới quay lại)",
+                "Kết hợp frequency và threshold hợp lý"
+              ]
+            },
+            {
+              "type": "tip",
+              "title": "Mẹo thi",
+              "body": "Chuỗi chuẩn: ip sla → schedule → track ip sla reachability → ip route ... track. reachability = thành công; state = OK theo threshold."
+            },
+            {
+              "type": "warn",
+              "title": "Probe đi qua link dự phòng",
+              "body": "Sau khi route chính bị rút, nếu probe không ép source-interface/route riêng, probe có thể đi qua ISP2, thành công, và track Up sai → flap. Thêm static host route 8.8.8.8 qua ISP1."
+            }
+          ],
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Track nào theo dõi kết quả IP SLA?",
+              "options": [
+                "track 1 ip sla 1 reachability",
+                "track 1 interface Gi0/0",
+                "track 1 ip route",
+                "track 1 list"
+              ],
+              "correct_answer": "track 1 ip sla 1 reachability",
+              "explanation": "ip sla reachability."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Khi track gắn với static route chuyển Down, điều gì xảy ra?",
+              "options": [
+                "Route được giữ",
+                "Router reload",
+                "Route bị rút khỏi RIB",
+                "Interface shutdown"
+              ],
+              "correct_answer": "Route bị rút khỏi RIB",
+              "explanation": "Floating route lên thay."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "delay up 30 trong track có tác dụng gì?",
+              "options": [
+                "Tăng frequency",
+                "Giảm priority",
+                "Chờ 30 s ổn định trước khi báo Up, chống flap",
+                "Tắt track"
+              ],
+              "correct_answer": "Chờ 30 s ổn định trước khi báo Up, chống flap",
+              "explanation": "Damping."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Vì sao nên có host route cho đích probe qua ISP1?",
+              "options": [
+                "Tăng tốc ping",
+                "Bắt buộc bởi IOS",
+                "Để dùng NTP",
+                "Tránh probe đi qua ISP2 khi route chính bị rút"
+              ],
+              "correct_answer": "Tránh probe đi qua ISP2 khi route chính bị rút",
+              "explanation": "Probe phải đi đúng link."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "track 3 ip route 10.0.0.0/8 reachability theo dõi gì?",
+              "options": [
+                "IP SLA",
+                "Interface up",
+                "Route có trong bảng định tuyến",
+                "BGP session"
+              ],
+              "correct_answer": "Route có trong bảng định tuyến",
+              "explanation": "Route reachability."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Tính năng nào có thể giảm priority theo track?",
+              "options": [
+                "NTP",
+                "HSRP/VRRP/GLBP",
+                "SNMP",
+                "Syslog"
+              ],
+              "correct_answer": "HSRP/VRRP/GLBP",
+              "explanation": "FHRP."
+            },
+            {
+              "type": "fill_code",
+              "prompt": "Gắn track 1 vào static route:",
+              "template": "R1(config)# ip route 0.0.0.0 0.0.0.0 203.0.113.1 [BLANK] 1",
+              "options": [
+                "track",
+                "sla",
+                "object",
+                "monitor"
+              ],
+              "correct_answer": "track",
+              "explanation": "track <n>."
+            },
+            {
+              "type": "reorder",
+              "prompt": "Sắp xếp cấu hình dual ISP tracking:",
+              "items": [
+                "Tạo ip sla 1 icmp-echo",
+                "ip sla schedule 1",
+                "track 1 ip sla 1 reachability",
+                "Static route chính kèm track 1",
+                "Floating static qua ISP2"
+              ],
+              "correct_order": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "explanation": "Thứ tự."
+            },
+            {
+              "type": "match_pairs",
+              "prompt": "Ghép tính năng với phản ứng theo track:",
+              "pairs": [
+                {
+                  "left": "Static route",
+                  "right": "Rút route khỏi RIB"
+                },
+                {
+                  "left": "HSRP",
+                  "right": "Giảm priority"
+                },
+                {
+                  "left": "PBR",
+                  "right": "Bỏ next-hop không khả dụng"
+                },
+                {
+                  "left": "EEM",
+                  "right": "Kích hoạt applet"
+                }
+              ],
+              "explanation": "Clients của track."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": "chap_04_assurance",
+      "chapter_title": "4.0 Network Assurance – 4.3 Catalyst Center Assurance và Telemetry",
+      "nodes": [
+        {
+          "node_id": "node_d4_assurance_health",
+          "node_title": "Catalyst Center Assurance: Health Dashboards",
+          "icon": "health.svg",
+          "lesson": [
+            {
+              "type": "text",
+              "title": "Assurance",
+              "body": "Mô-đun của Catalyst Center (trước là DNA Center) thu thập telemetry từ mạng, tương quan sự kiện và chấm điểm sức khỏe, giúp chuyển từ vận hành phản ứng sang chủ động.",
+              "bullets": [
+                "Nguồn dữ liệu: streaming telemetry, SNMP, syslog, NetFlow, AAA/ISE, DHCP, DNS, wireless (AP, WLC)",
+                "Health score thang 1–10 (càng cao càng tốt)",
+                "Lưu lịch sử: xem trạng thái tại thời điểm sự cố trong quá khứ (time travel)",
+                "Issues: phát hiện vấn đề, nguyên nhân, gợi ý khắc phục"
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "Các dashboard",
+              "headers": [
+                "Dashboard",
+                "Đánh giá"
+              ],
+              "rows": [
+                [
+                  "Overall Health",
+                  "Tổng quan theo site: thiết bị, client, issue"
+                ],
+                [
+                  "Network Health",
+                  "Router, switch, WLC, AP: CPU, bộ nhớ, link, reachability, lỗi interface"
+                ],
+                [
+                  "Client Health",
+                  "Wired/wireless: onboarding (association, AAA, DHCP), RSSI, SNR, throughput"
+                ],
+                [
+                  "Application Health",
+                  "Ứng dụng theo NBAR/AVC: latency, loss, jitter, throughput"
+                ],
+                [
+                  "Issues",
+                  "Danh sách vấn đề theo mức P1–P4"
+                ]
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "Các bước onboarding client được đo",
+              "headers": [
+                "Bước",
+                "Ý nghĩa"
+              ],
+              "rows": [
+                [
+                  "Association",
+                  "Client kết nối AP/SSID"
+                ],
+                [
+                  "Authentication (AAA)",
+                  "802.1X/PSK/WebAuth với ISE"
+                ],
+                [
+                  "DHCP",
+                  "Nhận địa chỉ IP"
+                ],
+                [
+                  "Kết quả",
+                  "Thời gian từng bước, điểm thất bại"
+                ]
+              ]
+            },
+            {
+              "type": "flow",
+              "title": "Dữ liệu tới Assurance",
+              "steps": [
+                {
+                  "who": "Thiết bị",
+                  "do": "Gửi streaming telemetry, syslog, SNMP, NetFlow"
+                },
+                {
+                  "who": "NDP (Network Data Platform)",
+                  "do": "Thu thập, chuẩn hóa, tương quan dữ liệu"
+                },
+                {
+                  "who": "Analytics",
+                  "do": "Tính health score, phát hiện issue, so với baseline"
+                },
+                {
+                  "who": "GUI/API",
+                  "do": "Hiển thị dashboard, gửi thông báo (webhook, email, ITSM)"
+                }
+              ]
+            },
+            {
+              "type": "code",
+              "title": "Truy vấn sức khỏe qua Intent API",
+              "code": "GET /dna/intent/api/v1/site-health\nGET /dna/intent/api/v1/network-health\nGET /dna/intent/api/v1/client-health\nGET /dna/intent/api/v1/issues?priority=P1\nHeaders: X-Auth-Token: <token>",
+              "note": "Assurance cũng có northbound API."
+            },
+            {
+              "type": "text",
+              "title": "Sensor và kiểm thử chủ động",
+              "body": "Assurance có thể dùng AP hoặc thiết bị sensor đóng vai client để kiểm thử định kỳ.",
+              "bullets": [
+                "Thử kết nối SSID, xác thực, DHCP, DNS",
+                "Kiểm tra tốc độ, truy cập web/ứng dụng",
+                "Phát hiện vấn đề trước khi người dùng thật bị ảnh hưởng"
+              ]
+            },
+            {
+              "type": "tip",
+              "title": "Mẹo thi",
+              "body": "Health score 1–10. Bốn nhóm: network, client, application, overall. Onboarding gồm association → AAA → DHCP."
+            }
+          ],
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Health score trong Catalyst Center dùng thang nào?",
+              "options": [
+                "0 đến 100",
+                "A đến F",
+                "1 đến 10",
+                "1 đến 5"
+              ],
+              "correct_answer": "1 đến 10",
+              "explanation": "Cao hơn tốt hơn."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Dashboard nào đánh giá RSSI và thời gian DHCP của laptop?",
+              "options": [
+                "Network Health",
+                "Client Health",
+                "Application Health",
+                "Device 360"
+              ],
+              "correct_answer": "Client Health",
+              "explanation": "Client."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Thành phần nào của Catalyst Center thu thập và tương quan dữ liệu?",
+              "options": [
+                "NCP",
+                "NDP",
+                "ISE",
+                "PnP"
+              ],
+              "correct_answer": "NDP",
+              "explanation": "Network Data Platform."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Application Health dựa trên công nghệ nhận diện nào?",
+              "options": [
+                "NBAR/AVC",
+                "STP",
+                "CDP",
+                "VTP"
+              ],
+              "correct_answer": "NBAR/AVC",
+              "explanation": "Nhận diện ứng dụng."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Ba bước onboarding client được đo?",
+              "options": [
+                "Association, Authentication, DHCP",
+                "Ping, Traceroute, ARP",
+                "OSPF, BGP, EIGRP",
+                "SNMP, Syslog, NetFlow"
+              ],
+              "correct_answer": "Association, Authentication, DHCP",
+              "explanation": "Onboarding."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Sensor trong Assurance dùng để làm gì?",
+              "options": [
+                "Đóng vai client kiểm thử chủ động",
+                "Thay thế AP",
+                "Mã hóa traffic",
+                "Làm WLC"
+              ],
+              "correct_answer": "Đóng vai client kiểm thử chủ động",
+              "explanation": "Proactive testing."
+            },
+            {
+              "type": "reorder",
+              "prompt": "Sắp xếp các bước onboarding wireless client:",
+              "items": [
+                "Association",
+                "Authentication",
+                "DHCP",
+                "Client có kết nối"
+              ],
+              "correct_order": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "explanation": "Thứ tự."
+            },
+            {
+              "type": "match_pairs",
+              "prompt": "Ghép dashboard với chỉ số:",
+              "pairs": [
+                {
+                  "left": "Network Health",
+                  "right": "CPU và link của switch"
+                },
+                {
+                  "left": "Client Health",
+                  "right": "Thời gian onboarding"
+                },
+                {
+                  "left": "Application Health",
+                  "right": "Latency của Webex"
+                },
+                {
+                  "left": "Issues",
+                  "right": "Vấn đề ưu tiên P1–P4"
+                }
+              ],
+              "explanation": "Assurance."
+            },
+            {
+              "type": "categorize",
+              "prompt": "Chỉ số thuộc dashboard nào?",
+              "pairs": [
+                {
+                  "left": "Reachability của router",
+                  "right": "Network Health"
+                },
+                {
+                  "left": "CPU của WLC",
+                  "right": "Network Health"
+                },
+                {
+                  "left": "SNR của điện thoại",
+                  "right": "Client Health"
+                },
+                {
+                  "left": "Lỗi xác thực 802.1X",
+                  "right": "Client Health"
+                },
+                {
+                  "left": "Jitter của ứng dụng voice",
+                  "right": "Application Health"
+                }
+              ],
+              "explanation": "Phân loại."
+            }
+          ]
+        },
+        {
+          "node_id": "node_d4_assurance_tools",
+          "node_title": "Client 360, Device 360, Path Trace và AI Analytics",
+          "icon": "tools.svg",
+          "lesson": [
+            {
+              "type": "compare",
+              "title": "Công cụ chuyên sâu",
+              "headers": [
+                "Công cụ",
+                "Chức năng"
+              ],
+              "rows": [
+                [
+                  "Client 360",
+                  "Toàn bộ hành trình một client: timeline onboarding, AP/switch đang kết nối, RF, roaming, ứng dụng, sự kiện"
+                ],
+                [
+                  "Device 360",
+                  "Chi tiết một thiết bị: health, interface, CPU/RAM, nhiệt độ, sự kiện, topology láng giềng"
+                ],
+                [
+                  "Path Trace",
+                  "Đường đi L2/L3 giữa hai endpoint, kiểm tra ACL, QoS, thống kê interface từng hop"
+                ],
+                [
+                  "Intelligent Capture",
+                  "Bắt gói không dây trực tiếp từ AP cho một client"
+                ],
+                [
+                  "Topology",
+                  "Bản đồ mạng có trạng thái sức khỏe"
+                ]
+              ]
+            },
+            {
+              "type": "flow",
+              "title": "Path Trace hoạt động",
+              "steps": [
+                {
+                  "who": "Admin",
+                  "do": "Nhập IP nguồn, đích, (tùy chọn) port, protocol"
+                },
+                {
+                  "who": "Catalyst Center",
+                  "do": "Dùng dữ liệu routing, CDP/LLDP, FIB đã thu thập để tính đường"
+                },
+                {
+                  "who": "Catalyst Center",
+                  "do": "Thu thập ACL, QoS, thống kê interface trên từng hop"
+                },
+                {
+                  "who": "Kết quả",
+                  "do": "Hiển thị đồ họa đường đi, ACL nào chặn, interface nào lỗi"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "title": "AI Network Analytics",
+              "body": "Dùng machine learning trên cloud để học baseline động của CHÍNH mạng đó thay vì ngưỡng tĩnh.",
+              "bullets": [
+                "Phát hiện bất thường: onboarding chậm, throughput giảm, roaming bất thường",
+                "Giảm cảnh báo giả",
+                "Peer comparison: so sánh với mạng tương tự (ẩn danh)",
+                "Trends and Insights: xu hướng dài hạn"
+              ]
+            },
+            {
+              "type": "text",
+              "title": "Machine Reasoning Engine (MRE)",
+              "body": "Mô phỏng quy trình suy luận của chuyên gia: chạy workflow kiểm tra tự động để tìm nguyên nhân gốc.",
+              "bullets": [
+                "Ví dụ: workflow kiểm tra vì sao hai thiết bị không giao tiếp (ACL, routing, interface)",
+                "Gợi ý và có thể áp dụng khắc phục",
+                "Kiến thức được Cisco TAC/chuyên gia đóng gói và cập nhật"
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "Truyền thống vs AI-powered",
+              "headers": [
+                "Tiêu chí",
+                "Truyền thống",
+                "AI-powered (Catalyst Center)"
+              ],
+              "rows": [
+                [
+                  "Ngưỡng",
+                  "Tĩnh, cảnh báo nhiều",
+                  "Baseline động, ít nhiễu"
+                ],
+                [
+                  "Phân tích",
+                  "Kỹ sư tự tương quan log",
+                  "Tương quan tự động, nguyên nhân gốc"
+                ],
+                [
+                  "Khắc phục",
+                  "Thủ công",
+                  "Guided remediation"
+                ],
+                [
+                  "Thời gian",
+                  "Phản ứng sau khi người dùng báo",
+                  "Chủ động, dự đoán"
+                ]
+              ]
+            },
+            {
+              "type": "flow",
+              "title": "Xử lý sự cố 'Wi-Fi chậm'",
+              "steps": [
+                {
+                  "who": "Helpdesk",
+                  "do": "Tìm user theo tên/MAC trong Client 360"
+                },
+                {
+                  "who": "Client 360",
+                  "do": "Timeline: kết nối AP-3F-07, RSSI −78 dBm, roaming kém"
+                },
+                {
+                  "who": "Device 360 của AP",
+                  "do": "Channel utilization 90%, nhiễu cao"
+                },
+                {
+                  "who": "Issue + gợi ý",
+                  "do": "Đổi kênh/công suất (RRM) hoặc thêm AP"
+                }
+              ]
+            },
+            {
+              "type": "tip",
+              "title": "Mẹo thi",
+              "body": "Path Trace = đường đi + ACL/QoS từng hop. Client 360 = góc nhìn một client. MRE = suy luận nguyên nhân. AI Network Analytics = baseline động."
+            }
+          ],
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Công cụ nào hiển thị đường đi giữa hai host và ACL từng hop?",
+              "options": [
+                "Client 360",
+                "Path Trace",
+                "Device 360",
+                "Intelligent Capture"
+              ],
+              "correct_answer": "Path Trace",
+              "explanation": "Trực quan L2/L3."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Client 360 cung cấp gì?",
+              "options": [
+                "Hành trình và sức khỏe của một client cụ thể",
+                "Cấu hình switch",
+                "Bảng định tuyến",
+                "License"
+              ],
+              "correct_answer": "Hành trình và sức khỏe của một client cụ thể",
+              "explanation": "Góc nhìn per-client."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "AI Network Analytics khác ngưỡng tĩnh thế nào?",
+              "options": [
+                "Dùng ngưỡng cố định",
+                "Học baseline động riêng cho mạng, giảm cảnh báo giả",
+                "Không cần dữ liệu",
+                "Chỉ cho switch"
+              ],
+              "correct_answer": "Học baseline động riêng cho mạng, giảm cảnh báo giả",
+              "explanation": "ML."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Machine Reasoning Engine làm gì?",
+              "options": [
+                "Chạy workflow suy luận tìm nguyên nhân gốc",
+                "Bắt gói",
+                "Gán SGT",
+                "Cấp IP"
+              ],
+              "correct_answer": "Chạy workflow suy luận tìm nguyên nhân gốc",
+              "explanation": "Mô phỏng chuyên gia."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Intelligent Capture bắt gói từ đâu?",
+              "options": [
+                "Từ SPAN switch",
+                "Từ router WAN",
+                "Trực tiếp từ AP cho client không dây",
+                "Từ ISE"
+              ],
+              "correct_answer": "Trực tiếp từ AP cho client không dây",
+              "explanation": "Wireless capture."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Device 360 hiển thị gì?",
+              "options": [
+                "Health, interface, tài nguyên và sự kiện của một thiết bị",
+                "Timeline một client",
+                "Đường đi gói",
+                "Ma trận SGACL"
+              ],
+              "correct_answer": "Health, interface, tài nguyên và sự kiện của một thiết bị",
+              "explanation": "Per-device."
+            },
+            {
+              "type": "reorder",
+              "prompt": "Sắp xếp xử lý sự cố Wi-Fi bằng Assurance:",
+              "items": [
+                "Tìm user trong Client 360",
+                "Xem timeline và RF",
+                "Mở Device 360 của AP",
+                "Áp dụng gợi ý khắc phục"
+              ],
+              "correct_order": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "explanation": "Từ user tới khắc phục."
+            },
+            {
+              "type": "match_pairs",
+              "prompt": "Ghép công cụ với chức năng:",
+              "pairs": [
+                {
+                  "left": "Client 360",
+                  "right": "Hành trình một client"
+                },
+                {
+                  "left": "Device 360",
+                  "right": "Sức khỏe một thiết bị"
+                },
+                {
+                  "left": "Path Trace",
+                  "right": "Đường đi và chính sách từng hop"
+                },
+                {
+                  "left": "Machine Reasoning Engine",
+                  "right": "Suy luận nguyên nhân gốc"
+                }
+              ],
+              "explanation": "Assurance tools."
+            },
+            {
+              "type": "categorize",
+              "prompt": "Truyền thống hay AI-powered?",
+              "pairs": [
+                {
+                  "left": "Ngưỡng CPU cố định 80%",
+                  "right": "Truyền thống"
+                },
+                {
+                  "left": "Kỹ sư tự đọc log nhiều thiết bị",
+                  "right": "Truyền thống"
+                },
+                {
+                  "left": "Baseline học từ dữ liệu",
+                  "right": "AI-powered"
+                },
+                {
+                  "left": "Gợi ý nguyên nhân gốc tự động",
+                  "right": "AI-powered"
+                }
+              ],
+              "explanation": "Cách vận hành."
+            }
+          ]
+        },
+        {
+          "node_id": "node_d4_mdt",
+          "node_title": "Model-Driven Telemetry",
+          "icon": "telemetry.svg",
+          "lesson": [
+            {
+              "type": "text",
+              "title": "Push thay vì Pull",
+              "body": "SNMP polling: NMS hỏi định kỳ (thường 5 phút), tốn CPU và chậm phát hiện. Model-Driven Telemetry: thiết bị chủ động ĐẨY dữ liệu có cấu trúc theo YANG model.",
+              "bullets": [
+                "Chu kỳ ngắn (giây hoặc dưới giây)",
+                "Dữ liệu chuẩn hóa theo YANG (native, IETF, OpenConfig)",
+                "Mã hóa: GPB (KV-GPB), JSON, XML",
+                "Hiệu quả: thiết bị không phải xử lý nhiều request",
+                "Hai kiểu subscription: periodic (theo chu kỳ, ví dụ CPU mỗi 5 s) và on-change (khi giá trị thay đổi, ví dụ trạng thái interface)"
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "SNMP vs MDT",
+              "headers": [
+                "Tiêu chí",
+                "SNMP polling",
+                "Model-Driven Telemetry"
+              ],
+              "rows": [
+                [
+                  "Mô hình",
+                  "Pull",
+                  "Push"
+                ],
+                [
+                  "Dữ liệu",
+                  "MIB/OID",
+                  "YANG model"
+                ],
+                [
+                  "Tần suất",
+                  "Phút",
+                  "Giây hoặc on-change"
+                ],
+                [
+                  "Hiệu năng",
+                  "Tốn CPU khi poll nhiều",
+                  "Hiệu quả hơn"
+                ],
+                [
+                  "Định dạng",
+                  "ASN.1/BER",
+                  "GPB, JSON, XML"
+                ]
+              ]
+            },
+            {
+              "type": "compare",
+              "title": "Dial-in vs Dial-out",
+              "headers": [
+                "Tiêu chí",
+                "Dial-in",
+                "Dial-out"
+              ],
+              "rows": [
+                [
+                  "Ai khởi tạo phiên",
+                  "Collector kết nối tới thiết bị",
+                  "Thiết bị kết nối tới collector"
+                ],
+                [
+                  "Subscription",
+                  "Dynamic – tồn tại theo phiên",
+                  "Configured – lưu trong running-config"
+                ],
+                [
+                  "Giao thức (IOS XE)",
+                  "NETCONF (yang-push), gNMI",
+                  "gRPC (grpc-tcp, grpc-tls)"
+                ],
+                [
+                  "Khi phiên đứt",
+                  "Subscription mất, collector phải tạo lại",
+                  "Thiết bị tự kết nối lại"
+                ]
+              ]
+            },
+            {
+              "type": "code",
+              "title": "Dial-out gRPC trên IOS XE",
+              "code": "R1(config)# telemetry ietf subscription 101\nR1(config-mdt-subs)# encoding encode-kvgpb\nR1(config-mdt-subs)# filter xpath /process-cpu-ios-xe-oper:cpu-usage/cpu-utilization/five-seconds\nR1(config-mdt-subs)# source-address 10.1.1.1\nR1(config-mdt-subs)# stream yang-push\nR1(config-mdt-subs)# update-policy periodic 500\nR1(config-mdt-subs)# receiver ip address 10.1.1.10 57500 protocol grpc-tcp\nR1# show telemetry ietf subscription 101 detail\nR1# show telemetry internal connection",
+              "note": "update-policy periodic tính bằng centi-giây: 500 = 5 giây."
+            },
+            {
+              "type": "flow",
+              "title": "Luồng dial-out với TIG stack",
+              "steps": [
+                {
+                  "who": "Thiết bị",
+                  "do": "Đọc configured subscription trong running-config"
+                },
+                {
+                  "who": "Thiết bị",
+                  "do": "Mở phiên gRPC tới collector (Telegraf)"
+                },
+                {
+                  "who": "Thiết bị",
+                  "do": "Đẩy dữ liệu YANG mỗi 5 giây hoặc khi thay đổi"
+                },
+                {
+                  "who": "Telegraf",
+                  "do": "Giải mã, ghi vào InfluxDB (time-series)"
+                },
+                {
+                  "who": "Grafana",
+                  "do": "Vẽ dashboard thời gian thực"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "title": "Dial-in qua NETCONF",
+              "body": "Collector mở phiên NETCONF (SSH 830), gửi RPC establish-subscription với xpath và chu kỳ.",
+              "bullets": [
+                "Cần netconf-yang bật trên thiết bị",
+                "Subscription dynamic, không xuất hiện trong running-config",
+                "Xem: show telemetry ietf subscription all"
+              ]
+            },
+            {
+              "type": "tip",
+              "title": "Mẹo thi",
+              "body": "Dial-out = configured, thiết bị gọi đi (gRPC). Dial-in = dynamic, collector gọi vào (NETCONF/gNMI). Periodic dùng centi-giây."
+            },
+            {
+              "type": "warn",
+              "title": "Hiểu nhầm đơn vị",
+              "body": "update-policy periodic 1000 là 10 giây, không phải 1000 giây hay 1 giây. Chu kỳ quá ngắn với nhiều xpath có thể tăng CPU thiết bị."
+            }
+          ],
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Trong dial-out, ai khởi tạo kết nối?",
+              "options": [
+                "Collector",
+                "Thiết bị mạng",
+                "Catalyst Center",
+                "NMS SNMP"
+              ],
+              "correct_answer": "Thiết bị mạng",
+              "explanation": "Configured subscription."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Subscription dial-in thuộc loại nào?",
+              "options": [
+                "Configured",
+                "Dynamic",
+                "Static",
+                "Permanent"
+              ],
+              "correct_answer": "Dynamic",
+              "explanation": "Mất khi phiên đóng."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "update-policy periodic 500 nghĩa là gì?",
+              "options": [
+                "Mỗi 500 giây",
+                "Mỗi 500 ms",
+                "Gửi mỗi 5 giây",
+                "Mỗi 50 giây"
+              ],
+              "correct_answer": "Gửi mỗi 5 giây",
+              "explanation": "Centi-giây."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Giao thức dial-out trên IOS XE?",
+              "options": [
+                "NETCONF",
+                "SNMP",
+                "Syslog",
+                "gRPC"
+              ],
+              "correct_answer": "gRPC",
+              "explanation": "grpc-tcp/grpc-tls."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Kiểu subscription nào phù hợp theo dõi trạng thái interface?",
+              "options": [
+                "Periodic 1 giây",
+                "Polling SNMP",
+                "Không cần",
+                "On-change"
+              ],
+              "correct_answer": "On-change",
+              "explanation": "Gửi khi thay đổi."
+            },
+            {
+              "type": "multiple_choice",
+              "prompt": "Ưu điểm của MDT so với SNMP polling?",
+              "options": [
+                "Không cần collector",
+                "Không cần mạng",
+                "Push dữ liệu YANG với tần suất cao và hiệu quả hơn",
+                "Dùng MIB cũ"
+              ],
+              "correct_answer": "Push dữ liệu YANG với tần suất cao và hiệu quả hơn",
+              "explanation": "Push model."
+            },
+            {
+              "type": "fill_code",
+              "prompt": "Đặt chu kỳ đẩy 5 giây:",
+              "template": "R1(config-mdt-subs)# update-policy [BLANK] 500",
+              "options": [
+                "periodic",
+                "on-change",
+                "interval",
+                "timer"
+              ],
+              "correct_answer": "periodic",
+              "explanation": "Đơn vị centi-giây."
+            },
+            {
+              "type": "reorder",
+              "prompt": "Sắp xếp luồng dial-out TIG:",
+              "items": [
+                "Thiết bị đọc subscription",
+                "Mở phiên gRPC tới Telegraf",
+                "Đẩy dữ liệu YANG",
+                "Telegraf ghi vào InfluxDB",
+                "Grafana hiển thị"
+              ],
+              "correct_order": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "explanation": "Từ thiết bị tới dashboard."
+            },
+            {
+              "type": "match_pairs",
+              "prompt": "Ghép công cụ TIG:",
+              "pairs": [
+                {
+                  "left": "Telegraf",
+                  "right": "Collector nhận telemetry"
+                },
+                {
+                  "left": "InfluxDB",
+                  "right": "Time-series database"
+                },
+                {
+                  "left": "Grafana",
+                  "right": "Dashboard trực quan"
+                }
+              ],
+              "explanation": "Stack telemetry."
+            },
+            {
+              "type": "categorize",
+              "prompt": "Dial-in hay dial-out?",
+              "pairs": [
+                {
+                  "left": "Collector mở phiên",
+                  "right": "Dial-in"
+                },
+                {
+                  "left": "NETCONF establish-subscription",
+                  "right": "Dial-in"
+                },
+                {
+                  "left": "Configured subscription",
+                  "right": "Dial-out"
+                },
+                {
+                  "left": "receiver ip address trong cấu hình",
+                  "right": "Dial-out"
+                }
+              ],
+              "explanation": "Mô hình MDT."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "glossary": [
+    {
+      "term": "Extended Ping",
+      "def": "Ping với tùy chọn source, size, df-bit, repeat, tos, sweep.",
+      "cmd": "ping 10.4.4.4 source Lo0 size 1500 df-bit",
+      "tag": "Diagnostics"
+    },
+    {
+      "term": "Traceroute",
+      "def": "Probe UDP tăng dần TTL, nhận ICMP Time Exceeded.",
+      "cmd": "traceroute 10.4.4.4 numeric",
+      "tag": "Diagnostics"
+    },
+    {
+      "term": "terminal monitor",
+      "def": "Hiển thị log/debug trên phiên VTY.",
+      "cmd": "terminal monitor",
+      "tag": "Diagnostics"
+    },
+    {
+      "term": "Conditional Debug",
+      "def": "Lọc debug theo interface/IP/MAC.",
+      "cmd": "debug condition ip 10.1.1.10",
+      "tag": "Diagnostics"
+    },
+    {
+      "term": "undebug all",
+      "def": "Tắt mọi debug.",
+      "cmd": "undebug all",
+      "tag": "Diagnostics"
+    },
+    {
+      "term": "SPAN",
+      "def": "Mirror traffic cục bộ trên một switch.",
+      "cmd": "monitor session 1 source interface Gi1/0/1 both",
+      "tag": "SPAN"
+    },
+    {
+      "term": "RSPAN",
+      "def": "Mirror qua nhiều switch bằng VLAN remote-span.",
+      "cmd": "remote-span",
+      "tag": "SPAN"
+    },
+    {
+      "term": "ERSPAN",
+      "def": "Mirror qua L3 bằng GRE (0x88BE).",
+      "cmd": "monitor session 1 type erspan-source",
+      "tag": "SPAN"
+    },
+    {
+      "term": "MIB",
+      "def": "Cơ sở dữ liệu đối tượng quản lý SNMP.",
+      "tag": "SNMP"
+    },
+    {
+      "term": "OID",
+      "def": "Định danh số của đối tượng trong MIB.",
+      "tag": "SNMP"
+    },
+    {
+      "term": "SNMP Trap",
+      "def": "Thông báo không xác nhận, UDP 162.",
+      "cmd": "snmp-server enable traps",
+      "tag": "SNMP"
+    },
+    {
+      "term": "SNMP Inform",
+      "def": "Thông báo có xác nhận.",
+      "cmd": "snmp-server host 10.1.1.50 informs version 3 priv noc1",
+      "tag": "SNMP"
+    },
+    {
+      "term": "authPriv",
+      "def": "SNMPv3 xác thực và mã hóa.",
+      "cmd": "snmp-server group G v3 priv",
+      "tag": "SNMP"
+    },
+    {
+      "term": "SNMP View",
+      "def": "Nhánh OID được phép truy cập.",
+      "cmd": "snmp-server view NOC-VIEW iso included",
+      "tag": "SNMP"
+    },
+    {
+      "term": "Syslog Severity",
+      "def": "0 Emergency đến 7 Debugging.",
+      "cmd": "logging trap notifications",
+      "tag": "Syslog"
+    },
+    {
+      "term": "logging buffered",
+      "def": "Lưu log vào RAM.",
+      "cmd": "logging buffered 128000 informational",
+      "tag": "Syslog"
+    },
+    {
+      "term": "Flow",
+      "def": "Chuỗi gói đơn hướng cùng trường khóa.",
+      "tag": "NetFlow"
+    },
+    {
+      "term": "Flow Record",
+      "def": "Định nghĩa match (key) và collect (non-key).",
+      "cmd": "flow record CUSTOM1",
+      "tag": "NetFlow"
+    },
+    {
+      "term": "Flow Exporter",
+      "def": "Định nghĩa collector và giao thức export.",
+      "cmd": "flow exporter EXP1",
+      "tag": "NetFlow"
+    },
+    {
+      "term": "Flow Monitor",
+      "def": "Gắn record + exporter, áp lên interface.",
+      "cmd": "ip flow monitor MON1 input",
+      "tag": "NetFlow"
+    },
+    {
+      "term": "Flow Sampler",
+      "def": "Lấy mẫu 1/N gói.",
+      "cmd": "sampler SAMP100",
+      "tag": "NetFlow"
+    },
+    {
+      "term": "IPFIX",
+      "def": "Chuẩn export flow IETF (NetFlow v10).",
+      "cmd": "export-protocol ipfix",
+      "tag": "NetFlow"
+    },
+    {
+      "term": "IP SLA",
+      "def": "Probe chủ động đo hiệu năng.",
+      "cmd": "ip sla 1",
+      "tag": "IP SLA"
+    },
+    {
+      "term": "IP SLA Responder",
+      "def": "Đầu xa trả lời probe kèm timestamp.",
+      "cmd": "ip sla responder",
+      "tag": "IP SLA"
+    },
+    {
+      "term": "udp-jitter",
+      "def": "Operation đo jitter, loss, MOS.",
+      "cmd": "udp-jitter 10.4.4.4 16384",
+      "tag": "IP SLA"
+    },
+    {
+      "term": "Object Tracking",
+      "def": "Theo dõi trạng thái đối tượng điều khiển route/FHRP.",
+      "cmd": "track 1 ip sla 1 reachability",
+      "tag": "IP SLA"
+    },
+    {
+      "term": "Health Score",
+      "def": "Điểm sức khỏe 1–10 trong Assurance.",
+      "tag": "Assurance"
+    },
+    {
+      "term": "Client 360",
+      "def": "Góc nhìn toàn diện một client.",
+      "tag": "Assurance"
+    },
+    {
+      "term": "Device 360",
+      "def": "Góc nhìn toàn diện một thiết bị.",
+      "tag": "Assurance"
+    },
+    {
+      "term": "Path Trace",
+      "def": "Đường đi và chính sách giữa hai endpoint.",
+      "tag": "Assurance"
+    },
+    {
+      "term": "AI Network Analytics",
+      "def": "Phát hiện bất thường bằng baseline học máy.",
+      "tag": "Assurance"
+    },
+    {
+      "term": "Machine Reasoning Engine",
+      "def": "Suy luận nguyên nhân gốc tự động.",
+      "tag": "Assurance"
+    },
+    {
+      "term": "Model-Driven Telemetry",
+      "def": "Đẩy dữ liệu YANG theo chu kỳ hoặc khi thay đổi.",
+      "cmd": "telemetry ietf subscription 101",
+      "tag": "Telemetry"
+    },
+    {
+      "term": "Dial-out",
+      "def": "Thiết bị kết nối collector (configured subscription, gRPC).",
+      "cmd": "receiver ip address 10.1.1.10 57500 protocol grpc-tcp",
+      "tag": "Telemetry"
+    },
+    {
+      "term": "Dial-in",
+      "def": "Collector kết nối thiết bị (dynamic subscription, NETCONF/gNMI).",
+      "tag": "Telemetry"
+    },
+    {
+      "term": "On-change",
+      "def": "Subscription gửi khi giá trị thay đổi.",
+      "cmd": "update-policy on-change",
+      "tag": "Telemetry"
+    }
+  ]
+}

@@ -3,14 +3,17 @@
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/widget_bg"
+    android:background="@drawable/bg_term"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:padding="12dp">
+    android:paddingStart="12dp"
+    android:paddingTop="10dp"
+    android:paddingEnd="12dp"
+    android:paddingBottom="15dp">
     <ImageView
         android:id="@+id/duck"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
+        android:layout_width="58dp"
+        android:layout_height="58dp"
         android:scaleType="fitCenter" />
     <LinearLayout
         android:layout_width="0dp"
@@ -18,32 +21,66 @@
         android:layout_marginStart="10dp"
         android:layout_weight="1"
         android:orientation="vertical">
-        <TextView android:id="@+id/tHead"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#049FD9"
-            android:textSize="11sp" android:textStyle="bold" />
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
-            <TextView android:id="@+id/tTerm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#3C3C3C"
-            android:textSize="19sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
-            <TextView android:id="@+id/tTag"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#0088A8"
-            android:textSize="11sp" android:textStyle="bold" android:layout_marginStart="8dp" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/tHead"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#00BCEB"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/tTag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/pill_cyan"
+                android:paddingStart="7dp"
+                android:paddingTop="1dp"
+                android:paddingEnd="7dp"
+                android:paddingBottom="1dp"
+                android:maxLines="1"
+                android:textColor="#0D2232"
+                android:textSize="10sp"
+                android:textStyle="bold" />
         </LinearLayout>
-        <TextView android:id="@+id/tDef"
+        <TextView
+            android:id="@+id/tTerm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#FFFFFF"
+            android:textSize="21sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/tDef"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:ellipsize="end"
+            android:maxLines="3"
+            android:textColor="#CFE3EE"
+            android:textSize="13sp" />
+        <TextView
+            android:id="@+id/tCmd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#555555"
-            android:textSize="13sp" android:maxLines="3" android:ellipsize="end" android:layout_marginTop="2dp" />
-        <TextView android:id="@+id/tCmd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#0088A8"
-            android:textSize="12sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:fontFamily="monospace" android:layout_marginTop="3dp" />
+            android:layout_marginTop="4dp"
+            android:background="@drawable/code_bg"
+            android:ellipsize="end"
+            android:fontFamily="monospace"
+            android:maxLines="1"
+            android:paddingStart="7dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="7dp"
+            android:paddingBottom="2dp"
+            android:textColor="#4DFF9A"
+            android:textSize="12sp"
+            android:textStyle="bold" />
     </LinearLayout>
 </LinearLayout>

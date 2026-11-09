@@ -113,7 +113,7 @@ object DuckViews {
         return rv
     }
 
-    // 4) Đếm ngược ngày thi
+    // 4) Đếm ngược ngày thi (đỏ khi còn <= 7 ngày)
     fun exam(ctx: Context): RemoteViews {
         val vi = DuckData.vi()
         val sp = DuckData.sp(ctx)
@@ -123,19 +123,23 @@ object DuckViews {
         var num = "—"
         var lbl = if (vi) "Đặt ngày thi trong Cài đặt" else "Set your exam date in Settings"
         var showWeak = false
+        var bg = R.drawable.bg_blue
         if (examNum != null) {
             val left = examNum - DuckData.todayNum()
             if (left > 0L) {
                 num = left.toString()
                 lbl = if (vi) "ngày nữa là thi" else "days to exam"
                 showWeak = weak.isNotEmpty()
+                if (left <= 7L) bg = R.drawable.bg_red
             } else if (left == 0L) {
                 num = "0"
                 lbl = if (vi) "Hôm nay thi! Chúc may mắn!" else "Exam day! Good luck!"
+                bg = R.drawable.bg_red
             } else {
                 lbl = if (vi) "Ngày thi đã qua" else "Exam date has passed"
             }
         }
+        rv.setInt(R.id.root, "setBackgroundResource", bg)
         rv.setTextViewText(R.id.eNum, num)
         rv.setTextViewText(R.id.eLbl, lbl)
         rv.setTextViewText(R.id.eWeak, (if (vi) "Cần luyện: " else "Focus: ") + weak)

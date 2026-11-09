@@ -1,0 +1,170 @@
+{
+  "course_id": "ccba_sample",
+  "course_title": "CCBA (mau de test, hay thay bang file cua ban)",
+  "chapters": [
+    {
+      "chapter_id": "ccba_radd",
+      "chapter_title": "RADD – Requirements Analysis and Design Definition",
+      "nodes": [
+        {
+          "node_id": "ccba_radd_n1",
+          "node_title": "RADD basics",
+          "icon": "router.svg",
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Trong BABOK Guide v3, task \"Specify and Model Requirements\" thuộc Knowledge Area nào?",
+              "options": [
+                "BAPM",
+                "EC",
+                "RADD",
+                "SE"
+              ],
+              "correct_answer": "RADD",
+              "explanation": "Task 'Specify and Model Requirements' thuộc Knowledge Area RADD (Requirements Analysis and Design Definition)."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": "ccba_ec",
+      "chapter_title": "EC – Elicitation and Collaboration",
+      "nodes": [
+        {
+          "node_id": "ccba_ec_n1",
+          "node_title": "EC basics",
+          "icon": "router.svg",
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Trong BABOK Guide v3, task \"Prepare for Elicitation\" thuộc Knowledge Area nào?",
+              "options": [
+                "EC",
+                "RLCM",
+                "SA",
+                "SE"
+              ],
+              "correct_answer": "EC",
+              "explanation": "Task 'Prepare for Elicitation' thuộc Knowledge Area EC (Elicitation and Collaboration)."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": "ccba_rlcm",
+      "chapter_title": "RLCM – Requirements Life Cycle Management",
+      "nodes": [
+        {
+          "node_id": "ccba_rlcm_n1",
+          "node_title": "RLCM basics",
+          "icon": "router.svg",
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Trong BABOK Guide v3, task \"Trace Requirements\" thuộc Knowledge Area nào?",
+              "options": [
+                "RADD",
+                "RLCM",
+                "BAPM",
+                "SA"
+              ],
+              "correct_answer": "RLCM",
+              "explanation": "Task 'Trace Requirements' thuộc Knowledge Area RLCM (Requirements Life Cycle Management)."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": "ccba_bapm",
+      "chapter_title": "BAPM – Business Analysis Planning and Monitoring",
+      "nodes": [
+        {
+          "node_id": "ccba_bapm_n1",
+          "node_title": "BAPM basics",
+          "icon": "router.svg",
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Trong BABOK Guide v3, task \"Plan Business Analysis Approach\" thuộc Knowledge Area nào?",
+              "options": [
+                "SA",
+                "EC",
+                "BAPM",
+                "RADD"
+              ],
+              "correct_answer": "BAPM",
+              "explanation": "Task 'Plan Business Analysis Approach' thuộc Knowledge Area BAPM (Business Analysis Planning and Monitoring)."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": "ccba_sa",
+      "chapter_title": "SA – Strategy Analysis",
+      "nodes": [
+        {
+          "node_id": "ccba_sa_n1",
+          "node_title": "SA basics",
+          "icon": "router.svg",
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Trong BABOK Guide v3, task \"Define Future State\" thuộc Knowledge Area nào?",
+              "options": [
+                "SE",
+                "SA",
+                "RLCM",
+                "EC"
+              ],
+              "correct_answer": "SA",
+              "explanation": "Task 'Define Future State' thuộc Knowledge Area SA (Strategy Analysis)."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "chapter_id": "ccba_se",
+      "chapter_title": "SE – Solution Evaluation",
+      "nodes": [
+        {
+          "node_id": "ccba_se_n1",
+          "node_title": "SE basics",
+          "icon": "router.svg",
+          "questions": [
+            {
+              "type": "multiple_choice",
+              "prompt": "Trong BABOK Guide v3, task \"Measure Solution Performance\" thuộc Knowledge Area nào?",
+              "options": [
+                "BAPM",
+                "RADD",
+                "SE",
+                "SA"
+              ],
+              "correct_answer": "SE",
+              "explanation": "Task 'Measure Solution Performance' thuộc Knowledge Area SE (Solution Evaluation)."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "glossary": [
+    {
+      "term": "BABOK",
+      "def": "A Guide to the Business Analysis Body of Knowledge: tài liệu chuẩn của IIBA mô tả các Knowledge Area và task của business analysis.",
+      "cmd": "",
+      "tag": "BABOK"
+    },
+    {
+      "term": "Stakeholder",
+      "def": "Cá nhân hoặc nhóm có lợi ích liên quan đến một thay đổi, giải pháp hoặc bối cảnh của nó.",
+      "cmd": "",
+      "tag": "BABOK"
+    }
+  ]
+}

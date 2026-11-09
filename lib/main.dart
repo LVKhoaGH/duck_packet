@@ -6,6 +6,7 @@ import 'home_screen.dart';
 import 'i18n.dart';
 import 'settings.dart';
 import 'theme.dart';
+import 'tracks.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,7 +14,8 @@ Future<void> main() async {
   await Hive.openBox('stats');
   await Hive.openBox('course');
   await DuckArt.load(); // the duck is drawn from PNG layers; load them before the first frame
-  runApp(const ProviderScope(child: DuckPacketApp()));
+  await Bundled.load(); // courses shipped inside the app (assets/courses/...)
+  runApp(ProviderScope(overrides: [courseOverride()], child: const DuckPacketApp()));
 }
 
 class DuckPacketApp extends StatelessWidget {
@@ -24,7 +26,7 @@ class DuckPacketApp extends StatelessWidget {
         title: 'DuckPacket',
         debugShowCheckedModeBanner: false,
         theme: buildTheme(),
-        home: const HomeScreen(),
+        home: const _Root(),
         // Language scope on top of everything. Window size decides the layout:
         //   < 600 px  phone, full screen (portrait)
         //   600-800   tablet portrait: phone layout, centred, max 560 px
@@ -52,4 +54,17 @@ class DuckPacketApp extends StatelessWidget {
           ),
         ),
       );
+}
+
+/// First launch: pick a course. After that: the app. Changing course rebuilds HomeScreen from scratch (key = course id).
+class _Root extends ConsumerWidget {
+  const _Root();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final t = ref.watch(trackProvider);
+    if (t.isEmpty) return const TrackPickerScreen(first: true);
+    if (t != kTrackCustom && Bundled.byTrack[t] == null) return const NoContentScreen();
+    return KeyedSubtree(key: ValueKey(t), child: const HomeScreen());
+  }
 }

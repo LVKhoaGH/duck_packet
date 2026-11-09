@@ -15,6 +15,7 @@ import 'models.dart';
 import 'sfx.dart';
 import 'study.dart';
 import 'theme.dart';
+import 'tracks.dart';
 import 'widgets.dart';
 
 /// Share of the exam per domain (ENCOR 350-401 blueprint). Groups without a domain number weigh 10.
@@ -26,7 +27,8 @@ const double kExamPass = 82.5;
 /// Selectable exam sizes. Time = 1.2 minutes per question (100 questions = 120 minutes).
 const kExamSizes = [30, 60, 100];
 
-int examMinutes(int n) => (n * 6 / 5).round();
+/// Time scales with the course: ENCOR 1.2 min per question, CCBA 180 / 130 min per question.
+int examMinutes(int n, ExamProfile pf) => (n * pf.minutes / pf.questions).round();
 
 class _ExamItem {
   final Question q;
@@ -35,20 +37,24 @@ class _ExamItem {
   _ExamItem(this.q, this.domain);
 }
 
-int _available(Course c) => domainStats(c).fold<int>(0, (a, g) => a + g.qs.length);
+/// Keeps only the question types this course's exam allows (CCBA = single choice only).
+List<Question> _ok(Iterable<Question> qs, ExamProfile pf) =>
+    pf.types == null ? qs.toList() : qs.where((q) => pf.types!.contains(q.type)).toList();
+
+int _available(Course c, ExamProfile pf) => domainStats(c).fold<int>(0, (a, g) => a + _ok(g.qs, pf).length);
 
 /// Picks questions per domain by weight, fills the rest randomly, then shuffles.
-List<_ExamItem> _buildExam(Course c, int n) {
+List<_ExamItem> _buildExam(Course c, int n, ExamProfile pf) {
   final rnd = Random();
-  final groups = domainStats(c);
+  final groups = domainStats(c).where((g) => _ok(g.qs, pf).isNotEmpty).toList();
   if (groups.isEmpty) return [];
-  final sumW = groups.fold<int>(0, (a, g) => a + (kExamWeight[g.order] ?? 10));
+  final sumW = groups.fold<int>(0, (a, g) => a + (pf.weights[g.order] ?? 10));
   final picked = <_ExamItem>[];
   final used = <Question>{};
   for (final g in groups) {
-    final w = kExamWeight[g.order] ?? 10;
+    final w = pf.weights[g.order] ?? 10;
     final want = (n * w / sumW).round();
-    final pool = List<Question>.of(g.qs)..shuffle(rnd);
+    final pool = _ok(g.qs, pf)..shuffle(rnd);
     for (final q in pool.take(min(want, pool.length))) {
       picked.add(_ExamItem(q, g.title));
       used.add(q);
@@ -57,7 +63,7 @@ List<_ExamItem> _buildExam(Course c, int n) {
   if (picked.length < n) {
     final rest = <_ExamItem>[
       for (final g in groups)
-        for (final q in g.qs)
+        for (final q in _ok(g.qs, pf))
           if (!used.contains(q)) _ExamItem(q, g.title),
     ]..shuffle(rnd);
     picked.addAll(rest.take(n - picked.length));
@@ -147,28 +153,30 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
   List<DomainStat> get _groups => domainStats(widget.course);
   List<Chapter> get _chapters => [for (final ch in widget.course.chapters) if (ch.nodes.any((n) => n.questions.isNotEmpty)) ch];
   bool get _graded => _dom < 0 && _chap < 0;
+  ExamProfile get _pf => examProfileFor(ref.read(trackProvider));
 
   int get _poolSize {
-    if (_dom >= 0 && _dom < _groups.length) return _groups[_dom].qs.length;
+    if (_dom >= 0 && _dom < _groups.length) return _ok(_groups[_dom].qs, _pf).length;
     if (_chap >= 0 && _chap < _chapters.length) {
-      return _chapters[_chap].nodes.fold<int>(0, (a, n) => a + n.questions.length);
+      return _ok([for (final n in _chapters[_chap].nodes) ...n.questions], _pf).length;
     }
-    return _available(widget.course);
+    return _available(widget.course, _pf);
   }
 
-  int get _maxQ => min(_poolSize, 100);
+  int get _maxQ => min(_poolSize, _pf.questions);
 
   void _fit() {
     final mx = _maxQ;
     final mn = min(5, mx);
     if (_size > mx) _size = mx;
     if (_size < mn) _size = mn;
-    if (!_minTouched) _min = max(1, examMinutes(_size));
+    if (!_minTouched) _min = max(1, examMinutes(_size, _pf));
   }
 
   @override
   void initState() {
     super.initState();
+    _size = _pf.questions;
     _fit();
   }
 
@@ -181,13 +189,13 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
   List<_ExamItem> _buildItems() {
     if (_dom >= 0 && _dom < _groups.length) {
       final g = _groups[_dom];
-      return _buildScoped(g.qs, g.title, _size);
+      return _buildScoped(_ok(g.qs, _pf), g.title, _size);
     }
     if (_chap >= 0 && _chap < _chapters.length) {
       final ch = _chapters[_chap];
-      return _buildScoped([for (final n in ch.nodes) ...n.questions], ch.title, _size);
+      return _buildScoped(_ok([for (final n in ch.nodes) ...n.questions], _pf), ch.title, _size);
     }
-    return _buildExam(widget.course, _size);
+    return _buildExam(widget.course, _size, _pf);
   }
 
   void _start() {
@@ -257,7 +265,7 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
     for (final it in _items) {
       it.ok ??= false;
     }
-    final good = _ratio >= kExamPass;
+    final good = _ratio >= _pf.pass;
     Sfx.play(good ? 'success' : 'wrong');
     Sfx.buzz(HapticFeedback.mediumImpact);
     setState(() => _phase = 2);
@@ -286,7 +294,7 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
   Widget _setup() {
     final groups = _groups;
     final chaps = _chapters;
-    final avail = _available(widget.course);
+    final avail = _available(widget.course, _pf);
     final mx = _maxQ;
     final mn = min(5, mx);
     return SafeArea(
@@ -366,7 +374,7 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
                   }),
                 ),
               Wrap(spacing: 8, children: [
-                for (final p in kExamSizes)
+                for (final p in {30, 60, _pf.questions})
                   if (p <= mx)
                     ActionChip(
                       label: Text('$p'),
@@ -428,7 +436,7 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
           const SizedBox(height: 10),
           Text(
               _graded
-                  ? 'Full exam follows the real domain weights. Pass mark: $kExamPass%. You cannot go back to a question.'
+                  ? 'Full exam follows the real domain weights. Pass mark: ${_pf.pass}%. You cannot go back to a question.'
                   : 'Practice mode: only this scope, no pass mark. You cannot go back to a question.',
               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
           const SizedBox(height: 4),
@@ -546,7 +554,7 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
 
   // ───────────────────────── result ─────────────────────────
   Widget _result() {
-    final pass = _ratio >= kExamPass;
+    final pass = _ratio >= _pf.pass;
     final byDomain = <String, List<_ExamItem>>{};
     for (final it in _items) {
       byDomain.putIfAbsent(it.domain, () => []).add(it);
@@ -564,7 +572,7 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
           const SizedBox(height: 4),
           Center(child: Text('$_pct%', style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w700, color: AppColors.ink))),
           Center(
-            child: Text(_graded ? '$_correctCount / ${_items.length} correct  ·  pass mark $kExamPass%' : '$_correctCount / ${_items.length} correct',
+            child: Text(_graded ? '$_correctCount / ${_items.length} correct  ·  pass mark ${_pf.pass}%' : '$_correctCount / ${_items.length} correct',
                 style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.black45)),
           ),
           const SizedBox(height: 22),
@@ -587,7 +595,7 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
                         Text('${(v * 100).round()}%  ($c/$t)', style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.black45)),
                       ]),
                       const SizedBox(height: 6),
-                      ProgressBar3D(v, track: AppColors.line, fill: v * 100 >= kExamPass ? AppColors.success : AppColors.error),
+                      ProgressBar3D(v, track: AppColors.line, fill: v * 100 >= _pf.pass ? AppColors.success : AppColors.error),
                     ]),
                   );
                 }),

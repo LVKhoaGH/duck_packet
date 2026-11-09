@@ -8,6 +8,7 @@ import 'i18n.dart';
 import 'settings.dart';
 import 'sfx.dart';
 import 'theme.dart';
+import 'tracks.dart';
 import 'widgets.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -49,6 +50,7 @@ class SettingsScreen extends ConsumerWidget {
     final s = ref.watch(settingsProvider);
     final goal = ref.watch(extrasProvider).goal;
     final n = ref.read(settingsProvider.notifier);
+    final track = trackOf(ref.watch(trackProvider));
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -62,6 +64,30 @@ class SettingsScreen extends ConsumerWidget {
           ),
           Expanded(
             child: ListView(padding: const EdgeInsets.fromLTRB(16, 0, 16, 32), children: [
+              _head('Course'),
+              PressScale(
+                onTap: () => Navigator.push(context, slideUpRoute(const TrackPickerScreen())),
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+                  decoration: duoCard(border: AppColors.line),
+                  child: Row(children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(color: track.color, borderRadius: BorderRadius.circular(12)),
+                      child: Icon(track.icon, color: Colors.white),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(track.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                        const Text('Tap to switch course', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
+                      ]),
+                    ),
+                    const Icon(Icons.chevron_right_rounded, color: Colors.black38),
+                  ]),
+                ),
+              ),
               _head('Sound'),
               _switch(Icons.volume_up_rounded, 'Sound effects', s.sound, (v) {
                 n.setSound(v);

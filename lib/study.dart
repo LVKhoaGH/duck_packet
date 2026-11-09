@@ -9,6 +9,18 @@ const kBossPass = 80;
 /// Spaced repetition steps (days): wrong -> due in 1 day, then 3, then 7, then graduated.
 const kSrsDays = [1, 3, 7];
 
+/// CCBA (IIBA BABOK) knowledge areas; chapter titles start with the code, e.g. "RADD – Requirements Analysis...".
+/// Order 1..6 = RADD, EC, RLCM, BAPM, SA, SE (the exam profile in tracks.dart uses the same order).
+const kCcbaCodes = ['RADD', 'EC', 'RLCM', 'BAPM', 'SA', 'SE'];
+const kCcbaNames = {
+  'RADD': 'Requirements Analysis & Design Definition',
+  'EC': 'Elicitation & Collaboration',
+  'RLCM': 'Requirements Life Cycle Management',
+  'BAPM': 'BA Planning & Monitoring',
+  'SA': 'Strategy Analysis',
+  'SE': 'Solution Evaluation',
+};
+
 const kDomainNames = {
   1: 'Architecture',
   2: 'Virtualization',
@@ -187,10 +199,11 @@ bool stageUnlocked(Course c, Set<String> done, String id) {
 class DomainStat {
   final String label;
   final int order;
+  final String code; // CCBA knowledge-area code, '' for other courses
   final List<Question> qs = [];
-  DomainStat(this.label, this.order);
+  DomainStat(this.label, this.order, {this.code = ''});
 
-  String get title => order < 99 ? '$order · $label' : label;
+  String get title => code.isNotEmpty ? '$code · $label' : (order < 99 ? '$order · $label' : label);
   double mastery(Map<String, QRec> r) =>
       qs.isEmpty ? 0 : qs.where((q) => r[qidOf(q)]?.lastOk == true).length / qs.length;
   int attempted(Map<String, QRec> r) => qs.where((q) => (r[qidOf(q)]?.a ?? 0) > 0).length;
@@ -201,12 +214,15 @@ class DomainStat {
 List<DomainStat> domainStats(Course c) {
   final groups = <String, DomainStat>{};
   final re = RegExp(r'\b([1-6])\.0\b');
+  final reCode = RegExp(r'^\s*(RADD|EC|RLCM|BAPM|SA|SE)\b');
   for (final ch in c.chapters) {
     final m = re.firstMatch(ch.title);
-    final order = m != null ? int.parse(m.group(1)!) : 99;
-    final key = m != null ? 'd$order' : 'c:${ch.title}';
-    final label = m != null ? (kDomainNames[order] ?? ch.title) : ch.title;
-    final g = groups.putIfAbsent(key, () => DomainStat(label, order));
+    final mc = m == null ? reCode.firstMatch(ch.title) : null;
+    final code = mc?.group(1) ?? '';
+    final order = m != null ? int.parse(m.group(1)!) : (code.isNotEmpty ? kCcbaCodes.indexOf(code) + 1 : 99);
+    final key = m != null ? 'd$order' : (code.isNotEmpty ? 'k:$code' : 'c:${ch.title}');
+    final label = m != null ? (kDomainNames[order] ?? ch.title) : (code.isNotEmpty ? (kCcbaNames[code] ?? ch.title) : ch.title);
+    final g = groups.putIfAbsent(key, () => DomainStat(label, order, code: code));
     for (final n in ch.nodes) {
       g.qs.addAll(n.questions);
     }

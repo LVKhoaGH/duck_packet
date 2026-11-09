@@ -3,15 +3,18 @@
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/widget_bg"
+    android:background="@drawable/bg_cyan"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:padding="12dp">
+    android:paddingStart="12dp"
+    android:paddingTop="10dp"
+    android:paddingEnd="12dp"
+    android:paddingBottom="15dp">
 
     <ImageView
         android:id="@+id/duck"
-        android:layout_width="76dp"
-        android:layout_height="76dp"
+        android:layout_width="78dp"
+        android:layout_height="78dp"
         android:scaleType="fitCenter" />
 
     <LinearLayout
@@ -30,28 +33,29 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="🔥"
-                android:textSize="22sp" />
+                android:textSize="24sp" />
             <TextView
                 android:id="@+id/streak"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
-                android:textColor="#3C3C3C"
-                android:textSize="28sp"
+                android:textColor="#FFFFFF"
+                android:textSize="32sp"
                 android:textStyle="bold" />
             <TextView
                 android:id="@+id/streakLbl"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
-                android:textColor="#777777"
-                android:textSize="13sp" />
+                android:textColor="#E6FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="4dp"
             android:orientation="horizontal">
             <LinearLayout
                 android:layout_width="0dp"
@@ -63,13 +67,13 @@
                     android:id="@+id/lbl0"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#8A8A8A"
+                    android:textColor="#E6FFFFFF"
                     android:textSize="11sp"
                     android:textStyle="bold" />
-                <View
+                <FrameLayout
                     android:id="@+id/dot0"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_marginTop="2dp" />
             </LinearLayout>
             <LinearLayout
@@ -82,13 +86,13 @@
                     android:id="@+id/lbl1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#8A8A8A"
+                    android:textColor="#E6FFFFFF"
                     android:textSize="11sp"
                     android:textStyle="bold" />
-                <View
+                <FrameLayout
                     android:id="@+id/dot1"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_marginTop="2dp" />
             </LinearLayout>
             <LinearLayout
@@ -101,13 +105,13 @@
                     android:id="@+id/lbl2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#8A8A8A"
+                    android:textColor="#E6FFFFFF"
                     android:textSize="11sp"
                     android:textStyle="bold" />
-                <View
+                <FrameLayout
                     android:id="@+id/dot2"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_marginTop="2dp" />
             </LinearLayout>
             <LinearLayout
@@ -120,13 +124,13 @@
                     android:id="@+id/lbl3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#8A8A8A"
+                    android:textColor="#E6FFFFFF"
                     android:textSize="11sp"
                     android:textStyle="bold" />
-                <View
+                <FrameLayout
                     android:id="@+id/dot3"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_marginTop="2dp" />
             </LinearLayout>
             <LinearLayout
@@ -139,13 +143,13 @@
                     android:id="@+id/lbl4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#8A8A8A"
+                    android:textColor="#E6FFFFFF"
                     android:textSize="11sp"
                     android:textStyle="bold" />
-                <View
+                <FrameLayout
                     android:id="@+id/dot4"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_marginTop="2dp" />
             </LinearLayout>
             <LinearLayout
@@ -158,13 +162,13 @@
                     android:id="@+id/lbl5"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#8A8A8A"
+                    android:textColor="#E6FFFFFF"
                     android:textSize="11sp"
                     android:textStyle="bold" />
-                <View
+                <FrameLayout
                     android:id="@+id/dot5"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_marginTop="2dp" />
             </LinearLayout>
             <LinearLayout
@@ -177,13 +181,13 @@
                     android:id="@+id/lbl6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#8A8A8A"
+                    android:textColor="#E6FFFFFF"
                     android:textSize="11sp"
                     android:textStyle="bold" />
-                <View
+                <FrameLayout
                     android:id="@+id/dot6"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_marginTop="2dp" />
             </LinearLayout>
         </LinearLayout>
@@ -193,7 +197,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textColor="#049FD9"
+            android:textColor="#FFFFFF"
             android:textSize="12sp"
             android:textStyle="bold" />
     </LinearLayout>

@@ -19,6 +19,15 @@ object DuckData {
         "love", "sleeping", "angry", "shy", "shocked", "determined", "worried"
     )
 
+    // Tham chiếu tĩnh để trình rút gọn tài nguyên (shrinkResources) KHÔNG xóa ảnh vịt
+    private val FACE_RES = intArrayOf(
+        R.drawable.duck_mood_surprised, R.drawable.duck_mood_dizzy, R.drawable.duck_mood_happy,
+        R.drawable.duck_mood_crying, R.drawable.duck_mood_bored, R.drawable.duck_mood_cool,
+        R.drawable.duck_mood_cheer, R.drawable.duck_mood_confused, R.drawable.duck_mood_love,
+        R.drawable.duck_mood_sleeping, R.drawable.duck_mood_angry, R.drawable.duck_mood_shy,
+        R.drawable.duck_mood_shocked, R.drawable.duck_mood_determined, R.drawable.duck_mood_worried
+    )
+
     fun sp(ctx: Context): SharedPreferences = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
     fun vi(): Boolean = Locale.getDefault().language == "vi"
@@ -71,8 +80,11 @@ object DuckData {
         return FACES[idx]
     }
 
-    fun duckRes(ctx: Context): Int =
-        ctx.resources.getIdentifier("duck_mood_" + faceName(), "drawable", ctx.packageName)
+    @Suppress("UNUSED_PARAMETER")
+    fun duckRes(ctx: Context): Int {
+        val i = FACES.indexOf(faceName())
+        return if (i >= 0) FACE_RES[i] else 0
+    }
 
     /** Số ngày chuỗi đang hiển thị: tính cả Streak Freeze, quá hạn thì về 0. */
     fun streakShown(ctx: Context): Int {

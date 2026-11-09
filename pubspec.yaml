@@ -29,6 +29,8 @@ flutter:
     - assets/icons/
     - assets/mascot/
     - assets/mascot/moods/
+    - assets/courses/encor/
+    - assets/courses/ccba/
   fonts:
     - family: Nunito
       fonts:

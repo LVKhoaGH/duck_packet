@@ -373,7 +373,7 @@ class _AiSheetState extends ConsumerState<AiSheet> {
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink)),
       const SizedBox(height: 8),
       DropdownButtonFormField<String>(
-        value: _prov,
+        initialValue: _prov,
         decoration: InputDecoration(
           labelText: _t('Provider', 'Nhà cung cấp'),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

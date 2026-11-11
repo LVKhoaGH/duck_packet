@@ -67,7 +67,7 @@ class _PulseRingState extends State<PulseRing> with SingleTickerProviderStateMix
                 right: -d,
                 bottom: -d,
                 child: DecoratedBox(
-                    decoration: BoxDecoration(shape: BoxShape.circle, color: widget.color.withOpacity(0.35 * (1 - t)))),
+                    decoration: BoxDecoration(shape: BoxShape.circle, color: widget.color.withValues(alpha: 0.35 * (1 - t)))),
               ),
               Positioned.fill(child: child!),
             ]);
@@ -126,7 +126,7 @@ class _ConfettiPainter extends CustomPainter {
       if (local <= 0) continue;
       final y = -20 + local * (size.height + 40) * p.speed;
       final x = p.x * size.width + sin(local * 8 + p.rot) * p.drift;
-      final paint = Paint()..color = p.color.withOpacity((1 - local * local).clamp(0.0, 1.0));
+      final paint = Paint()..color = p.color.withValues(alpha: (1 - local * local).clamp(0.0, 1.0));
       canvas.save();
       canvas.translate(x, y);
       canvas.rotate(local * 10 + p.rot);
@@ -161,7 +161,7 @@ class StatPill extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         margin: const EdgeInsets.only(left: 6),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(20)),
+        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(20)),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           SvgIcon(icon, size: 20),
           const SizedBox(width: 4),
@@ -299,7 +299,7 @@ class ProgressBar3D extends StatelessWidget {
 
 Route<T> slideUpRoute<T>(Widget page) => PageRouteBuilder<T>(
       transitionDuration: const Duration(milliseconds: 350),
-      pageBuilder: (_, __, ___) => page,
+      pageBuilder: (_, __, ___) => _Narrow(page),
       transitionsBuilder: (_, a, __, child) {
         final c = CurvedAnimation(parent: a, curve: Curves.easeOutCubic);
         return SlideTransition(
@@ -308,6 +308,21 @@ Route<T> slideUpRoute<T>(Widget page) => PageRouteBuilder<T>(
         );
       },
     );
+
+/// Pushed screens keep a phone-like width (max 720 px) on laptops; the sides get the page background colour.
+class _Narrow extends StatelessWidget {
+  final Widget child;
+  const _Narrow(this.child);
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, c) => c.maxWidth <= 720
+            ? child
+            : ColoredBox(
+                color: const Color(0xFFE9EDF1),
+                child: Align(alignment: Alignment.topCenter, child: SizedBox(width: 720, child: child)),
+              ),
+      );
+}
 
 /// Word-bank style chip.
 Widget duoChip(String t, {bool mono = false, bool ghost = false}) => Container(

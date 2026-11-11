@@ -573,8 +573,8 @@ class DuckPainter extends CustomPainter {
         canvas.drawLine(const Offset(96, 64), const Offset(104, 64), _hs(_ink, 3.5));
         break;
       case 'shades':
-        final rl = RRect.fromRectAndRadius(Rect.fromLTWH(66, 55, 32, 22), const Radius.circular(8));
-        final rr = RRect.fromRectAndRadius(Rect.fromLTWH(102, 55, 32, 22), const Radius.circular(8));
+        final rl = RRect.fromRectAndRadius(const Rect.fromLTWH(66, 55, 32, 22), const Radius.circular(8));
+        final rr = RRect.fromRectAndRadius(const Rect.fromLTWH(102, 55, 32, 22), const Radius.circular(8));
         canvas.drawRRect(rl, _fill(const Color(0xFF212121)));
         canvas.drawRRect(rr, _fill(const Color(0xFF212121)));
         canvas.drawLine(const Offset(98, 62), const Offset(102, 62), _hs(const Color(0xFF212121), 4));
@@ -1009,7 +1009,7 @@ class _DuckScreenState extends ConsumerState<DuckScreen> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: duoCard(border: AppColors.line, fill: AppColors.tint, radius: 24),
-              child: Center(child: DuckView(size: 180, mood: DuckMood.happy)),
+              child: const Center(child: DuckView(size: 180, mood: DuckMood.happy)),
             ),
           ),
           const SizedBox(height: 12),

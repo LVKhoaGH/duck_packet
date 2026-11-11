@@ -253,7 +253,7 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(color: Colors.black.withOpacity(0.15), borderRadius: BorderRadius.circular(12)),
+                      decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         const Text('Correct solution:',
                             style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w700, fontSize: 13)),
@@ -730,7 +730,7 @@ class _MatchQuestionState extends State<MatchQuestion> {
 
   Widget _pill(String text, Color? paired, bool selected, VoidCallback onTap) {
     final deco = paired != null
-        ? duoCard(border: paired, fill: paired.withOpacity(0.15))
+        ? duoCard(border: paired, fill: paired.withValues(alpha: 0.15))
         : selected
             ? duoCard(border: AppColors.primary, fill: AppColors.tint, shadow: AppColors.primaryShadow)
             : duoCard();
@@ -828,7 +828,7 @@ class _FillCodeQuestionState extends State<FillCodeQuestion> {
           duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
-            color: cand.isNotEmpty ? AppColors.primary.withOpacity(0.35) : (selected == null ? Colors.white12 : AppColors.primary.withOpacity(0.25)),
+            color: cand.isNotEmpty ? AppColors.primary.withValues(alpha: 0.35) : (selected == null ? Colors.white12 : AppColors.primary.withValues(alpha: 0.25)),
             borderRadius: BorderRadius.circular(6),
             border: Border.all(color: AppColors.primary, width: cand.isNotEmpty ? 2 : 1),
           ),
@@ -1046,7 +1046,7 @@ class _CategorizeQuestionState extends State<CategorizeQuestion> {
           padding: const EdgeInsets.all(12),
           constraints: const BoxConstraints(minHeight: 88),
           decoration: duoCard(
-              border: color, fill: (cand.isNotEmpty || selected != null) ? color.withOpacity(0.12) : Colors.white),
+              border: color, fill: (cand.isNotEmpty || selected != null) ? color.withValues(alpha: 0.12) : Colors.white),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(groups[g], style: TextStyle(fontWeight: FontWeight.w700, color: color, fontSize: 15)),
             const SizedBox(height: 8),

@@ -637,7 +637,7 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: _phase != 1,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (!didPop && _phase == 1) _confirmQuit();
       },
       child: Scaffold(

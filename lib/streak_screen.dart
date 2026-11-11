@@ -45,8 +45,8 @@ class _StreakScreenState extends ConsumerState<StreakScreen> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: RadialGradient(colors: [
-                        AppColors.streak.withOpacity(0.35),
-                        AppColors.streak.withOpacity(0.0),
+                        AppColors.streak.withValues(alpha: 0.35),
+                        AppColors.streak.withValues(alpha: 0.0),
                       ]),
                     ),
                   ),

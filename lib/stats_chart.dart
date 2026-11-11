@@ -98,10 +98,10 @@ class _ProgressChartCardState extends ConsumerState<ProgressChartCard> {
       padding: const EdgeInsets.all(14),
       decoration: duoCard(border: AppColors.line),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          const Icon(Icons.show_chart_rounded, color: AppColors.primary),
-          const SizedBox(width: 8),
-          const Text('Progress', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink)),
+        const Row(children: [
+          Icon(Icons.show_chart_rounded, color: AppColors.primary),
+          SizedBox(width: 8),
+          Text('Progress', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink)),
         ]),
         const SizedBox(height: 10),
         Row(children: [

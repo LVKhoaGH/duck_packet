@@ -48,12 +48,12 @@ class _LearnTabState extends ConsumerState<LearnTab> {
               Text(done ? 'All lessons read!' : 'Continue learning',
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: col)),
               const SizedBox(height: 2),
-              Text(done ? 'Time to fight the monsters' : (next?.title ?? ''),
+              Text(done ? 'Time to fight the monsters' : next.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.ink)),
               if (!done)
-                Text('${next?.lesson.length ?? 0} cards',
+                Text('${next.lesson.length} cards',
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
             ]),
           ),
@@ -66,7 +66,7 @@ class _LearnTabState extends ConsumerState<LearnTab> {
           onPressed: done
               ? widget.onGoMap
               : () {
-                  if (next != null) _openLesson(c, next);
+                  _openLesson(c, next);
                 },
         ),
       ]),
@@ -481,8 +481,8 @@ class _CardView extends StatelessWidget {
           ),
         ]),
         if (i < steps.length - 1)
-          Padding(
-            padding: const EdgeInsets.only(left: 6, top: 2, bottom: 2),
+          const Padding(
+            padding: EdgeInsets.only(left: 6, top: 2, bottom: 2),
             child: Icon(Icons.arrow_downward_rounded, size: 16, color: AppColors.locked),
           ),
       ],
@@ -505,13 +505,13 @@ class _CardView extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(border: Border.all(color: AppColors.line, width: 2), borderRadius: BorderRadius.circular(14)),
         child: Table(
-          border: TableBorder.symmetric(inside: const BorderSide(color: AppColors.line, width: 2)),
+          border: const TableBorder.symmetric(inside: BorderSide(color: AppColors.line, width: 2)),
           defaultColumnWidth: const FlexColumnWidth(1.3),
           columnWidths: const {0: FlexColumnWidth(1.0)},
           children: [
             if (headers.isNotEmpty)
               TableRow(
-                decoration: BoxDecoration(color: color.withOpacity(0.14)),
+                decoration: BoxDecoration(color: color.withValues(alpha: 0.14)),
                 children: [for (final h in pad(headers)) cell(h, bold: true)],
               ),
             for (final r in rows)
@@ -536,7 +536,7 @@ class _CardView extends StatelessWidget {
           width: double.infinity,
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(color: c.withOpacity(0.12), borderRadius: BorderRadius.circular(14)),
+          decoration: BoxDecoration(color: c.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(14)),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Icon(card.type == 'tip' ? Icons.lightbulb_rounded : Icons.warning_amber_rounded, color: c),
             const SizedBox(width: 10),

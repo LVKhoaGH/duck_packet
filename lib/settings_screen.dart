@@ -23,7 +23,7 @@ class SettingsScreen extends ConsumerWidget {
           Icon(icon, color: AppColors.primary),
           const SizedBox(width: 12),
           Expanded(child: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink))),
-          Switch(value: v, activeColor: Colors.white, activeTrackColor: AppColors.success, onChanged: on),
+          Switch(value: v, activeThumbColor: Colors.white, activeTrackColor: AppColors.success, onChanged: on),
         ]),
       );
 

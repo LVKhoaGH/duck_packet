@@ -68,7 +68,7 @@ class PracticeTab extends ConsumerWidget {
           onTap: on
               ? () {
                   Sfx.play('tap');
-                  onTap!();
+                  onTap();
                 }
               : null,
           child: Container(
@@ -101,10 +101,10 @@ class PracticeTab extends ConsumerWidget {
     }
 
     return ListView(padding: const EdgeInsets.fromLTRB(16, 16, 16, 32), children: [
-      Row(children: [
-        const DuckView(size: 58),
-        const SizedBox(width: 12),
-        const Expanded(child: Text('Practice', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.ink))),
+      const Row(children: [
+        DuckView(size: 58),
+        SizedBox(width: 12),
+        Expanded(child: Text('Practice', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.ink))),
       ]),
       const SizedBox(height: 14),
 
@@ -184,7 +184,7 @@ class PracticeTab extends ConsumerWidget {
                     Container(
                       margin: const EdgeInsets.only(right: 8),
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(color: AppColors.error.withOpacity(0.12), borderRadius: BorderRadius.circular(10)),
+                      decoration: BoxDecoration(color: AppColors.error.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
                       child: const Text('WEAKEST', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.error, letterSpacing: 0.6)),
                     ),
                   Text('${(d.mastery(study.recs) * 100).round()}%',

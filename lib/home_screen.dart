@@ -709,7 +709,7 @@ class _UnitHeader extends SliverPersistentHeaderDelegate {
                 width: 46,
                 height: 46,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.18),
+                  color: Colors.white.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: Colors.white54, width: 2),
                 ),
@@ -837,7 +837,7 @@ class _NodeButtonState extends State<_NodeButton> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           decoration: BoxDecoration(
-            color: (w.pct! >= kBossPass ? AppColors.success : AppColors.streak).withOpacity(0.15),
+            color: (w.pct! >= kBossPass ? AppColors.success : AppColors.streak).withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Text('Best ${w.pct}%',
@@ -861,7 +861,7 @@ class _Connector extends StatelessWidget {
         width: double.infinity,
         height: 40,
         child: CustomPaint(
-          painter: _ConnectorPainter(fromDx, toDx, active ? AppColors.success.withOpacity(0.55) : AppColors.line),
+          painter: _ConnectorPainter(fromDx, toDx, active ? AppColors.success.withValues(alpha: 0.55) : AppColors.line),
         ),
       );
 }

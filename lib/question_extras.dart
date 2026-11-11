@@ -8,7 +8,6 @@ import 'i18n.dart' show tr;
 import 'models.dart';
 import 'sfx.dart';
 import 'theme.dart';
-import 'widgets.dart';
 
 const TextStyle _mono = TextStyle(fontFamily: 'JetBrainsMono', fontSize: 13, height: 1.45, color: Color(0xFF4DFF9A));
 

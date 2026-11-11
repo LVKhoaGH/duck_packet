@@ -45,7 +45,7 @@ class LibraryScreen extends ConsumerWidget {
                   width: double.infinity,
                   margin: const EdgeInsets.only(bottom: 8),
                   padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(color: AppColors.error.withOpacity(0.08), borderRadius: BorderRadius.circular(10)),
+                  decoration: BoxDecoration(color: AppColors.error.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(10)),
                   child: SelectableText(f, style: const TextStyle(color: AppColors.error, fontSize: 13, height: 1.35)),
                 ),
               if (r.ok.isEmpty && r.failed.isEmpty) const Text('Nothing was imported.'),
@@ -236,7 +236,7 @@ class LibraryScreen extends ConsumerWidget {
           ),
           Switch(
             value: on,
-            activeColor: Colors.white,
+            activeThumbColor: Colors.white,
             activeTrackColor: AppColors.success,
             onChanged: (_) {
               Sfx.play('tap');
@@ -331,7 +331,7 @@ class LibraryScreen extends ConsumerWidget {
                   ),
                   Switch(
                     value: allOn,
-                    activeColor: Colors.white,
+                    activeThumbColor: Colors.white,
                     activeTrackColor: AppColors.success,
                     onChanged: inside.isEmpty
                         ? null

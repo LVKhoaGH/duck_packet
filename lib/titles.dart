@@ -60,7 +60,7 @@ class TitlesScreen extends ConsumerWidget {
             child: ListView(padding: const EdgeInsets.fromLTRB(16, 8, 16, 32), children: [
               Container(
                 padding: const EdgeInsets.all(16),
-                decoration: duoCard(border: t.color, fill: t.color.withOpacity(0.08)),
+                decoration: duoCard(border: t.color, fill: t.color.withValues(alpha: 0.08)),
                 child: Column(children: [
                   Icon(t.icon, size: 54, color: t.color),
                   const SizedBox(height: 6),

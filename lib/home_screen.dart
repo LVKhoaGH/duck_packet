@@ -15,6 +15,7 @@ import 'learn_tab.dart';
 import 'models.dart';
 import 'practice_tab.dart';
 import 'providers.dart';
+import 'reminders.dart';
 import 'sfx.dart';
 import 'study.dart';
 import 'tabs.dart';
@@ -40,6 +41,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     ref.listenManual(statsProvider, (prev, next) => syncHomeWidget(ref));
+    ref.listenManual(statsProvider, (prev, next) => ref.read(reminderProvider.notifier).sync());
+    WidgetsBinding.instance.addPostFrameCallback((_) => ref.read(reminderProvider.notifier).sync());
     ref.listenManual(studyProvider, (prev, next) => syncHomeWidget(ref));
     ref.listenManual(courseProvider, (prev, next) => syncHomeWidget(ref));
     WidgetsBinding.instance.addPostFrameCallback((_) => syncHomeWidget(ref));
@@ -421,7 +424,10 @@ class _MapViewState extends ConsumerState<_MapView> {
       Navigator.push(context, slideUpRoute(GameSessionScreen(node: node)));
 
   void _openBoss(BuildContext context, Chapter ch) {
-    final pool = <Question>[for (final n in ch.nodes) ...n.questions]..shuffle();
+    // Boss không bốc câu lab (lab cần terminal, không hợp với nhịp 10 câu nhanh).
+    final all = <Question>[for (final n in ch.nodes) ...n.questions];
+    final noLab = all.where((q) => q.type != 'lab').toList();
+    final pool = (noLab.isNotEmpty ? noLab : all)..shuffle();
     if (pool.isEmpty) {
       _snack(context, 'This chapter has no questions yet');
       return;

@@ -1,12 +1,22 @@
-DuckPacket v9 - Sua AI tren Android + build Windows portable (giai nen de len duck_packet/)
+DuckPacket v10b + v10c  (giải nén đè vào duck_packet/, CHƯA biên dịch)
 
-FILE:
- android/app/src/main/AndroidManifest.xml   (DE) them quyen INTERNET
- .github/workflows/build-windows.yml        (MOI) build exe portable tren GitHub Actions
+SAU KHI ĐÈ: chạy `flutter pub get` (có thêm 2 package), rồi dừng hẳn app và chạy lại.
 
-1) Android khong goi duoc AI: ban release khong co quyen INTERNET trong manifest chinh
-   (chi ban debug tu co), nen "Failed host lookup". Web khong bi. Da them
-   <uses-permission android:name="android.permission.INTERNET"/>. Build APK lai va cai de.
-2) Windows portable: Actions > "Build Windows portable" > artifact duckpacket-windows
-   (DuckPacket-windows.zip). Giai nen ra thu muc bat ky, chay duckpacket.exe. Khong can cai dat/quyen admin.
-   Du lieu nam trong Documents cua user. Chua bien dich.
+FILE MỚI
+  lib/quests.dart, lib/quests_screen.dart, lib/i18n_vi_meta.dart     nhiệm vụ ngày, huy hiệu, thưởng bất ngờ
+  lib/reminders.dart                                                 nhắc học (logic + lịch)
+  lib/reminder_backend_web.dart                                      thông báo trình duyệt
+  lib/reminder_backend_native.dart                                   Android / iOS (hẹn giờ thật), Windows (toast PowerShell)
+  .github/workflows/build-ios.yml                                    build .ipa chưa ký
+
+FILE ĐÈ
+  lib/game_session_screen.dart, lib/tabs.dart, lib/bag.dart, lib/i18n.dart
+  lib/settings_screen.dart    thêm mục "Study reminders"
+  lib/home_screen.dart        boss không bốc lab + đồng bộ nhắc học
+  lib/ai_service.dart         che API key trong lỗi
+  pubspec.yaml                + flutter_local_notifications ^19.0.0, timezone ^0.10.0
+  android/app/src/main/AndroidManifest.xml    quyền thông báo + receiver
+  android/app/build.gradle.kts                bật desugaring (plugin thông báo cần)
+
+XÓA
+  test/widget_test.dart   (git rm test/widget_test.dart)

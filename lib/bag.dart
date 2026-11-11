@@ -65,6 +65,23 @@ class BagNotifier extends Notifier<BagState> {
     return 2;
   }
 
+  /// Adds one item (surprise rewards, quest bonus). A full Streak Freeze slot turns into an XP x2.
+  /// Returns the item that was really added: 'freeze' | 'xp2'.
+  String give(String id) {
+    var freeze = state.freeze, xp2 = state.xp2;
+    String got;
+    if (id == 'freeze' && freeze < kMaxFreeze) {
+      freeze++;
+      got = 'freeze';
+    } else {
+      xp2++;
+      got = 'xp2';
+    }
+    state = _with(freeze: freeze, xp2: xp2);
+    _save();
+    return got;
+  }
+
   /// Opens the chest of a chapter (once). Returns null if it was already opened.
   ChestReward? openChest(String chapterId) {
     if (state.chests.contains(chapterId)) return null;

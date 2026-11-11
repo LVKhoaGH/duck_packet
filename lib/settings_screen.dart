@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'ai_chat.dart';
 import 'providers.dart' show dayKey;
+import 'reminders.dart';
 import 'widget_sync.dart';
 import 'extras.dart';
 import 'i18n.dart';
@@ -44,6 +45,51 @@ class SettingsScreen extends ConsumerWidget {
         padding: const EdgeInsets.only(top: 14, bottom: 8),
         child: Text(t, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.secondary)),
       );
+
+  void _snack(BuildContext c, String t) => ScaffoldMessenger.of(c).showSnackBar(SnackBar(content: Text(t)));
+
+  Widget _remRow(IconData icon, String title, String value, VoidCallback onTap) => PressScale(
+        onTap: onTap,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.fromLTRB(14, 14, 10, 14),
+          decoration: duoCard(border: AppColors.line),
+          child: Row(children: [
+            Icon(icon, color: AppColors.primary),
+            const SizedBox(width: 12),
+            Expanded(child: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink))),
+            if (value.isNotEmpty) Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primaryShadow)),
+            const Icon(Icons.chevron_right_rounded, color: Colors.black38),
+          ]),
+        ),
+      );
+
+  List<Widget> _reminders(BuildContext context, WidgetRef ref) {
+    final r = ref.watch(reminderProvider);
+    final rn = ref.read(reminderProvider.notifier);
+    return [
+      _head('Study reminders'),
+      _switch(Icons.notifications_active_rounded, 'Study reminders', r.enabled, (v) async {
+        final ok = await rn.setEnabled(v);
+        if (v && !ok && context.mounted) {
+          _snack(context, 'Notifications are blocked. Allow them in your browser or phone settings.');
+        }
+      }),
+      if (r.enabled) ...[
+        _remRow(Icons.schedule_rounded, 'Remind me at', TimeOfDay(hour: r.hour, minute: r.minute).format(context), () async {
+          final t = await showTimePicker(context: context, initialTime: TimeOfDay(hour: r.hour, minute: r.minute));
+          if (t != null) await rn.setMinutes(t.hour * 60 + t.minute);
+        }),
+        _switch(Icons.local_fire_department_rounded, 'Warn me before I lose my streak', r.rescue, (v) => rn.setRescue(v)),
+        _remRow(Icons.send_rounded, 'Send a test notification', '', () => rn.testNow()),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(4, 0, 4, 4),
+          child: Text('Reminders on Android and iPhone work even when the app is closed. On web and Windows the app must stay open.',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
+        ),
+      ],
+    ];
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -144,6 +190,7 @@ class SettingsScreen extends ConsumerWidget {
                   ]),
                 ),
               ),
+              ..._reminders(context, ref),
               _head('AI assistant'),
               PressScale(
                 onTap: () => showAiSheet(context),

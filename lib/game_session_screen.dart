@@ -14,6 +14,8 @@ import 'extras.dart';
 import 'history.dart';
 import 'models.dart';
 import 'providers.dart';
+import 'quests.dart';
+import 'quests_screen.dart';
 import 'sfx.dart';
 import 'streak_screen.dart';
 import 'study.dart';
@@ -40,6 +42,11 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
   bool _ready = false, _correct = false, _finished = false, _firstToday = false, _passed = false;
   int _acc = 0, _earnedXp = 0;
   bool _boosted = false;
+  final Stopwatch _sw = Stopwatch()..start();
+  final List<String> _qids = [];
+  final List<bool> _oks = [];
+  int _labsPassed = 0;
+  MetaOutcome? _meta;
 
   bool get _isBoss => widget.mode == SessionMode.boss;
   bool get _isNode => widget.mode == SessionMode.node;
@@ -119,7 +126,12 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
     final ok = _correct;
     final isRetry = (_retries[q] ?? 0) > 0;
     ref.read(studyProvider.notifier).record(qidOf(q), ok, retry: isRetry);
-    if (!isRetry) ref.read(historyProvider.notifier).addAnswer(ok);
+    if (!isRetry) {
+      ref.read(historyProvider.notifier).addAnswer(ok);
+      _qids.add(qidOf(q));
+      _oks.add(ok);
+      if (ok && q.type == 'lab') _labsPassed++;
+    }
 
     if (ok) {
       _correctCount++;
@@ -185,6 +197,22 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
     }
     ref.read(extrasProvider.notifier).addXp(_earnedXp);
     ref.read(historyProvider.notifier).addXp(_earnedXp);
+    // nhiệm vụ ngày + huy hiệu + thưởng bất ngờ
+    _meta = ref.read(metaProvider.notifier).onSessionDone(SessionResult(
+      mode: widget.mode.name,
+      total: total,
+      mistakes: min(_mistakes, total),
+      acc: _acc,
+      seconds: _sw.elapsed.inSeconds,
+      bestCombo: _bestCombo,
+      earnedXp: _earnedXp,
+      labsPassed: _labsPassed,
+      hour: DateTime.now().hour,
+      passed: _isBoss ? _passed : true,
+      bossId: widget.node.id,
+      qids: List<String>.of(_qids),
+      oks: List<bool>.of(_oks),
+    ));
     Sfx.play('success');
     Sfx.buzz(HapticFeedback.mediumImpact);
     setState(() => _finished = true);
@@ -461,7 +489,13 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
               const Spacer(),
               Button3D(
                 label: lost ? 'Back to map' : 'Continue',
-                onPressed: () {
+                onPressed: () async {
+                  final m = _meta;
+                  if (m != null && !m.isEmpty) {
+                    _meta = null;
+                    await showRewardDialogs(context, ref, m);
+                    if (!mounted) return;
+                  }
                   if (_firstToday) {
                     Navigator.pushReplacement(context, slideUpRoute(StreakScreen(streak: ref.read(statsProvider).streak)));
                   } else {

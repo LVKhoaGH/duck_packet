@@ -115,6 +115,13 @@ class AiService {
     throw AiError('${last!.message}$tried', last.status);
   }
 
+  /// Che API key khỏi mọi thông báo lỗi (URL Gemini chứa ?key=...).
+  static String _scrub(String s, String key) {
+    var r = s;
+    if (key.isNotEmpty) r = r.replaceAll(key, '***');
+    return r.replaceAll(RegExp(r'key=[^&\s)\x27"]+'), 'key=***');
+  }
+
   static String _sys(String? ctx) => ctx == null || ctx.trim().isEmpty
       ? _system
       : '$_system\n\nThe student is asking about this question from the app:\n$ctx';
@@ -160,7 +167,7 @@ class AiService {
             .timeout(_timeout);
       }
     } catch (e) {
-      throw AiError('${providerOf(k.provider).name}: no connection, timeout, or the browser blocked the request. ($e)');
+      throw AiError('${providerOf(k.provider).name}: no connection, timeout, or the browser blocked the request. (${_scrub('$e', k.key)})');
     }
 
     dynamic data;
@@ -173,7 +180,7 @@ class AiService {
       var raw = '';
       if (data is Map && data['error'] is Map) raw = ('${data['error']['message'] ?? ''}');
       if (data is Map && data['error'] is String) raw = '${data['error']}';
-      throw AiError('${providerOf(k.provider).name}: ${_hint(res.statusCode, raw)}', res.statusCode);
+      throw AiError('${providerOf(k.provider).name}: ${_hint(res.statusCode, _scrub(raw, k.key))}', res.statusCode);
     }
     String text = '';
     if (k.provider == 'gemini') {

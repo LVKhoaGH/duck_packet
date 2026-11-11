@@ -12,6 +12,8 @@ import 'stats_chart.dart';
 import 'titles.dart';
 import 'models.dart';
 import 'providers.dart';
+import 'quests.dart';
+import 'quests_screen.dart';
 import 'sfx.dart';
 import 'study.dart';
 import 'theme.dart';
@@ -109,6 +111,7 @@ class ProfileTab extends ConsumerWidget {
       ref.read(studyProvider.notifier).reset();
       ref.read(historyProvider.notifier).reset();
       ref.read(bagProvider.notifier).reset();
+      ref.read(metaProvider.notifier).reset();
       ref.read(duckProvider.notifier).reset();
       ref.read(duckMuscleProvider.notifier).reset();
     }
@@ -126,6 +129,9 @@ class ProfileTab extends ConsumerWidget {
     final pct = stages.isEmpty ? 0 : (cleared * 100 / stages.length).round();
 
     final bag = ref.watch(bagProvider);
+    final meta = ref.watch(metaProvider);
+    final claimable = questsClaimable(meta);
+    final badgesGot = kAch.where((a) => meta.ach.containsKey(a.id)).length;
     final title = titleFor(stats.xp);
     final duck = ref.watch(duckProvider);
     final duckGot = duck.owned.where((e) => e != 'white').length;
@@ -241,6 +247,15 @@ class ProfileTab extends ConsumerWidget {
             () => Navigator.push(context, slideUpRoute(const TitlesScreen()))),
         const SizedBox(width: 10),
         _tile(Icons.checkroom_rounded, AppColors.secondary, 'Wardrobe', '$duckGot unlocked', openDuck),
+      ]),
+      const SizedBox(height: 10),
+      Row(children: [
+        _tile(Icons.task_alt_rounded, AppColors.success, 'Quests',
+            claimable > 0 ? 'Claim reward!' : '${questsDoneCount(meta)}/3 done',
+            () => Navigator.push(context, slideUpRoute(const QuestsScreen()))),
+        const SizedBox(width: 10),
+        _tile(Icons.military_tech_rounded, AppColors.error, 'Badges', '$badgesGot/${kAch.length} unlocked',
+            () => Navigator.push(context, slideUpRoute(const BadgesScreen()))),
       ]),
       const SizedBox(height: 14),
       const _Fold(title: 'Progress chart', child: ProgressChartCard()),

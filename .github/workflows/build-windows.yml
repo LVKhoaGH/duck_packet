@@ -30,7 +30,11 @@ jobs:
 
       - run: flutter pub get
 
-      - run: flutter build windows --release
+      # Plugin thông báo Windows dùng <experimental/coroutine>: MSVC mới coi là lỗi nếu không tắt cảnh báo này.
+      - name: Build Windows
+        env:
+          CL: /D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS
+        run: flutter build windows --release
 
       - name: Make the portable zip (bundles the VC++ runtime DLLs)
         shell: pwsh

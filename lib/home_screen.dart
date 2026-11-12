@@ -407,7 +407,7 @@ class _MapViewState extends ConsumerState<_MapView> {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: const [BoxShadow(color: AppColors.primaryShadow, offset: Offset(0, 4))],
               ),
-              child: Row(mainAxisSize: MainAxisSize.min, children: const [
+              child: const Row(mainAxisSize: MainAxisSize.min, children: [
                 Icon(Icons.my_location_rounded, color: Colors.white, size: 20),
                 SizedBox(width: 8),
                 Text('Current stage', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
@@ -478,7 +478,7 @@ class _MapViewState extends ConsumerState<_MapView> {
                 leading: Icon(done.contains(bossId(ch)) ? Icons.emoji_events_rounded : Icons.whatshot_rounded,
                     color: done.contains(bossId(ch)) ? AppColors.streak : AppColors.error),
                 title: const Text('Boss', style: TextStyle(fontWeight: FontWeight.w700)),
-                subtitle: Text('10 mixed questions · need $kBossPass%'),
+                subtitle: const Text('10 mixed questions · need $kBossPass%'),
                 trailing: best[bossId(ch)] == null
                     ? null
                     : Text('${best[bossId(ch)]}%', style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.success)),

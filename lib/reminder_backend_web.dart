@@ -1,6 +1,6 @@
 // reminder_backend_web.dart  (FILE MỚI)  Thông báo trên web: Notification API của trình duyệt.
 // Chỉ hiện khi tab DuckPacket còn mở và bạn đã cho phép thông báo.
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 
 class ReminderBackend {

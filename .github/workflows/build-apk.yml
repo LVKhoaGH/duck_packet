@@ -45,7 +45,7 @@ jobs:
       - name: Build APK
         run: |
           for i in 1 2 3; do
-            flutter build apk --release && exit 0
+            flutter build apk --release --android-skip-build-dependency-validation && exit 0
             echo "Build failed (attempt $i), retrying in 40s..."
             sleep 40
           done

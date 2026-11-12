@@ -197,13 +197,13 @@ class SettingsScreen extends ConsumerWidget {
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(14, 14, 10, 14),
                   decoration: duoCard(border: AppColors.line),
-                  child: Row(children: [
-                    const Icon(Icons.auto_awesome_rounded, color: AppColors.primary),
-                    const SizedBox(width: 12),
-                    const Expanded(
+                  child: const Row(children: [
+                    Icon(Icons.auto_awesome_rounded, color: AppColors.primary),
+                    SizedBox(width: 12),
+                    Expanded(
                         child: Text('Gemini API key & chat',
                             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink))),
-                    const Icon(Icons.chevron_right_rounded, color: Colors.black38),
+                    Icon(Icons.chevron_right_rounded, color: Colors.black38),
                   ]),
                 ),
               ),

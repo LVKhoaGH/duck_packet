@@ -102,7 +102,7 @@ const List<AchDef> kAch = [
   AchDef('fast_10', 'speed', Icons.speed_rounded, AppColors.error, 'fast', 10, 80, 'Speed Demon', 'Quỷ Tốc Độ', 'Do that 10 times', 'Làm được điều đó 10 lần'),
   AchDef('fast_50', 'speed', Icons.hourglass_bottom_rounded, _purple, 'fast', 50, 150, 'Time Lord', 'Chúa Tể Thời Gian', 'Do that 50 times', 'Làm được điều đó 50 lần'),
   // Grit
-  AchDef('stubborn_3', 'grit', Icons.sentiment_neutral_rounded, AppColors.lockedShadow, 'wrongMax', 3, 15, 'Stubborn', 'Cứng Đầu', 'Get the same question wrong 3 times', 'Sai cùng một câu 3 lần'),
+  AchDef('stubborn_3', 'grit', Icons.sentiment_neutral_rounded, Color(0xFF9AA5B1), 'wrongMax', 3, 15, 'Stubborn', 'Cứng Đầu', 'Get the same question wrong 3 times', 'Sai cùng một câu 3 lần'),
   AchDef('stubborn_5', 'grit', Icons.sentiment_dissatisfied_rounded, AppColors.streak, 'wrongMax', 5, 25, 'Hard Head', 'Đầu Đá', 'Get the same question wrong 5 times', 'Sai cùng một câu 5 lần'),
   AchDef('stubborn_10', 'grit', Icons.sentiment_very_dissatisfied_rounded, AppColors.error, 'wrongMax', 10, 50, 'Never Give Up', 'Không Bỏ Cuộc', 'Get the same question wrong 10 times and keep trying', 'Sai cùng một câu 10 lần mà vẫn tiếp tục'),
   AchDef('phoenix', 'grit', Icons.cached_rounded, AppColors.error, 'phoenix', 1, 40, 'Phoenix', 'Phượng Hoàng', 'Answer correctly a question you got wrong 3+ times before', 'Trả lời đúng một câu từng sai 3 lần trở lên'),

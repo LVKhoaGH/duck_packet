@@ -288,7 +288,7 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
   // ───────────────────────── setup ─────────────────────────
   Widget _sec(String t) => Padding(
         padding: const EdgeInsets.only(top: 18, bottom: 8),
-        child: Text(t, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink)),
+        child: Text(t, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink)),
       );
 
   Widget _setup() {
@@ -300,19 +300,19 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
     return SafeArea(
       child: ListView(padding: const EdgeInsets.fromLTRB(20, 4, 20, 24), children: [
         Row(children: [
-          IconButton(icon: const Icon(Icons.close_rounded, size: 30, color: Color(0xFFAFAFAF)), onPressed: () => Navigator.pop(context)),
+          IconButton(icon: Icon(Icons.close_rounded, size: 30, color: AppColors.icon), onPressed: () => Navigator.pop(context)),
         ]),
         const Center(child: DuckView(size: 110)),
         const SizedBox(height: 8),
-        const Center(child: Text('Mock exam', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.ink))),
+        Center(child: Text('Mock exam', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.ink))),
         const SizedBox(height: 6),
-        const Center(
+        Center(
           child: Text('Timed, no answers until the end.',
-              textAlign: TextAlign.center, style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w700)),
+              textAlign: TextAlign.center, style: TextStyle(color: AppColors.mid, fontWeight: FontWeight.w700)),
         ),
         if (avail == 0) ...[
           const SizedBox(height: 20),
-          const Center(child: Text('Import a course with questions first.', style: TextStyle(color: Colors.black45, fontWeight: FontWeight.w700))),
+          Center(child: Text('Import a course with questions first.', style: TextStyle(color: AppColors.sub, fontWeight: FontWeight.w700))),
         ] else ...[
           _sec('Scope'),
           Wrap(spacing: 8, runSpacing: 4, children: [
@@ -358,7 +358,7 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
               Row(children: [
                 const Icon(Icons.quiz_rounded, color: AppColors.primary),
                 const SizedBox(width: 10),
-                Expanded(child: Text('$_size of $_poolSize available', style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink))),
+                Expanded(child: Text('$_size of $_poolSize available', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink))),
               ]),
               if (mx > mn)
                 Slider(
@@ -395,7 +395,7 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
               Row(children: [
                 const Icon(Icons.timer_rounded, color: AppColors.primary),
                 const SizedBox(width: 10),
-                const Expanded(child: Text('Timer', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink))),
+                Expanded(child: Text('Timer', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink))),
                 Switch(value: _timed, onChanged: (v) => setState(() => _timed = v)),
               ]),
               if (_timed)
@@ -411,7 +411,7 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
                   ),
                   Expanded(
                     child: Center(
-                      child: Text('$_min min', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                      child: Text('$_min min', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink)),
                     ),
                   ),
                   IconButton(
@@ -438,10 +438,10 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
               _graded
                   ? 'Full exam follows the real domain weights. Pass mark: ${_pf.pass}%. You cannot go back to a question.'
                   : 'Practice mode: only this scope, no pass mark. You cannot go back to a question.',
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.faint)),
           const SizedBox(height: 4),
-          const Text('Mock exams give no XP and do not touch your streak.',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
+          Text('Mock exams give no XP and do not touch your streak.',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.faint)),
           const SizedBox(height: 20),
         ],
         Button3D(label: 'Start exam', onPressed: avail == 0 || _poolSize == 0 ? null : _start),
@@ -460,14 +460,14 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
         Padding(
           padding: const EdgeInsets.fromLTRB(8, 10, 16, 6),
           child: Row(children: [
-            IconButton(icon: const Icon(Icons.close_rounded, size: 30, color: Color(0xFFAFAFAF)), onPressed: _confirmQuit),
+            IconButton(icon: Icon(Icons.close_rounded, size: 30, color: AppColors.icon), onPressed: _confirmQuit),
             Expanded(child: ProgressBar3D(_i / _items.length, track: AppColors.line)),
             if (_timed) ...[
             const SizedBox(width: 10),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: low ? const Color(0xFFFFE5E6) : AppColors.tint,
+                color: low ? AppColors.errorTint : AppColors.tint,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -487,15 +487,15 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
               key: ValueKey(_i),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text('Question ${_i + 1} of ${_items.length}',
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.black38)),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.faint)),
                 const SizedBox(height: 4),
-                Text(_instruction(q), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                Text(_instruction(q), style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink)),
                 const SizedBox(height: 14),
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
                   decoration: duoCard(border: AppColors.line, shadow: Colors.transparent),
-                  child: Text(q.prompt, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                  child: Text(q.prompt, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink)),
                 ),
                 const SizedBox(height: 22),
                 if (q.type == 'reorder')
@@ -526,7 +526,7 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
         ),
         Container(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-          decoration: const BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: AppColors.line, width: 2))),
+          decoration: BoxDecoration(color: AppColors.surface, border: Border(top: BorderSide(color: AppColors.line, width: 2))),
           child: Row(children: [
             SizedBox(
               width: 110,
@@ -570,13 +570,13 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: pass ? AppColors.success : AppColors.error)),
           ),
           const SizedBox(height: 4),
-          Center(child: Text('$_pct%', style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w700, color: AppColors.ink))),
+          Center(child: Text('$_pct%', style: TextStyle(fontSize: 48, fontWeight: FontWeight.w700, color: AppColors.ink))),
           Center(
             child: Text(_graded ? '$_correctCount / ${_items.length} correct  ·  pass mark ${_pf.pass}%' : '$_correctCount / ${_items.length} correct',
-                style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.black45)),
+                style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.sub)),
           ),
           const SizedBox(height: 22),
-          const Text('By domain', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink)),
+          Text('By domain', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink)),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(14),
@@ -591,8 +591,8 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 6),
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Row(children: [
-                        Expanded(child: Text(e.key, style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink))),
-                        Text('${(v * 100).round()}%  ($c/$t)', style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.black45)),
+                        Expanded(child: Text(e.key, style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink))),
+                        Text('${(v * 100).round()}%  ($c/$t)', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.sub)),
                       ]),
                       const SizedBox(height: 6),
                       ProgressBar3D(v, track: AppColors.line, fill: v * 100 >= _pf.pass ? AppColors.success : AppColors.error),
@@ -603,7 +603,7 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
           ),
           if (wrong.isNotEmpty) ...[
             const SizedBox(height: 22),
-            Text('Review mistakes (${wrong.length})', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink)),
+            Text('Review mistakes (${wrong.length})', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink)),
             const SizedBox(height: 8),
             for (final it in wrong)
               Padding(
@@ -613,14 +613,14 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
                   padding: const EdgeInsets.all(14),
                   decoration: duoCard(border: AppColors.error, shadow: AppColors.errorShadow),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(it.domain, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
+                    Text(it.domain, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.faint)),
                     const SizedBox(height: 4),
-                    Text(it.q.prompt, style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink)),
+                    Text(it.q.prompt, style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink)),
                     const SizedBox(height: 8),
                     const Text('Correct solution:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.success)),
-                    Text(_answerText(it.q), style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink)),
+                    Text(_answerText(it.q), style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink)),
                     const SizedBox(height: 6),
-                    Text(it.q.explanation, style: const TextStyle(color: Colors.black54, height: 1.4)),
+                    Text(it.q.explanation, style: TextStyle(color: AppColors.mid, height: 1.4)),
                   ]),
                 ),
               ),
@@ -641,7 +641,7 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
         if (!didPop && _phase == 1) _confirmQuit();
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         body: _phase == 0 ? _setup() : (_phase == 1 ? _run() : _result()),
       ),
     );

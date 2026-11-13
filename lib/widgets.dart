@@ -229,7 +229,7 @@ class _MascotTipState extends State<MascotTip> {
                       constraints: const BoxConstraints(maxWidth: 220),
                       padding: const EdgeInsets.all(10),
                       decoration: duoCard(border: AppColors.primary, shadow: AppColors.primaryShadow, radius: 14),
-                      child: Text(_tip!, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.ink)),
+                      child: Text(_tip!, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.ink)),
                     ),
             ),
           ),
@@ -318,7 +318,7 @@ class _Narrow extends StatelessWidget {
         builder: (context, c) => c.maxWidth <= 720
             ? child
             : ColoredBox(
-                color: const Color(0xFFE9EDF1),
+                color: AppColors.outer,
                 child: Align(alignment: Alignment.topCenter, child: SizedBox(width: 720, child: child)),
               ),
       );
@@ -353,7 +353,7 @@ class WeekRow extends StatelessWidget {
           final done = days.contains(k);
           final today = k == todayKey;
           return Column(children: [
-            Text(labels[i], style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.black45)),
+            Text(labels[i], style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.sub)),
             const SizedBox(height: 6),
             Container(
               width: 34,
@@ -382,9 +382,9 @@ Future<bool?> showQuitSheet(BuildContext context) => showModalBottomSheet<bool>(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             const DuckView(size: 100, mood: DuckMood.confused),
             const SizedBox(height: 12),
-            const Text("Wait, don't go!", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink)),
+            Text("Wait, don't go!", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink)),
             const SizedBox(height: 6),
-            const Text("You'll lose your progress on this lesson.", style: TextStyle(color: Colors.black54)),
+            Text("You'll lose your progress on this lesson.", style: TextStyle(color: AppColors.mid)),
             const SizedBox(height: 20),
             Button3D(label: 'Keep learning', onPressed: () => Navigator.pop(ctx, false)),
             const SizedBox(height: 6),

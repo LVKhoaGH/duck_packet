@@ -110,7 +110,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (!wide) {
         // Phone / portrait: top bar, swipeable tabs, bottom navigation.
         return Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.surface,
           body: Stack(fit: StackFit.expand, children: [
             SafeArea(
               bottom: false,
@@ -126,7 +126,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
       // Laptop / landscape: side rail on the left, content centred (max 760 px).
       return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         body: Stack(fit: StackFit.expand, children: [
           SafeArea(
           child: Row(children: [
@@ -169,7 +169,7 @@ class _SideNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 200,
-      color: Colors.white,
+      color: AppColors.surface,
       padding: const EdgeInsets.fromLTRB(12, 18, 12, 12),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         const Padding(
@@ -245,7 +245,7 @@ class _TopBar extends ConsumerWidget {
     return Container(
       height: 58,
       padding: const EdgeInsets.symmetric(horizontal: 14),
-      decoration: const BoxDecoration(color: Colors.white, border: Border(bottom: BorderSide(color: AppColors.line, width: 2))),
+      decoration: BoxDecoration(color: AppColors.surface, border: Border(bottom: BorderSide(color: AppColors.line, width: 2))),
       child: Row(children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -256,7 +256,7 @@ class _TopBar extends ConsumerWidget {
         if (bag.boost > 0) ...[
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(color: const Color(0xFFFFF3D6), borderRadius: BorderRadius.circular(10)),
+            decoration: BoxDecoration(color: AppColors.streakTint, borderRadius: BorderRadius.circular(10)),
             child: Text('x2 · ${bag.boost}', style: const TextStyle(color: AppColors.streakShadow, fontWeight: FontWeight.w700, fontSize: 12)),
           ),
           const SizedBox(width: 10),
@@ -281,7 +281,7 @@ class _BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        decoration: const BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: AppColors.line, width: 2))),
+        decoration: BoxDecoration(color: AppColors.surface, border: Border(top: BorderSide(color: AppColors.line, width: 2))),
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: SafeArea(
           top: false,
@@ -303,7 +303,7 @@ class _BottomNav extends StatelessWidget {
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(color: i == index ? AppColors.primary : Colors.transparent, width: 2),
                         ),
-                        child: Icon(_icons[i], size: 30, color: i == index ? AppColors.primary : const Color(0xFFAFAFAF)),
+                        child: Icon(_icons[i], size: 30, color: i == index ? AppColors.primary : AppColors.icon),
                       ),
                     ),
                   ),
@@ -324,10 +324,10 @@ class _EmptyState extends StatelessWidget {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             const DuckView(size: 150, mood: DuckMood.happy),
             const SizedBox(height: 16),
-            const Text('Welcome to DuckPacket!', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink)),
+            Text('Welcome to DuckPacket!', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink)),
             const SizedBox(height: 6),
-            const Text('Add one or more course JSON files to start',
-                textAlign: TextAlign.center, style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w700)),
+            Text('Add one or more course JSON files to start',
+                textAlign: TextAlign.center, style: TextStyle(color: AppColors.mid, fontWeight: FontWeight.w700)),
             const SizedBox(height: 24),
             SizedBox(width: 240, child: Button3D(label: 'Add JSON files', onPressed: onImport)),
           ]),
@@ -451,7 +451,7 @@ class _MapViewState extends ConsumerState<_MapView> {
   void _guide(BuildContext context, Chapter ch, Set<String> done, Map<String, int> best) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (_) => SafeArea(
@@ -460,7 +460,7 @@ class _MapViewState extends ConsumerState<_MapView> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(ch.title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.ink)),
+              Text(ch.title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.ink)),
               const SizedBox(height: 8),
               for (final n in ch.nodes)
                 ListTile(
@@ -654,7 +654,7 @@ class _Overall extends StatelessWidget {
           Row(children: [
             const Icon(Icons.flag_rounded, color: AppColors.streak),
             const SizedBox(width: 8),
-            const Text('Course cleared', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.ink)),
+            Text('Course cleared', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.ink)),
             const Spacer(),
             Text('${(v * 100).round()}%', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.success)),
           ]),
@@ -662,7 +662,7 @@ class _Overall extends StatelessWidget {
           ProgressBar3D(v, track: AppColors.line),
           const SizedBox(height: 6),
           Text('$cleared / $total stages (monsters + bosses)',
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black45)),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.sub)),
         ]),
       ),
     );
@@ -682,7 +682,7 @@ class _UnitHeader extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => Container(
-        color: Colors.white,
+        color: AppColors.surface,
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
         child: Container(
           padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
@@ -816,7 +816,7 @@ class _NodeButtonState extends State<_NodeButton> {
                 top: -2,
                 child: Container(
                   padding: const EdgeInsets.all(3),
-                  decoration: BoxDecoration(color: AppColors.streak, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
+                  decoration: BoxDecoration(color: AppColors.streak, shape: BoxShape.circle, border: Border.all(color: AppColors.surface, width: 2)),
                   child: const Icon(Icons.star_rounded, size: 16, color: Colors.white),
                 ),
               ),

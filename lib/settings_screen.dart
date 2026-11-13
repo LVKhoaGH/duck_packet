@@ -22,7 +22,7 @@ class SettingsScreen extends ConsumerWidget {
         child: Row(children: [
           Icon(icon, color: AppColors.primary),
           const SizedBox(width: 12),
-          Expanded(child: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink))),
+          Expanded(child: Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink))),
           Switch(value: v, activeThumbColor: Colors.white, activeTrackColor: AppColors.success, onChanged: on),
         ]),
       );
@@ -36,7 +36,7 @@ class SettingsScreen extends ConsumerWidget {
             decoration: sel
                 ? duoCard(border: AppColors.primary, fill: AppColors.tint, shadow: AppColors.primaryShadow, radius: 12)
                 : duoCard(radius: 12),
-            child: Text(label, style: TextStyle(fontWeight: FontWeight.w700, color: sel ? AppColors.primaryShadow : Colors.black45)),
+            child: Text(label, style: TextStyle(fontWeight: FontWeight.w700, color: sel ? AppColors.primaryShadow : AppColors.sub)),
           ),
         ),
       );
@@ -57,9 +57,9 @@ class SettingsScreen extends ConsumerWidget {
           child: Row(children: [
             Icon(icon, color: AppColors.primary),
             const SizedBox(width: 12),
-            Expanded(child: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink))),
+            Expanded(child: Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink))),
             if (value.isNotEmpty) Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primaryShadow)),
-            const Icon(Icons.chevron_right_rounded, color: Colors.black38),
+            Icon(Icons.chevron_right_rounded, color: AppColors.faint),
           ]),
         ),
       );
@@ -82,10 +82,10 @@ class SettingsScreen extends ConsumerWidget {
         }),
         _switch(Icons.local_fire_department_rounded, 'Warn me before I lose my streak', r.rescue, (v) => rn.setRescue(v)),
         _remRow(Icons.send_rounded, 'Send a test notification', '', () => rn.testNow()),
-        const Padding(
+        Padding(
           padding: EdgeInsets.fromLTRB(4, 0, 4, 4),
           child: Text('Reminders on Android and iPhone work even when the app is closed. On web and Windows the app must stay open.',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.faint)),
         ),
       ],
     ];
@@ -98,14 +98,14 @@ class SettingsScreen extends ConsumerWidget {
     final n = ref.read(settingsProvider.notifier);
     final track = trackOf(ref.watch(trackProvider));
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Column(children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 10, 16, 4),
             child: Row(children: [
-              IconButton(icon: const Icon(Icons.arrow_back_rounded, size: 28, color: Color(0xFFAFAFAF)), onPressed: () => Navigator.pop(context)),
-              const Expanded(child: Text('Settings', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink))),
+              IconButton(icon: Icon(Icons.arrow_back_rounded, size: 28, color: AppColors.icon), onPressed: () => Navigator.pop(context)),
+              Expanded(child: Text('Settings', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink))),
             ]),
           ),
           Expanded(
@@ -126,11 +126,11 @@ class SettingsScreen extends ConsumerWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text(track.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink)),
-                        const Text('Tap to switch course', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
+                        Text(track.title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                        Text('Tap to switch course', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.faint)),
                       ]),
                     ),
-                    const Icon(Icons.chevron_right_rounded, color: Colors.black38),
+                    Icon(Icons.chevron_right_rounded, color: AppColors.faint),
                   ]),
                 ),
               ),
@@ -145,6 +145,14 @@ class SettingsScreen extends ConsumerWidget {
                 _chip('English', s.lang == 'en', () => n.setLang('en')),
                 const SizedBox(width: 10),
                 _chip('Tiếng Việt', s.lang == 'vi', () => n.setLang('vi')),
+              ]),
+              _head('Appearance'),
+              Row(children: [
+                _chip('Auto', s.theme == 'auto', () => n.setTheme('auto')),
+                const SizedBox(width: 8),
+                _chip('Light', s.theme == 'light', () => n.setTheme('light')),
+                const SizedBox(width: 8),
+                _chip('Dark', s.theme == 'dark', () => n.setTheme('dark')),
               ]),
               _head('Daily goal'),
               Row(children: [
@@ -178,15 +186,15 @@ class SettingsScreen extends ConsumerWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(ref.watch(examDateProvider).isEmpty ? 'Not set' : ref.watch(examDateProvider),
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink)),
                     ),
                     if (ref.watch(examDateProvider).isNotEmpty)
                       IconButton(
-                        icon: const Icon(Icons.close_rounded, color: Colors.black38),
+                        icon: Icon(Icons.close_rounded, color: AppColors.faint),
                         onPressed: () => setExamDate(ref, ''),
                       )
                     else
-                      const Padding(padding: EdgeInsets.all(8), child: Icon(Icons.chevron_right_rounded, color: Colors.black38)),
+                      Padding(padding: EdgeInsets.all(8), child: Icon(Icons.chevron_right_rounded, color: AppColors.faint)),
                   ]),
                 ),
               ),
@@ -197,13 +205,13 @@ class SettingsScreen extends ConsumerWidget {
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(14, 14, 10, 14),
                   decoration: duoCard(border: AppColors.line),
-                  child: const Row(children: [
+                  child: Row(children: [
                     Icon(Icons.auto_awesome_rounded, color: AppColors.primary),
                     SizedBox(width: 12),
                     Expanded(
                         child: Text('Gemini API key & chat',
                             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink))),
-                    Icon(Icons.chevron_right_rounded, color: Colors.black38),
+                    Icon(Icons.chevron_right_rounded, color: AppColors.faint),
                   ]),
                 ),
               ),

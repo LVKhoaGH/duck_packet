@@ -26,7 +26,7 @@ class _StreakScreenState extends ConsumerState<StreakScreen> {
     final days = ref.watch(statsProvider).days;
     final s = widget.streak;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: Stack(children: [
         SafeArea(
           child: Padding(
@@ -74,8 +74,8 @@ class _StreakScreenState extends ConsumerState<StreakScreen> {
                 ),
               ),
               const SizedBox(height: 14),
-              const Text('Practice every day to keep your streak alive.',
-                  textAlign: TextAlign.center, style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w700)),
+              Text('Practice every day to keep your streak alive.',
+                  textAlign: TextAlign.center, style: TextStyle(color: AppColors.mid, fontWeight: FontWeight.w700)),
               const Spacer(),
               Button3D(
                   label: 'Continue',

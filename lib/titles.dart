@@ -16,7 +16,7 @@ class TitleDef {
 
 /// Placeholder names, change them freely. Keep the list sorted by xp (first one must be 0).
 const kTitles = [
-  TitleDef(0, 'Hatchling', 'Vịt Con', Icons.egg_alt_rounded, AppColors.lockedShadow),
+  TitleDef(0, 'Hatchling', 'Vịt Con', Icons.egg_alt_rounded, Color(0xFF9AA5B1)),
   TitleDef(500, 'Ping Duck', 'Vịt Ping', Icons.wifi_tethering_rounded, AppColors.primary),
   TitleDef(1000, 'Packet Duck', 'Vịt Gói Tin', Icons.mail_rounded, AppColors.success),
   TitleDef(2500, 'Router Duck', 'Vịt Định Tuyến', Icons.router_rounded, AppColors.secondary),
@@ -45,15 +45,15 @@ class TitlesScreen extends ConsumerWidget {
     final next = cur + 1 < kTitles.length ? kTitles[cur + 1] : null;
     final t = kTitles[cur];
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Column(children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 10, 16, 4),
             child: Row(children: [
-              IconButton(icon: const Icon(Icons.arrow_back_rounded, size: 28, color: Color(0xFFAFAFAF)), onPressed: () => Navigator.pop(context)),
-              const Expanded(child: Text('Titles', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink))),
-              Text('$xp XP', style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.black45)),
+              IconButton(icon: Icon(Icons.arrow_back_rounded, size: 28, color: AppColors.icon), onPressed: () => Navigator.pop(context)),
+              Expanded(child: Text('Titles', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink))),
+              Text('$xp XP', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.sub)),
             ]),
           ),
           Expanded(
@@ -70,9 +70,9 @@ class TitlesScreen extends ConsumerWidget {
                     ProgressBar3D((xp - t.xp) / (next.xp - t.xp), track: AppColors.line, fill: t.color),
                     const SizedBox(height: 6),
                     Text('${next.xp - xp} XP to ${next.name}',
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.black45)),
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.sub)),
                   ] else
-                    const Text('Highest title reached!', style: TextStyle(fontWeight: FontWeight.w700, color: Colors.black45)),
+                    Text('Highest title reached!', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.sub)),
                 ]),
               ),
               const SizedBox(height: 16),
@@ -82,7 +82,7 @@ class TitlesScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(12),
                   decoration: i <= cur
                       ? duoCard(border: kTitles[i].color)
-                      : duoCard(border: AppColors.line, fill: const Color(0xFFF7F7F7), shadow: AppColors.line),
+                      : duoCard(border: AppColors.line, fill: AppColors.soft, shadow: AppColors.line),
                   child: Row(children: [
                     Container(
                       width: 46,
@@ -95,7 +95,7 @@ class TitlesScreen extends ConsumerWidget {
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Text(kTitles[i].name,
                             style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: i <= cur ? AppColors.ink : AppColors.lockedShadow)),
-                        Text('${kTitles[i].xp} XP', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
+                        Text('${kTitles[i].xp} XP', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.faint)),
                       ]),
                     ),
                     if (i == cur) const Icon(Icons.check_circle_rounded, color: AppColors.success),

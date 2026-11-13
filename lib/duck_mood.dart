@@ -174,7 +174,7 @@ class _WelcomeDialogState extends State<_WelcomeDialog> {
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(color: AppColors.line, width: 2),
           ),
@@ -185,12 +185,12 @@ class _WelcomeDialogState extends State<_WelcomeDialog> {
               const SizedBox(height: 8),
               Text(title,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 21, fontWeight: FontWeight.w700, color: AppColors.ink)),
               const SizedBox(height: 6),
               Text(sub,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 15, color: AppColors.ink)),
+                  style: TextStyle(fontSize: 15, color: AppColors.ink)),
               const SizedBox(height: 20),
               if (grumpy)
                 Button3D(

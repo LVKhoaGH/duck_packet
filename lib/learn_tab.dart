@@ -36,7 +36,7 @@ class _LearnTabState extends ConsumerState<LearnTab> {
       padding: const EdgeInsets.all(14),
       decoration: duoCard(
         border: col,
-        fill: done ? const Color(0xFFE6F8EF) : AppColors.tint,
+        fill: done ? AppColors.successTint : AppColors.tint,
         shadow: done ? AppColors.successShadow : AppColors.primaryShadow,
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -51,10 +51,10 @@ class _LearnTabState extends ConsumerState<LearnTab> {
               Text(done ? 'Time to fight the monsters' : next.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.ink)),
               if (!done)
                 Text('${next.lesson.length} cards',
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.faint)),
             ]),
           ),
         ]),
@@ -77,11 +77,11 @@ class _LearnTabState extends ConsumerState<LearnTab> {
   Widget build(BuildContext context) {
     final c = widget.course;
     if (c == null) {
-      return const Center(
+      return Center(
         child: Padding(
           padding: EdgeInsets.all(32),
           child: Text('Import a course to start learning.',
-              textAlign: TextAlign.center, style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w700, fontSize: 16)),
+              textAlign: TextAlign.center, style: TextStyle(color: AppColors.mid, fontWeight: FontWeight.w700, fontSize: 16)),
         ),
       );
     }
@@ -111,10 +111,10 @@ class _LearnTabState extends ConsumerState<LearnTab> {
 
     final children = <Widget>[
       Row(children: [
-        const Text('Learn', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.ink)),
+        Text('Learn', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.ink)),
         const Spacer(),
         Text('$read / $withLesson lessons read',
-            style: const TextStyle(color: Colors.black45, fontWeight: FontWeight.w700)),
+            style: TextStyle(color: AppColors.sub, fontWeight: FontWeight.w700)),
       ]),
       const SizedBox(height: 12),
       _continueCard(c, next, withLesson),
@@ -150,7 +150,7 @@ class _LearnTabState extends ConsumerState<LearnTab> {
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.secondary)),
               ),
               const SizedBox(width: 8),
-              Text('$rd/$tot', style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.black38)),
+              Text('$rd/$tot', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.faint)),
               const SizedBox(width: 4),
               Icon(open ? Icons.expand_less_rounded : Icons.expand_more_rounded, color: AppColors.locked),
             ]),
@@ -178,7 +178,7 @@ class _LearnTabState extends ConsumerState<LearnTab> {
               padding: const EdgeInsets.all(12),
               decoration: has
                   ? duoCard(border: isSeen ? AppColors.success : (isNext ? AppColors.primary : AppColors.line))
-                  : duoCard(border: AppColors.line, fill: const Color(0xFFF7F7F7), shadow: AppColors.line),
+                  : duoCard(border: AppColors.line, fill: AppColors.soft, shadow: AppColors.line),
               child: Row(children: [
                 Container(
                   width: 44,
@@ -198,10 +198,10 @@ class _LearnTabState extends ConsumerState<LearnTab> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: has ? AppColors.ink : AppColors.lockedShadow)),
                     Text(has ? '${n.lesson.length} cards' : 'Coming soon',
-                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: Colors.black38)),
+                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: AppColors.faint)),
                   ]),
                 ),
-                if (has) const Icon(Icons.chevron_right_rounded, color: AppColors.locked),
+                if (has) Icon(Icons.chevron_right_rounded, color: AppColors.locked),
               ]),
             ),
           ),
@@ -291,16 +291,16 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
     final canFight = widget.node.questions.isNotEmpty &&
         stageUnlocked(widget.course, ref.watch(statsProvider).completed, widget.node.id);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 720), child: Column(children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 10, 16, 4),
             child: Row(children: [
-              IconButton(icon: const Icon(Icons.close_rounded, size: 30, color: Color(0xFFAFAFAF)), onPressed: () => Navigator.pop(context)),
+              IconButton(icon: Icon(Icons.close_rounded, size: 30, color: AppColors.icon), onPressed: () => Navigator.pop(context)),
               Expanded(child: ProgressBar3D((_page + 1) / n, track: AppColors.line)),
               const SizedBox(width: 12),
-              Text('${_page + 1}/$n', style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.black45)),
+              Text('${_page + 1}/$n', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.sub)),
             ]),
           ),
           Padding(
@@ -308,7 +308,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(widget.node.title, maxLines: 1, overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.black45)),
+                  style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.sub)),
             ),
           ),
           Padding(
@@ -326,7 +326,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
                   margin: const EdgeInsets.only(bottom: 8),
                   decoration: duoCard(border: AppColors.line, radius: 14),
                   child: Text(_duckMsg(true),
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.ink)),
                 ),
               ),
             ]),
@@ -363,14 +363,14 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
           ),
           Container(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-            decoration: const BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: AppColors.line, width: 2))),
+            decoration: BoxDecoration(color: AppColors.surface, border: Border(top: BorderSide(color: AppColors.line, width: 2))),
             child: Row(children: [
               if (_page > 0) ...[
                 SizedBox(
                   width: 110,
                   child: Button3D(
                     label: 'Back',
-                    color: Colors.white,
+                    color: AppColors.surface,
                     shadow: AppColors.locked,
                     textColor: AppColors.ink,
                     onPressed: () {
@@ -441,7 +441,7 @@ class _CardView extends StatelessWidget {
 
   Widget _para(String t) => Padding(
         padding: const EdgeInsets.only(bottom: 12),
-        child: Text(t, style: const TextStyle(fontSize: 16, height: 1.45, color: AppColors.ink)),
+        child: Text(t, style: TextStyle(fontSize: 16, height: 1.45, color: AppColors.ink)),
       );
 
   Widget _bullet(String t, Color c) => Padding(
@@ -451,7 +451,7 @@ class _CardView extends StatelessWidget {
             padding: const EdgeInsets.only(top: 8, right: 10),
             child: Container(width: 7, height: 7, decoration: BoxDecoration(color: c, shape: BoxShape.circle)),
           ),
-          Expanded(child: Text(t, style: const TextStyle(fontSize: 16, height: 1.4, color: AppColors.ink))),
+          Expanded(child: Text(t, style: TextStyle(fontSize: 16, height: 1.4, color: AppColors.ink))),
         ]),
       );
 
@@ -476,12 +476,12 @@ class _CardView extends StatelessWidget {
               if (steps[i].key.isNotEmpty)
                 Text(steps[i].key,
                     style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: colors[steps[i].key] ?? AppColors.secondary)),
-              Text(steps[i].value, style: const TextStyle(fontSize: 15, height: 1.35, color: AppColors.ink)),
+              Text(steps[i].value, style: TextStyle(fontSize: 15, height: 1.35, color: AppColors.ink)),
             ]),
           ),
         ]),
         if (i < steps.length - 1)
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(left: 6, top: 2, bottom: 2),
             child: Icon(Icons.arrow_downward_rounded, size: 16, color: AppColors.locked),
           ),
@@ -505,7 +505,7 @@ class _CardView extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(border: Border.all(color: AppColors.line, width: 2), borderRadius: BorderRadius.circular(14)),
         child: Table(
-          border: const TableBorder.symmetric(inside: BorderSide(color: AppColors.line, width: 2)),
+          border: TableBorder.symmetric(inside: BorderSide(color: AppColors.line, width: 2)),
           defaultColumnWidth: const FlexColumnWidth(1.3),
           columnWidths: const {0: FlexColumnWidth(1.0)},
           children: [
@@ -540,7 +540,7 @@ class _CardView extends StatelessWidget {
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Icon(card.type == 'tip' ? Icons.lightbulb_rounded : Icons.warning_amber_rounded, color: c),
             const SizedBox(width: 10),
-            Expanded(child: Text(body, style: const TextStyle(fontSize: 16, height: 1.45, color: AppColors.ink))),
+            Expanded(child: Text(body, style: TextStyle(fontSize: 16, height: 1.45, color: AppColors.ink))),
           ]),
         ));
       }
@@ -571,7 +571,7 @@ class _CardView extends StatelessWidget {
     }
     if (card.note.isNotEmpty) {
       out.add(const SizedBox(height: 10));
-      out.add(Text(card.note, style: const TextStyle(fontSize: 14, height: 1.4, color: Colors.black54, fontWeight: FontWeight.w700)));
+      out.add(Text(card.note, style: TextStyle(fontSize: 14, height: 1.4, color: AppColors.mid, fontWeight: FontWeight.w700)));
     }
     return out;
   }
@@ -596,7 +596,7 @@ class _CardView extends StatelessWidget {
             if (card.title.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: Text(card.title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink, height: 1.2)),
+                child: Text(card.title, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink, height: 1.2)),
               ),
             ..._content(),
           ]),

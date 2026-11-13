@@ -90,7 +90,7 @@ class _ProgressChartCardState extends ConsumerState<ProgressChartCard> {
     Widget stat(String v, String label, Color c) => Expanded(
           child: Column(children: [
             Text(v, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: c)),
-            Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.black38)),
+            Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.faint)),
           ]),
         );
 
@@ -98,7 +98,7 @@ class _ProgressChartCardState extends ConsumerState<ProgressChartCard> {
       padding: const EdgeInsets.all(14),
       decoration: duoCard(border: AppColors.line),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Row(children: [
+        Row(children: [
           Icon(Icons.show_chart_rounded, color: AppColors.primary),
           SizedBox(width: 8),
           Text('Progress', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink)),
@@ -122,7 +122,7 @@ class _ProgressChartCardState extends ConsumerState<ProgressChartCard> {
                         : duoCard(radius: 10),
                     child: Text(_labels[r]!,
                         style: TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.w700, color: _r == r ? AppColors.primaryShadow : Colors.black45)),
+                            fontSize: 12, fontWeight: FontWeight.w700, color: _r == r ? AppColors.primaryShadow : AppColors.sub)),
                   ),
                 ),
               ),
@@ -141,28 +141,28 @@ class _ProgressChartCardState extends ConsumerState<ProgressChartCard> {
           width: double.infinity,
           child: Stack(children: [
             Positioned.fill(child: CustomPaint(painter: _ChartPainter(buckets, maxXp))),
-            Positioned(left: 2, top: 0, child: Text('$maxXp XP', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.black26))),
+            Positioned(left: 2, top: 0, child: Text('$maxXp XP', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.ghost))),
           ]),
         ),
         const SizedBox(height: 4),
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Text(_date(start, longRange), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.black38)),
-          Text(_date(today, longRange), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.black38)),
+          Text(_date(start, longRange), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.faint)),
+          Text(_date(today, longRange), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.faint)),
         ]),
         const SizedBox(height: 8),
         Row(children: [
           Container(width: 10, height: 10, decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(3))),
           const SizedBox(width: 4),
-          const Text('XP', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black45)),
+          Text('XP', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.sub)),
           const SizedBox(width: 14),
           Container(width: 14, height: 4, decoration: BoxDecoration(color: AppColors.success, borderRadius: BorderRadius.circular(2))),
           const SizedBox(width: 4),
-          const Text('Accuracy', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black45)),
+          Text('Accuracy', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.sub)),
         ]),
         if (h.isEmpty) ...[
           const SizedBox(height: 8),
-          const Text('The chart fills up as you study. Earlier days are not recorded.',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
+          Text('The chart fills up as you study. Earlier days are not recorded.',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.faint)),
         ],
       ]),
     );
@@ -215,7 +215,7 @@ class _ChartPainter extends CustomPainter {
     }
     canvas.drawPath(path, line);
     final dot = Paint()..color = AppColors.success;
-    final ring = Paint()..color = Colors.white;
+    final ring = Paint()..color = AppColors.surface;
     for (final p in pts) {
       canvas.drawCircle(p, 5, ring);
       canvas.drawCircle(p, 3.5, dot);

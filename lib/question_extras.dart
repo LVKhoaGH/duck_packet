@@ -77,7 +77,7 @@ class TopologyCanvas extends StatelessWidget {
         width: w,
         height: h,
         decoration: BoxDecoration(
-          color: const Color(0xFFF7FBFD),
+          color: AppColors.tintSoft,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.line, width: 2),
         ),
@@ -104,7 +104,7 @@ class TopologyCanvas extends StatelessWidget {
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.ink)),
               ]),
             ),
           if (slotBuilder != null)
@@ -168,7 +168,7 @@ class _LinkPainter extends CustomPainter {
         final off = down ? const Offset(0, -22) : Offset.zero;
         final r = RRect.fromRectAndRadius(
             Rect.fromCenter(center: mid + off, width: tp.width + 12, height: tp.height + 6), const Radius.circular(8));
-        canvas.drawRRect(r, Paint()..color = Colors.white);
+        canvas.drawRRect(r, Paint()..color = AppColors.surface);
         canvas.drawRRect(r, Paint()
           ..color = AppColors.line
           ..style = PaintingStyle.stroke
@@ -250,7 +250,7 @@ class _RoutePredictQuestionState extends State<RoutePredictQuestion> {
           controller: _ctl,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           autocorrect: false,
-          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink),
           onChanged: _changed,
           decoration: InputDecoration(
             labelText: tr('Your answer'),
@@ -309,12 +309,12 @@ class _TopologyDragQuestionState extends State<TopologyDragQuestion> {
   Widget _chip(String t, {bool sel = false, bool ghost = false}) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
         decoration: BoxDecoration(
-          color: ghost ? const Color(0xFFF1F3F5) : (sel ? AppColors.tint : Colors.white),
+          color: ghost ? AppColors.soft : (sel ? AppColors.tint : AppColors.surface),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: sel ? AppColors.primary : (ghost ? AppColors.line : AppColors.locked), width: 2),
         ),
         child: Text(t,
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: ghost ? Colors.black26 : AppColors.ink)),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: ghost ? AppColors.ghost : AppColors.ink)),
       );
 
   @override
@@ -343,7 +343,7 @@ class _TopologyDragQuestionState extends State<TopologyDragQuestion> {
                 alignment: Alignment.center,
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 decoration: BoxDecoration(
-                  color: has ? Colors.white : (hot ? AppColors.tint : const Color(0xFFEAF6FB)),
+                  color: has ? AppColors.surface : (hot ? AppColors.tint : AppColors.tintSoft),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: hot || (_sel != null && !has) ? AppColors.primary : AppColors.secondary, width: 2),
                 ),
@@ -360,7 +360,7 @@ class _TopologyDragQuestionState extends State<TopologyDragQuestion> {
       ),
       const SizedBox(height: 10),
       Text(tr('Drag a label into a numbered box, or tap a label then tap a box. Tap a filled box to remove it.'),
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.black38)),
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.faint)),
       const SizedBox(height: 12),
       Wrap(spacing: 10, runSpacing: 10, children: [
         for (var i = 0; i < _labels.length; i++)

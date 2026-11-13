@@ -27,11 +27,11 @@ class PracticeTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final c = course;
     if (c == null) {
-      return const Center(
+      return Center(
         child: Padding(
           padding: EdgeInsets.all(32),
           child: Text('Import a course to unlock practice.',
-              textAlign: TextAlign.center, style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w700, fontSize: 16)),
+              textAlign: TextAlign.center, style: TextStyle(color: AppColors.mid, fontWeight: FontWeight.w700, fontSize: 16)),
         ),
       );
     }
@@ -73,7 +73,7 @@ class PracticeTab extends ConsumerWidget {
               : null,
           child: Container(
             padding: const EdgeInsets.all(12),
-            decoration: on ? duoCard(border: color) : duoCard(border: AppColors.line, fill: const Color(0xFFF7F7F7), shadow: AppColors.line),
+            decoration: on ? duoCard(border: color) : duoCard(border: AppColors.line, fill: AppColors.soft, shadow: AppColors.line),
             child: Row(children: [
               Container(
                 width: 46,
@@ -85,7 +85,7 @@ class PracticeTab extends ConsumerWidget {
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(title, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: on ? AppColors.ink : AppColors.lockedShadow)),
-                  Text(sub, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.black38)),
+                  Text(sub, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.faint)),
                 ]),
               ),
               if (count != null && count > 0)
@@ -101,7 +101,7 @@ class PracticeTab extends ConsumerWidget {
     }
 
     return ListView(padding: const EdgeInsets.fromLTRB(16, 16, 16, 32), children: [
-      const Row(children: [
+      Row(children: [
         DuckView(size: 58),
         SizedBox(width: 12),
         Expanded(child: Text('Practice', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.ink))),
@@ -160,10 +160,10 @@ class PracticeTab extends ConsumerWidget {
             : () => _start(context, 'Labs', (labPool.toList()..shuffle()).take(3).toList(), SessionMode.practice),
       ),
       const SizedBox(height: 14),
-      const Text('Domain mastery', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.ink)),
+      Text('Domain mastery', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.ink)),
       const SizedBox(height: 4),
-      const Text('% of questions whose latest first attempt was correct',
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
+      Text('% of questions whose latest first attempt was correct',
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.faint)),
       const SizedBox(height: 10),
       Container(
         padding: const EdgeInsets.all(14),
@@ -178,7 +178,7 @@ class PracticeTab extends ConsumerWidget {
                     child: Text(d.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink)),
+                        style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink)),
                   ),
                   if (identical(d, weakest))
                     Container(
@@ -194,10 +194,10 @@ class PracticeTab extends ConsumerWidget {
                 ProgressBar3D(d.mastery(study.recs), track: AppColors.line, fill: _barColor(d.mastery(study.recs))),
                 const SizedBox(height: 2),
                 Text('${d.attempted(study.recs)} / ${d.qs.length} attempted',
-                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.black38)),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.faint)),
               ]),
             ),
-          if (domains.isEmpty) const Text('No questions yet.', style: TextStyle(color: Colors.black45, fontWeight: FontWeight.w700)),
+          if (domains.isEmpty) Text('No questions yet.', style: TextStyle(color: AppColors.sub, fontWeight: FontWeight.w700)),
           Button3D(
             label: weakest == null ? 'Play a lesson first' : 'Train weakest',
             onPressed: weakest == null

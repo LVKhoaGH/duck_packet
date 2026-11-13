@@ -18,28 +18,43 @@ Future<void> main() async {
   runApp(ProviderScope(overrides: [courseOverride()], child: const DuckPacketApp()));
 }
 
-class DuckPacketApp extends StatelessWidget {
+class DuckPacketApp extends ConsumerWidget {
   const DuckPacketApp({super.key});
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) => MaterialApp(
         title: 'DuckPacket',
         debugShowCheckedModeBanner: false,
         theme: buildTheme(),
+        darkTheme: buildTheme(dark: true),
+        themeMode: switch (ref.watch(settingsProvider).theme) {
+          'light' => ThemeMode.light,
+          'dark' => ThemeMode.dark,
+          _ => ThemeMode.system,
+        },
         home: const _Root(),
         // Language scope on top of everything. Window size decides the layout:
         //   < 600 px  phone, full screen (portrait)
         //   600-800   tablet portrait: phone layout, centred, max 560 px
         //   >= 800    laptop / landscape: HomeScreen switches to a side navigation rail, content max 1180 px
         builder: (context, child) => Consumer(
-          builder: (context, ref, _) => LangScope(
+          builder: (context, ref, _) {
+            // Neutral colours (AppColors.ink, surface, ...) follow this flag. It must be set before the UI below is built.
+            final mode = ref.watch(settingsProvider).theme;
+            final sysDark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+            final dark = mode == 'dark' || (mode == 'auto' && sysDark);
+            if (dark != AppColors.dark) {
+              AppColors.dark = dark;
+              WidgetsBinding.instance.addPostFrameCallback((_) => rebuildAllElements());
+            }
+            return LangScope(
             code: ref.watch(settingsProvider).lang,
             child: LayoutBuilder(builder: (context, c) {
               if (c.maxWidth < 600) return child!;
               final maxW = c.maxWidth < 800 ? 560.0 : 1180.0;
               final w = c.maxWidth < maxW ? c.maxWidth : maxW;
               return Container(
-                color: const Color(0xFFE9EDF1),
+                color: AppColors.outer,
                 alignment: Alignment.center,
                 child: SizedBox(
                   width: w,
@@ -51,7 +66,8 @@ class DuckPacketApp extends StatelessWidget {
                 ),
               );
             }),
-          ),
+            );
+          },
         ),
       );
 }

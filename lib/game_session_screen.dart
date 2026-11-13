@@ -280,8 +280,8 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
             const SizedBox(height: 8),
             Button3D(
               label: ok ? 'Continue' : 'Got it',
-              color: Colors.white,
-              shadow: Colors.black26,
+              color: AppColors.surface,
+              shadow: AppColors.ghost,
               textColor: dark,
               onPressed: () => Navigator.pop(ctx),
             ),
@@ -311,13 +311,13 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
     final q = _queue[_index];
     final isRetry = _queue.indexOf(q) < _index;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Column(children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 10, 16, 6),
             child: Row(children: [
-              IconButton(icon: const Icon(Icons.close_rounded, size: 30, color: Color(0xFFAFAFAF)), onPressed: _confirmQuit),
+              IconButton(icon: Icon(Icons.close_rounded, size: 30, color: AppColors.icon), onPressed: _confirmQuit),
               if (_isBoss)
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
@@ -345,7 +345,7 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFF3D6),
+                            color: AppColors.streakTint,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -380,13 +380,13 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
                       if (isRetry) ...[
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(color: const Color(0xFFFFF3D6), borderRadius: BorderRadius.circular(20)),
+                          decoration: BoxDecoration(color: AppColors.streakTint, borderRadius: BorderRadius.circular(20)),
                           child: const Text('TRY AGAIN',
                               style: TextStyle(color: AppColors.streak, fontWeight: FontWeight.w700, fontSize: 12, letterSpacing: 0.8)),
                         ),
                         const SizedBox(height: 8),
                       ],
-                      Text(_instruction(q), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                      Text(_instruction(q), style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.ink)),
                       const SizedBox(height: 16),
                       _PromptBubble(
                         text: q.prompt,
@@ -424,7 +424,7 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
           // Bottom Action Bar (thumb zone)
           Container(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-            decoration: const BoxDecoration(color: Colors.white, border: Border(top: BorderSide(color: AppColors.line, width: 2))),
+            decoration: BoxDecoration(color: AppColors.surface, border: Border(top: BorderSide(color: AppColors.line, width: 2))),
             child: Button3D(label: 'Check Answer', onPressed: _ready ? _check : null),
           ),
         ]),
@@ -446,7 +446,7 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
             ? widget.node.title
             : 'Great review session';
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: Stack(children: [
         SafeArea(
           child: Padding(
@@ -463,7 +463,7 @@ class _GameSessionScreenState extends ConsumerState<GameSessionScreen> {
               const SizedBox(height: 4),
               Text(sub,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.black45)),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.sub)),
               const SizedBox(height: 24),
               Row(children: [
                 Expanded(child: _Tile(label: 'TOTAL XP', color: AppColors.streak, icon: const Icon(Icons.bolt_rounded, color: AppColors.streak, size: 26), end: _earnedXp, delay: 0)),
@@ -524,7 +524,7 @@ class _Tile extends StatelessWidget {
       delay: delay,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: color, width: 2),
         ),
@@ -568,7 +568,7 @@ class _PromptBubble extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               decoration: duoCard(border: AppColors.line, shadow: Colors.transparent),
-              child: Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink)),
+              child: Text(text, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink)),
             ),
             Positioned(
               left: -8,
@@ -580,8 +580,8 @@ class _PromptBubble extends StatelessWidget {
                   child: Container(
                     width: 14,
                     height: 14,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
                       border: Border(
                         left: BorderSide(color: AppColors.line, width: 2),
                         bottom: BorderSide(color: AppColors.line, width: 2),
@@ -667,7 +667,7 @@ class _ReorderQuestionState extends State<ReorderQuestion> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(widget.q.items[answer[pos]],
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink)),
                         ),
                       ]),
                     ),
@@ -678,8 +678,8 @@ class _ReorderQuestionState extends State<ReorderQuestion> {
                     height: 50,
                     alignment: Alignment.centerLeft,
                     padding: const EdgeInsets.only(left: 14),
-                    decoration: BoxDecoration(color: const Color(0xFFF7F7F7), borderRadius: BorderRadius.circular(16)),
-                    child: Text('${pos + 1}', style: const TextStyle(color: AppColors.locked, fontWeight: FontWeight.w700, fontSize: 18)),
+                    decoration: BoxDecoration(color: AppColors.soft, borderRadius: BorderRadius.circular(16)),
+                    child: Text('${pos + 1}', style: TextStyle(color: AppColors.locked, fontWeight: FontWeight.w700, fontSize: 18)),
                   ),
           ),
         ),
@@ -750,7 +750,7 @@ class _MatchQuestionState extends State<MatchQuestion> {
           constraints: const BoxConstraints(minHeight: 64),
           alignment: Alignment.center,
           decoration: deco,
-          child: Text(text, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink)),
+          child: Text(text, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink)),
         ),
       ),
     );
@@ -843,7 +843,7 @@ class _FillCodeQuestionState extends State<FillCodeQuestion> {
         decoration: BoxDecoration(
           color: AppColors.terminalBg,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: const [BoxShadow(color: Colors.black26, offset: Offset(0, 4))],
+          boxShadow: [BoxShadow(color: AppColors.ghost, offset: Offset(0, 4))],
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Padding(
@@ -897,13 +897,13 @@ class _GoalLine extends ConsumerWidget {
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(e.goalDone ? 'Daily goal reached!' : 'Daily goal',
-                  style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink)),
+                  style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink)),
               const SizedBox(height: 6),
               ProgressBar3D(v, track: AppColors.line),
             ]),
           ),
           const SizedBox(width: 12),
-          Text('${e.todayXp}/${e.goal}', style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.black45)),
+          Text('${e.todayXp}/${e.goal}', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.sub)),
         ]),
       ),
     );
@@ -956,19 +956,19 @@ class _MultipleChoiceQuestionState extends State<MultipleChoiceQuestion> {
                     height: 30,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: selected == opts[i] ? AppColors.primary : Colors.white,
+                      color: selected == opts[i] ? AppColors.primary : AppColors.surface,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: selected == opts[i] ? AppColors.primary : AppColors.locked, width: 2),
                     ),
                     child: Text(String.fromCharCode(65 + i),
                         style: TextStyle(
                             fontWeight: FontWeight.w700,
-                            color: selected == opts[i] ? Colors.white : Colors.black45)),
+                            color: selected == opts[i] ? Colors.white : AppColors.sub)),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(opts[i],
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink, height: 1.3)),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink, height: 1.3)),
                   ),
                 ]),
               ),
@@ -1028,7 +1028,7 @@ class _CategorizeQuestionState extends State<CategorizeQuestion> {
   Widget _selectedChip(String t) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: duoCard(border: AppColors.primary, fill: AppColors.tint, shadow: AppColors.primaryShadow),
-        child: Text(t, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.ink)),
+        child: Text(t, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.ink)),
       );
 
   Widget _bucket(int g) {
@@ -1046,13 +1046,13 @@ class _CategorizeQuestionState extends State<CategorizeQuestion> {
           padding: const EdgeInsets.all(12),
           constraints: const BoxConstraints(minHeight: 88),
           decoration: duoCard(
-              border: color, fill: (cand.isNotEmpty || selected != null) ? color.withValues(alpha: 0.12) : Colors.white),
+              border: color, fill: (cand.isNotEmpty || selected != null) ? color.withValues(alpha: 0.12) : AppColors.surface),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(groups[g], style: TextStyle(fontWeight: FontWeight.w700, color: color, fontSize: 15)),
             const SizedBox(height: 8),
             if (items.isEmpty)
               Text(selected == null ? 'Drag items here' : 'Tap to place here',
-                  style: const TextStyle(color: Colors.black38, fontWeight: FontWeight.w700))
+                  style: TextStyle(color: AppColors.faint, fontWeight: FontWeight.w700))
             else
               Wrap(spacing: 8, runSpacing: 8, children: [
                 for (final t in items) PressScale(onTap: () => _unplace(t), child: duoChip(widget.q.pairs[t].left)),

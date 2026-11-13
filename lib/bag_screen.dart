@@ -27,7 +27,7 @@ Future<void> showChestDialog(BuildContext context, ChestReward r) => showDialog<
       context: context,
       barrierDismissible: false,
       builder: (ctx) => Dialog(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -40,7 +40,7 @@ Future<void> showChestDialog(BuildContext context, ChestReward r) => showDialog<
               child: const Icon(Icons.card_giftcard_rounded, size: 84, color: AppColors.streak),
             ),
             const SizedBox(height: 6),
-            const Text('Chest opened!', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.ink)),
+            Text('Chest opened!', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.ink)),
             const SizedBox(height: 14),
             Pop(
               delay: 150,
@@ -63,7 +63,7 @@ Widget _rewardRow(ItemInfo i, String text) => Container(
       child: Row(children: [
         Icon(i.icon, color: i.color),
         const SizedBox(width: 10),
-        Expanded(child: Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink))),
+        Expanded(child: Text(text, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink))),
       ]),
     );
 
@@ -76,7 +76,7 @@ class BagScreen extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
-      decoration: has ? duoCard(border: i.color) : duoCard(border: AppColors.line, fill: const Color(0xFFF7F7F7), shadow: AppColors.line),
+      decoration: has ? duoCard(border: i.color) : duoCard(border: AppColors.line, fill: AppColors.soft, shadow: AppColors.line),
       child: Row(children: [
         Container(
           width: 52,
@@ -92,8 +92,8 @@ class BagScreen extends ConsumerWidget {
               const SizedBox(width: 8),
               Text('x$count', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: has ? i.color : AppColors.lockedShadow)),
             ]),
-            Text(i.desc, style: const TextStyle(fontSize: 12, height: 1.3, fontWeight: FontWeight.w700, color: Colors.black45)),
-            if (note != null) Text(note, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
+            Text(i.desc, style: TextStyle(fontSize: 12, height: 1.3, fontWeight: FontWeight.w700, color: AppColors.sub)),
+            if (note != null) Text(note, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.faint)),
           ]),
         ),
         if (action != null) ...[const SizedBox(width: 8), action],
@@ -105,14 +105,14 @@ class BagScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final bag = ref.watch(bagProvider);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Column(children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 10, 16, 4),
             child: Row(children: [
-              IconButton(icon: const Icon(Icons.arrow_back_rounded, size: 28, color: Color(0xFFAFAFAF)), onPressed: () => Navigator.pop(context)),
-              const Expanded(child: Text('Bag', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink))),
+              IconButton(icon: Icon(Icons.arrow_back_rounded, size: 28, color: AppColors.icon), onPressed: () => Navigator.pop(context)),
+              Expanded(child: Text('Bag', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink))),
             ]),
           ),
           Expanded(
@@ -121,7 +121,7 @@ class BagScreen extends ConsumerWidget {
                 Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(12),
-                  decoration: duoCard(border: AppColors.streak, fill: const Color(0xFFFFF3D6), shadow: AppColors.streakShadow),
+                  decoration: duoCard(border: AppColors.streak, fill: AppColors.streakTint, shadow: AppColors.streakShadow),
                   child: Row(children: [
                     const Icon(Icons.bolt_rounded, color: AppColors.streak),
                     const SizedBox(width: 8),
@@ -152,8 +152,8 @@ class BagScreen extends ConsumerWidget {
               ),
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: duoCard(border: AppColors.line, fill: const Color(0xFFF7F7F7), shadow: AppColors.line),
-                child: const Row(children: [
+                decoration: duoCard(border: AppColors.line, fill: AppColors.soft, shadow: AppColors.line),
+                child: Row(children: [
                   Icon(Icons.lock_rounded, color: AppColors.locked),
                   SizedBox(width: 10),
                   Expanded(
@@ -163,9 +163,9 @@ class BagScreen extends ConsumerWidget {
                 ]),
               ),
               const SizedBox(height: 16),
-              const Text('Beat a boss, then open the chest at the end of the section to earn items.',
+              Text('Beat a boss, then open the chest at the end of the section to earn items.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.black38)),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.faint)),
             ]),
           ),
         ]),

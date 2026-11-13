@@ -21,15 +21,15 @@ class _GlossaryScreenState extends State<GlossaryScreen> {
         .toList()
       ..sort((a, b) => a.term.toLowerCase().compareTo(b.term.toLowerCase()));
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Column(children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 10, 16, 4),
             child: Row(children: [
-              IconButton(icon: const Icon(Icons.arrow_back_rounded, size: 28, color: Color(0xFFAFAFAF)), onPressed: () => Navigator.pop(context)),
-              const Expanded(child: Text('Glossary', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink))),
-              Text('${list.length}', style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.black45)),
+              IconButton(icon: Icon(Icons.arrow_back_rounded, size: 28, color: AppColors.icon), onPressed: () => Navigator.pop(context)),
+              Expanded(child: Text('Glossary', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink))),
+              Text('${list.length}', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.sub)),
             ]),
           ),
           Padding(
@@ -40,7 +40,7 @@ class _GlossaryScreenState extends State<GlossaryScreen> {
                 hintText: 'Search term or command',
                 prefixIcon: const Icon(Icons.search_rounded),
                 filled: true,
-                fillColor: const Color(0xFFF7F7F7),
+                fillColor: AppColors.soft,
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
               ),
@@ -48,11 +48,11 @@ class _GlossaryScreenState extends State<GlossaryScreen> {
           ),
           Expanded(
             child: widget.items.isEmpty
-                ? const Center(
+                ? Center(
                     child: Padding(
                       padding: EdgeInsets.all(32),
                       child: Text('No glossary in this course yet.\nAdd a "glossary" array to the course JSON.',
-                          textAlign: TextAlign.center, style: TextStyle(color: Colors.black45, fontWeight: FontWeight.w700)),
+                          textAlign: TextAlign.center, style: TextStyle(color: AppColors.sub, fontWeight: FontWeight.w700)),
                     ),
                   )
                 : ListView.builder(
@@ -87,7 +87,7 @@ class _GlossaryCard extends StatelessWidget {
               ),
           ]),
           const SizedBox(height: 4),
-          Text(g.def, style: const TextStyle(fontSize: 15, height: 1.4, color: AppColors.ink)),
+          Text(g.def, style: TextStyle(fontSize: 15, height: 1.4, color: AppColors.ink)),
           if (g.cmd.isNotEmpty) ...[
             const SizedBox(height: 8),
             Container(

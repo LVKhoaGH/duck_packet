@@ -41,10 +41,10 @@ class _LabQuestionState extends State<LabQuestion> {
       const SizedBox(height: 18),
       Button3D(label: s.touched ? 'Back to terminal' : 'Open terminal', onPressed: _open),
       if (s.touched)
-        const Padding(
+        Padding(
           padding: EdgeInsets.only(top: 10),
           child: Text('Done? Press Check Answer below.',
-              style: TextStyle(color: Colors.black45, fontWeight: FontWeight.w700)),
+              style: TextStyle(color: AppColors.sub, fontWeight: FontWeight.w700)),
         ),
     ]);
   }
@@ -68,7 +68,7 @@ class LabBrief extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 12),
           decoration: duoCard(border: AppColors.line),
           child: Text(s.scenario,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.ink, height: 1.35)),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.ink, height: 1.35)),
         ),
       if (topo.isNotEmpty)
         Container(
@@ -95,7 +95,7 @@ class LabBrief extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(tasks[i]['text'] ?? '',
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.ink, height: 1.35)),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.ink, height: 1.35)),
             ),
           ]),
         ),
@@ -215,7 +215,7 @@ class _LabTerminalScreenState extends State<LabTerminalScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (_) => SafeArea(
         child: Padding(

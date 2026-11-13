@@ -70,19 +70,19 @@ class _MultiSelectQuestionState extends State<MultiSelectQuestion> {
                   height: 30,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: sel.contains(opts[i]) ? AppColors.primary : Colors.white,
+                    color: sel.contains(opts[i]) ? AppColors.primary : AppColors.surface,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: sel.contains(opts[i]) ? AppColors.primary : AppColors.locked, width: 2),
                   ),
                   child: sel.contains(opts[i])
                       ? const Icon(Icons.check_rounded, color: Colors.white, size: 20)
                       : Text(String.fromCharCode(65 + i),
-                          style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.black45)),
+                          style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.sub)),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(opts[i],
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink, height: 1.3)),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink, height: 1.3)),
                 ),
               ]),
             ),

@@ -146,7 +146,7 @@ class LibraryScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (ctx) => SafeArea(
         child: ConstrainedBox(
@@ -154,12 +154,12 @@ class LibraryScreen extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('Sample JSON', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.ink)),
+              Text('Sample JSON', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.ink)),
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'One file = one or more chapters. IDs (chapter_id, node_id) must be unique across all files. '
                 '"lesson" and "glossary" are optional.',
-                style: TextStyle(fontSize: 13, height: 1.35, color: Colors.black54, fontWeight: FontWeight.w700),
+                style: TextStyle(fontSize: 13, height: 1.35, color: AppColors.mid, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 10),
               Flexible(
@@ -204,7 +204,7 @@ class LibraryScreen extends ConsumerWidget {
               child: Text(p.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.ink, decoration: TextDecoration.none)),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.ink, decoration: TextDecoration.none)),
             ),
           ]),
         ),
@@ -217,7 +217,7 @@ class LibraryScreen extends ConsumerWidget {
     final card = Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.fromLTRB(14, 12, 8, 6),
-      decoration: on ? duoCard(border: AppColors.primary) : duoCard(border: AppColors.line, fill: const Color(0xFFF7F7F7), shadow: AppColors.line),
+      decoration: on ? duoCard(border: AppColors.primary) : duoCard(border: AppColors.line, fill: AppColors.soft, shadow: AppColors.line),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Icon(Icons.description_rounded, color: on ? AppColors.primary : AppColors.locked),
@@ -231,7 +231,7 @@ class LibraryScreen extends ConsumerWidget {
               Text(c.chapters.map((x) => x.title).join(' · '),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.faint)),
             ]),
           ),
           Switch(
@@ -248,7 +248,7 @@ class LibraryScreen extends ConsumerWidget {
         Text(
             '${c.chapters.length} chapters · ${p.nodeCount} nodes · ${p.questionCount} questions · ${p.lessonCount} lessons'
             '${c.glossary.isEmpty ? '' : ' · ${c.glossary.length} terms'}',
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black45)),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.sub)),
         Row(children: [
           IconButton(
             tooltip: 'Move up',
@@ -261,11 +261,11 @@ class LibraryScreen extends ConsumerWidget {
             onPressed: i == n - 1 ? null : () => ref.read(packsProvider.notifier).move(p.id, 1),
           ),
           const Spacer(),
-          if (!on) const Text('Hidden', style: TextStyle(fontWeight: FontWeight.w700, color: Colors.black38)),
+          if (!on) Text('Hidden', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.faint)),
           if (folders.isNotEmpty)
             PopupMenuButton<String>(
               tooltip: 'Move to folder',
-              icon: const Icon(Icons.folder_open_rounded, color: Colors.black45),
+              icon: Icon(Icons.folder_open_rounded, color: AppColors.sub),
               onSelected: (v) {
                 Sfx.play('tap');
                 ref.read(packsProvider.notifier).moveTo(p.id, v == '_root' ? '' : v);
@@ -324,9 +324,9 @@ class LibraryScreen extends ConsumerWidget {
                       Text(f.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.ink)),
                       Text('${inside.length} file(s) · $onCount on',
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.faint)),
                     ]),
                   ),
                   Switch(
@@ -342,7 +342,7 @@ class LibraryScreen extends ConsumerWidget {
                   ),
                   PopupMenuButton<String>(
                     tooltip: 'Folder menu',
-                    icon: const Icon(Icons.more_vert_rounded, color: Colors.black45),
+                    icon: Icon(Icons.more_vert_rounded, color: AppColors.sub),
                     onSelected: (v) {
                       if (v == 'rename') {
                         _renameFolder(context, ref, f);
@@ -364,7 +364,7 @@ class LibraryScreen extends ConsumerWidget {
                       PopupMenuItem<String>(value: 'delete', child: Text('Delete folder')),
                     ],
                   ),
-                  Icon(f.open ? Icons.expand_less_rounded : Icons.expand_more_rounded, color: Colors.black38),
+                  Icon(f.open ? Icons.expand_less_rounded : Icons.expand_more_rounded, color: AppColors.faint),
                   const SizedBox(width: 6),
                 ]),
               ),
@@ -374,10 +374,10 @@ class LibraryScreen extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(10, 0, 10, 4),
                 child: Column(children: [
                   if (inside.isEmpty)
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.fromLTRB(4, 4, 4, 14),
                       child: Text('Empty. Drag a file here, or open the menu and choose "Add files here".',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.faint)),
                     ),
                   for (var i = 0; i < inside.length; i++) _packCard(context, ref, inside[i], i, inside.length, folders),
                 ]),
@@ -410,16 +410,16 @@ class LibraryScreen extends ConsumerWidget {
             border: Border.all(color: hot ? AppColors.primary : AppColors.line, width: 2),
           ),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Padding(
+            Padding(
               padding: EdgeInsets.fromLTRB(6, 2, 6, 8),
               child: Text('NOT IN A FOLDER',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: Colors.black38)),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: AppColors.faint)),
             ),
             if (loose.isEmpty)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.fromLTRB(6, 0, 6, 14),
                 child: Text('Drop a file here to take it out of its folder.',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.faint)),
               ),
             for (var i = 0; i < loose.length; i++) _packCard(context, ref, loose[i], i, loose.length, folders),
           ]),
@@ -436,15 +436,15 @@ class LibraryScreen extends ConsumerWidget {
     final loose = <Pack>[for (final p in packs) if (!ids.contains(p.folder)) p];
     final active = packs.where((p) => p.enabled).length;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Column(children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 10, 16, 4),
             child: Row(children: [
-              IconButton(icon: const Icon(Icons.arrow_back_rounded, size: 28, color: Color(0xFFAFAFAF)), onPressed: () => Navigator.pop(context)),
-              const Expanded(child: Text('Course library', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink))),
-              Text('$active/${packs.length} on', style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.black45)),
+              IconButton(icon: Icon(Icons.arrow_back_rounded, size: 28, color: AppColors.icon), onPressed: () => Navigator.pop(context)),
+              Expanded(child: Text('Course library', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink))),
+              Text('$active/${packs.length} on', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.sub)),
             ]),
           ),
           Expanded(
@@ -465,22 +465,22 @@ class LibraryScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 6),
-              const Text(
+              Text(
                   'Pick several files at once (.json or .zip). Long-press a file and drag it onto a folder, or use the folder icon on the file. '
                   'Chapters follow this order: folders top to bottom, then files not in a folder.',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.faint)),
               const SizedBox(height: 16),
               if (packs.isEmpty && folders.isEmpty)
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: duoCard(border: AppColors.line),
-                  child: const Column(children: [
+                  child: Column(children: [
                     Icon(Icons.inbox_rounded, size: 44, color: AppColors.locked),
                     SizedBox(height: 8),
                     Text('The library is empty', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.ink)),
                     SizedBox(height: 4),
                     Text('Add a JSON file, or open "Sample JSON" to see the format.',
-                        textAlign: TextAlign.center, style: TextStyle(color: Colors.black45, fontWeight: FontWeight.w700)),
+                        textAlign: TextAlign.center, style: TextStyle(color: AppColors.sub, fontWeight: FontWeight.w700)),
                   ]),
                 ),
               for (final f in folders) _folderCard(context, ref, f, folders, packs),

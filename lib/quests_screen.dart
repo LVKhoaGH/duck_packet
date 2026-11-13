@@ -26,9 +26,9 @@ Widget _rowCard(IconData icon, Color color, String title, String sub, {String? t
         const SizedBox(width: 10),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.ink)),
+            Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.ink)),
             if (sub.isNotEmpty)
-              Text(sub, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black45)),
+              Text(sub, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.sub)),
           ]),
         ),
         if (trailing != null)
@@ -41,7 +41,7 @@ Future<void> _dialog(BuildContext context, DuckFace face, String title, List<Wid
     context: context,
     barrierDismissible: false,
     builder: (ctx) => Dialog(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       insetPadding: const EdgeInsets.symmetric(horizontal: 24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: ConstrainedBox(
@@ -53,7 +53,7 @@ Future<void> _dialog(BuildContext context, DuckFace face, String title, List<Wid
             const SizedBox(height: 4),
             Text(title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink)),
             const SizedBox(height: 12),
             Flexible(child: SingleChildScrollView(child: Column(children: rows))),
             const SizedBox(height: 10),
@@ -84,10 +84,10 @@ Future<void> showRewardDialogs(BuildContext context, WidgetRef ref, MetaOutcome 
       ..._badgeRows(o.badges),
     ];
     if (o.questsDone.isNotEmpty) {
-      rows.add(const Padding(
+      rows.add(Padding(
         padding: EdgeInsets.only(top: 4),
         child: Text('Claim quest rewards in Profile → Quests.',
-            textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black45)),
+            textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.sub)),
       ));
     }
     await _dialog(context, o.badges.isNotEmpty ? DuckFace.cheer : DuckFace.cool,
@@ -155,17 +155,17 @@ class _QuestsScreenState extends ConsumerState<QuestsScreen> {
     final defs = questsFor(s.day);
     final allClaimed = s.claimed.length >= defs.length;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Column(children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 10, 16, 4),
             child: Row(children: [
               IconButton(
-                  icon: const Icon(Icons.arrow_back_rounded, size: 28, color: Color(0xFFAFAFAF)),
+                  icon: Icon(Icons.arrow_back_rounded, size: 28, color: AppColors.icon),
                   onPressed: () => Navigator.pop(context)),
-              const Expanded(child: Text('Daily quests', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink))),
-              Text('${questsDoneCount(s)}/${defs.length}', style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.black45)),
+              Expanded(child: Text('Daily quests', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink))),
+              Text('${questsDoneCount(s)}/${defs.length}', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.sub)),
             ]),
           ),
           Expanded(
@@ -173,9 +173,9 @@ class _QuestsScreenState extends ConsumerState<QuestsScreen> {
               Row(children: [
                 DuckFaceView(face: allClaimed ? DuckFace.cheer : DuckFace.determined, size: 84),
                 const SizedBox(width: 10),
-                const Expanded(
+                Expanded(
                   child: Text('New quests every day. Finish all 3 for a bonus!',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.black54)),
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.mid)),
                 ),
               ]),
               const SizedBox(height: 12),
@@ -184,8 +184,8 @@ class _QuestsScreenState extends ConsumerState<QuestsScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: s.bonus
-                    ? duoCard(border: AppColors.success, fill: const Color(0xFFE6F8F0), shadow: AppColors.successShadow)
-                    : duoCard(border: AppColors.streak, fill: const Color(0xFFFFF3D6), shadow: AppColors.streakShadow),
+                    ? duoCard(border: AppColors.success, fill: AppColors.successTint, shadow: AppColors.successShadow)
+                    : duoCard(border: AppColors.streak, fill: AppColors.streakTint, shadow: AppColors.streakShadow),
                 child: Row(children: [
                   Icon(s.bonus ? Icons.check_circle_rounded : Icons.card_giftcard_rounded,
                       color: s.bonus ? AppColors.success : AppColors.streakShadow, size: 30),
@@ -224,7 +224,7 @@ class _QuestsScreenState extends ConsumerState<QuestsScreen> {
           decoration: duoCard(),
           child: Column(children: [
             Text(v, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: c)),
-            Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black45)),
+            Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.sub)),
           ]),
         ),
       );
@@ -237,7 +237,7 @@ class _QuestsScreenState extends ConsumerState<QuestsScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: claimed
-          ? duoCard(border: AppColors.line, fill: const Color(0xFFF7F7F7), shadow: AppColors.line)
+          ? duoCard(border: AppColors.line, fill: AppColors.soft, shadow: AppColors.line)
           : duoCard(border: done ? AppColors.success : AppColors.line),
       child: Row(children: [
         Container(
@@ -255,7 +255,7 @@ class _QuestsScreenState extends ConsumerState<QuestsScreen> {
             ProgressBar3D(cur / q.target, track: AppColors.line, fill: done ? AppColors.success : AppColors.primary),
             const SizedBox(height: 2),
             Text('$cur / ${q.target}   ·   +${q.xp} XP',
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.black38)),
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.faint)),
           ]),
         ),
         if (done && !claimed) ...[
@@ -284,17 +284,17 @@ class BadgesScreen extends ConsumerWidget {
     final s = rolled(ref.watch(metaProvider));
     final got = kAch.where((a) => s.ach.containsKey(a.id)).length;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Column(children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(8, 10, 16, 4),
             child: Row(children: [
               IconButton(
-                  icon: const Icon(Icons.arrow_back_rounded, size: 28, color: Color(0xFFAFAFAF)),
+                  icon: Icon(Icons.arrow_back_rounded, size: 28, color: AppColors.icon),
                   onPressed: () => Navigator.pop(context)),
-              const Expanded(child: Text('Badges', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink))),
-              Text('$got / ${kAch.length}', style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.black45)),
+              Expanded(child: Text('Badges', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink))),
+              Text('$got / ${kAch.length}', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.sub)),
             ]),
           ),
           Expanded(
@@ -304,7 +304,7 @@ class BadgesScreen extends ConsumerWidget {
               for (final g in kAchGroups) ...[
                 Padding(
                   padding: const EdgeInsets.only(top: 14, bottom: 8),
-                  child: Text(g.value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                  child: Text(g.value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink)),
                 ),
                 for (final a in kAch.where((a) => a.group == g.key)) _badge(a, s),
               ],
@@ -321,7 +321,7 @@ class BadgesScreen extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
-      decoration: on ? duoCard(border: a.color) : duoCard(border: AppColors.line, fill: const Color(0xFFF7F7F7), shadow: AppColors.line),
+      decoration: on ? duoCard(border: a.color) : duoCard(border: AppColors.line, fill: AppColors.soft, shadow: AppColors.line),
       child: Row(children: [
         Container(
           width: 48,
@@ -334,11 +334,11 @@ class BadgesScreen extends ConsumerWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(a.name,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: on ? AppColors.ink : AppColors.lockedShadow)),
-            Text(a.desc, style: const TextStyle(fontSize: 12, height: 1.3, fontWeight: FontWeight.w700, color: Colors.black45)),
+            Text(a.desc, style: TextStyle(fontSize: 12, height: 1.3, fontWeight: FontWeight.w700, color: AppColors.sub)),
             if (!on && a.goal > 1) ...[
               const SizedBox(height: 6),
               ProgressBar3D(cur / a.goal, track: AppColors.line, fill: a.color),
-              Text('$cur / ${a.goal}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.black38)),
+              Text('$cur / ${a.goal}', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.faint)),
             ],
           ]),
         ),
@@ -346,7 +346,7 @@ class BadgesScreen extends ConsumerWidget {
         if (on)
           const Icon(Icons.check_circle_rounded, color: AppColors.success)
         else
-          Text('+${a.xp} XP', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.black38)),
+          Text('+${a.xp} XP', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.faint)),
       ]),
     );
   }

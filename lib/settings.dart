@@ -5,9 +5,10 @@ import 'i18n.dart';
 class SettingsState {
   final bool sound, haptics;
   final String lang; // en | vi
-  const SettingsState({this.sound = true, this.haptics = true, this.lang = 'en'});
-  SettingsState copy({bool? sound, bool? haptics, String? lang}) =>
-      SettingsState(sound: sound ?? this.sound, haptics: haptics ?? this.haptics, lang: lang ?? this.lang);
+  final String theme; // auto | light | dark
+  const SettingsState({this.sound = true, this.haptics = true, this.lang = 'en', this.theme = 'auto'});
+  SettingsState copy({bool? sound, bool? haptics, String? lang, String? theme}) => SettingsState(
+      sound: sound ?? this.sound, haptics: haptics ?? this.haptics, lang: lang ?? this.lang, theme: theme ?? this.theme);
 }
 
 /// Keys in the 'stats' Hive box: x_sound, x_haptics, x_lang.
@@ -23,6 +24,7 @@ class SettingsNotifier extends Notifier<SettingsState> {
       sound: _box.get('x_sound', defaultValue: true) != false,
       haptics: _box.get('x_haptics', defaultValue: true) != false,
       lang: lang,
+      theme: ['auto', 'light', 'dark'].contains('${_box.get('x_theme')}') ? '${_box.get('x_theme')}' : 'auto',
     );
   }
 
@@ -34,6 +36,11 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setHaptics(bool v) {
     _box.put('x_haptics', v);
     state = state.copy(haptics: v);
+  }
+
+  void setTheme(String t) {
+    _box.put('x_theme', t);
+    state = state.copy(theme: t);
   }
 
   void setLang(String l) {

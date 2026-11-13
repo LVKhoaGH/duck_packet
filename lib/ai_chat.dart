@@ -214,7 +214,7 @@ class _AiSheetState extends ConsumerState<AiSheet> {
       padding: EdgeInsets.only(bottom: bottom),
       child: Column(children: [
         _header(),
-        const Divider(height: 1, color: AppColors.line),
+        Divider(height: 1, color: AppColors.line),
         Expanded(
           child: !_loaded ? const Center(child: CircularProgressIndicator()) : (_setup ? _setupView() : _chatView()),
         ),
@@ -229,18 +229,18 @@ class _AiSheetState extends ConsumerState<AiSheet> {
           const SizedBox(width: 10),
           Expanded(
             child: Text(_t('AI assistant', 'Trợ lý AI'),
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.ink)),
           ),
           if (_loaded && _hasKey && !_setup)
             IconButton(
               tooltip: _t('API keys', 'Quản lý API key'),
-              icon: const Icon(Icons.key_rounded, color: Colors.black45),
+              icon: Icon(Icons.key_rounded, color: AppColors.sub),
               onPressed: () => setState(() {
                 _setup = true;
                 _setupErr = null;
               }),
             ),
-          IconButton(icon: const Icon(Icons.close_rounded, color: Colors.black45), onPressed: () => Navigator.pop(context)),
+          IconButton(icon: Icon(Icons.close_rounded, color: AppColors.sub), onPressed: () => Navigator.pop(context)),
         ]),
       );
 
@@ -260,7 +260,7 @@ class _AiSheetState extends ConsumerState<AiSheet> {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Padding(
                 padding: const EdgeInsets.only(top: 3),
-                child: Text(text, style: const TextStyle(fontSize: 15, height: 1.35, color: AppColors.ink)),
+                child: Text(text, style: TextStyle(fontSize: 15, height: 1.35, color: AppColors.ink)),
               ),
               if (extra != null) extra,
             ]),
@@ -307,18 +307,18 @@ class _AiSheetState extends ConsumerState<AiSheet> {
                 'Their free plans and model names change, so check their site.',
                 'Nhà cung cấp khác (Groq, OpenRouter, ...) cũng dùng được: tạo key trên trang của họ rồi chọn trong danh sách. '
                     'Gói miễn phí và tên model của họ hay thay đổi, hãy xem trên trang của họ.'),
-            style: const TextStyle(fontSize: 13, height: 1.35, color: Colors.black54)),
+            style: TextStyle(fontSize: 13, height: 1.35, color: AppColors.mid)),
       ]);
 
   Widget _setupView() {
     return ListView(padding: const EdgeInsets.fromLTRB(16, 16, 16, 24), children: [
       Text(_t('API keys (free)', 'API key (miễn phí)'),
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink)),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink)),
       const SizedBox(height: 4),
       Text(
           _t('Add one or more of YOUR OWN keys. The app tries them in turn and skips a key that errors or runs out of quota.',
               'Thêm một hoặc nhiều key CỦA BẠN. App dùng lần lượt, key nào lỗi hoặc hết lượt sẽ được bỏ qua.'),
-          style: const TextStyle(fontSize: 14, color: Colors.black54, height: 1.3)),
+          style: TextStyle(fontSize: 14, color: AppColors.mid, height: 1.3)),
       const SizedBox(height: 12),
       for (final k in _keys)
         Container(
@@ -330,8 +330,8 @@ class _AiSheetState extends ConsumerState<AiSheet> {
             const SizedBox(width: 10),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(k.label, style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink)),
-                Text(k.model, style: const TextStyle(fontSize: 12, color: Colors.black45)),
+                Text(k.label, style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink)),
+                Text(k.model, style: TextStyle(fontSize: 12, color: AppColors.sub)),
               ]),
             ),
             IconButton(
@@ -356,7 +356,7 @@ class _AiSheetState extends ConsumerState<AiSheet> {
       const SizedBox(height: 6),
       Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: const Color(0xFFFFF4D6), borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(color: AppColors.streakTint, borderRadius: BorderRadius.circular(12)),
         child: Text(
           _t(
               'Keep your keys private: never share them or post them on GitHub or in screenshots. Free tiers have usage limits, '
@@ -370,7 +370,7 @@ class _AiSheetState extends ConsumerState<AiSheet> {
       ),
       const SizedBox(height: 16),
       Text(_t('Add a key', 'Thêm key'),
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink)),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink)),
       const SizedBox(height: 8),
       DropdownButtonFormField<String>(
         initialValue: _prov,
@@ -473,7 +473,7 @@ class _AiSheetState extends ConsumerState<AiSheet> {
                 const SizedBox(height: 10),
                 Center(
                   child: Text(_t('Ask me anything about ENCOR!', 'Hỏi mình bất cứ điều gì về ENCOR nhé!'),
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink)),
                 ),
                 const SizedBox(height: 16),
                 for (final s in _suggestions)
@@ -487,7 +487,7 @@ class _AiSheetState extends ConsumerState<AiSheet> {
                           border: Border.all(color: AppColors.line, width: 2),
                           borderRadius: BorderRadius.circular(14),
                         ),
-                        child: Text(s, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                        child: Text(s, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.ink)),
                       ),
                     ),
                   ),
@@ -502,7 +502,7 @@ class _AiSheetState extends ConsumerState<AiSheet> {
                 },
               ),
       ),
-      const Divider(height: 1, color: AppColors.line),
+      Divider(height: 1, color: AppColors.line),
       Padding(
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
         child: Row(children: [
@@ -541,7 +541,7 @@ class _AiSheetState extends ConsumerState<AiSheet> {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.82),
         decoration: BoxDecoration(
-          color: mine ? AppColors.primary : (err ? const Color(0xFFFFE3E4) : const Color(0xFFF1F3F5)),
+          color: mine ? AppColors.primary : (err ? AppColors.errorTint : AppColors.soft),
           borderRadius: BorderRadius.circular(16),
         ),
         child: typing

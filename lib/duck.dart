@@ -913,7 +913,7 @@ class _DuckScreenState extends ConsumerState<DuckScreen> {
             Expanded(
               child: Stack(alignment: Alignment.center, children: [
                 child,
-                if (locked) const Icon(Icons.lock_rounded, color: AppColors.lockedShadow, size: 26),
+                if (locked) Icon(Icons.lock_rounded, color: AppColors.lockedShadow, size: 26),
               ]),
             ),
             const SizedBox(height: 4),
@@ -940,7 +940,7 @@ class _DuckScreenState extends ConsumerState<DuckScreen> {
     final itemCells = <Widget>[
       if (_slot != 'color' && _slot != 'body')
         _cell(
-          child: const Icon(Icons.block_rounded, size: 40, color: AppColors.locked),
+          child: Icon(Icons.block_rounded, size: 40, color: AppColors.locked),
           label: 'None',
           worn: wornId == null,
           locked: false,
@@ -992,12 +992,12 @@ class _DuckScreenState extends ConsumerState<DuckScreen> {
     final cells = _slot == 'body' ? bodyCells : itemCells;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: ListView(padding: const EdgeInsets.fromLTRB(16, 4, 16, 32), children: [
           Row(children: [
             IconButton(icon: const Icon(Icons.close_rounded, size: 30, color: Color(0xFFAFAFAF)), onPressed: () => Navigator.pop(context)),
-            const Expanded(
+            Expanded(
               child: Text('My Duck',
                   textAlign: TextAlign.center, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.ink)),
             ),
@@ -1020,7 +1020,7 @@ class _DuckScreenState extends ConsumerState<DuckScreen> {
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 Flexible(
                   child: Text(d.name,
-                      maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                      maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.ink)),
                 ),
                 const SizedBox(width: 8),
                 const Icon(Icons.edit_rounded, size: 22, color: AppColors.secondary),
@@ -1114,7 +1114,7 @@ Future<void> showDuckUnlock(BuildContext context, WidgetRef ref, DuckItem item) 
   return showDialog<void>(
     context: context,
     builder: (ctx) => Dialog(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -1124,7 +1124,7 @@ Future<void> showDuckUnlock(BuildContext context, WidgetRef ref, DuckItem item) 
           const SizedBox(height: 10),
           CustomPaint(size: const Size(150, 165), painter: DuckPainter(look, mood: DuckMood.happy)),
           const SizedBox(height: 8),
-          Text(item.name, textAlign: TextAlign.center, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink)),
+          Text(item.name, textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink)),
           Text(kDuckSlotLabel[item.slot] ?? item.slot,
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.black38)),
           const SizedBox(height: 16),

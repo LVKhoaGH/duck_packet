@@ -139,7 +139,7 @@ class TrackPickerScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cur = ref.watch(trackProvider);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -149,7 +149,7 @@ class TrackPickerScreen extends ConsumerWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back_rounded, size: 28, color: Color(0xFFAFAFAF)),
+                    icon: Icon(Icons.arrow_back_rounded, size: 28, color: AppColors.icon),
                     onPressed: () => Navigator.pop(context),
                   ),
                 )
@@ -157,14 +157,14 @@ class TrackPickerScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
               const Center(child: DuckView(size: 120)),
               const SizedBox(height: 10),
-              const Center(
+              Center(
                 child: Text('What do you want to learn?',
                     textAlign: TextAlign.center, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.ink)),
               ),
               const SizedBox(height: 6),
-              const Center(
+              Center(
                 child: Text('You can switch any time. Your XP, streak and duck stay with you.',
-                    textAlign: TextAlign.center, style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w700)),
+                    textAlign: TextAlign.center, style: TextStyle(color: AppColors.mid, fontWeight: FontWeight.w700)),
               ),
               const SizedBox(height: 22),
               for (final t in kTracks)
@@ -192,8 +192,8 @@ class TrackPickerScreen extends ConsumerWidget {
                         const SizedBox(width: 14),
                         Expanded(
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Text(t.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink)),
-                            Text(t.sub, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.black45)),
+                            Text(t.title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                            Text(t.sub, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.sub)),
                             if (t.bundled && Bundled.byTrack[t.id] == null)
                               const Text('No lessons bundled yet', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.error)),
                           ]),
@@ -219,7 +219,7 @@ class NoContentScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = trackOf(ref.watch(trackProvider));
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -228,10 +228,10 @@ class NoContentScreen extends ConsumerWidget {
               const DuckView(size: 130),
               const SizedBox(height: 16),
               Text('No lessons for ${t.title} yet',
-                  textAlign: TextAlign.center, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink)),
+                  textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.ink)),
               const SizedBox(height: 8),
               Text('Put the course JSON files in assets/courses/${t.id}/ and rebuild the app, or choose another course.',
-                  textAlign: TextAlign.center, style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.w700)),
+                  textAlign: TextAlign.center, style: TextStyle(color: AppColors.mid, fontWeight: FontWeight.w700)),
               const SizedBox(height: 24),
               SizedBox(
                 width: 240,

@@ -1,4 +1,6 @@
-duckpacket_v12: widget Android sinh dong + theo che do sang/toi
-MOI: lib/widget_theme.dart, res/drawable/bg_dark.xml, res/drawable/bar_progress.xml
-DE: DuckData.kt, DuckViews.kt, res/layout/duck_widget.xml, res/layout/duck_review_widget.xml, lib/widget_sync.dart, lib/settings.dart
-KHONG DOI: MainActivity.kt, DuckWidgets.kt, DuckWidgetProvider.kt, cac layout/drawable con lai
+duckpacket_v13: Lab ho tro address-family (config 3 tang)
+DE: lib/cli_engine.dart, lib/cli_modules.dart
+MOI: samples/lab_bgp_af_sample.json (khong nam trong app; import qua Library de thu)
+Module moi: "af" (BGP/EIGRP named/OSPFv3 address-family), "vrf" (VRF-lite).
+Goal moi: "in": "router bgp 65001 > address-family ipv4"
+Giu nguyen: home_screen.dart v12b khong dung o day.

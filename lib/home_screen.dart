@@ -15,6 +15,8 @@ import 'learn_tab.dart';
 import 'models.dart';
 import 'practice_tab.dart';
 import 'providers.dart';
+import 'quests.dart' show metaProvider;
+import 'settings.dart';
 import 'reminders.dart';
 import 'sfx.dart';
 import 'study.dart';
@@ -45,6 +47,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => ref.read(reminderProvider.notifier).sync());
     ref.listenManual(studyProvider, (prev, next) => syncHomeWidget(ref));
     ref.listenManual(courseProvider, (prev, next) => syncHomeWidget(ref));
+    ref.listenManual(metaProvider, (prev, next) => syncHomeWidget(ref));
+    ref.listenManual(settingsProvider, (prev, next) {
+      if (prev?.theme != next.theme) syncHomeWidget(ref);
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) => syncHomeWidget(ref));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final box = Hive.box('stats');

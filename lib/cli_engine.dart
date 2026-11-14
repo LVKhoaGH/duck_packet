@@ -68,6 +68,12 @@ String normHead(String h) {
   return t;
 }
 
+/// Head of an address-family line. BGP shows "address-family ipv4 unicast" as "address-family ipv4".
+String _afHead(String t) {
+  final s = t.trim().replaceAll(RegExp(r'\s+'), ' ').toLowerCase();
+  return s.replaceAll(RegExp(r' unicast$'), '');
+}
+
 String _norm(String s) => s.trim().replaceAll(RegExp(r'\s+'), ' ').toLowerCase();
 bool _eq(String a, String b) => _norm(a) == _norm(b);
 
@@ -210,6 +216,8 @@ class LabDev {
   String hostname;
   String mode;
   String ctx = '';
+  String sub = ''; // head of the open address-family section ('' = none)
+  String afParent = ''; // mode to return to when leaving the address-family
   List<CfgBlock> cfg;
   List<CfgBlock> startup;
   bool saved = true;
@@ -486,16 +494,29 @@ class LabSession {
     var res = _parse(d, toks, mode, neg);
     var useMode = mode;
     if (res.p == null && res.err == 'invalid' && mode.startsWith('config') && mode != 'config') {
-      final r2 = _parse(d, toks, 'config', neg); // IOS lets global commands be typed in sub-modes
-      if (r2.p != null) {
-        res = r2;
-        useMode = 'config';
+      // IOS lets parent / global commands be typed in sub-modes
+      final chain = <String>[];
+      if (d.sub.isNotEmpty && d.afParent.isNotEmpty) chain.add(d.afParent);
+      chain.add('config');
+      for (final m in chain) {
+        final r2 = _parse(d, toks, m, neg);
+        if (r2.p != null) {
+          res = r2;
+          useMode = m;
+          break;
+        }
       }
     }
     if (res.p == null) return _err(d, ms, res.err, res.tok + off, cmd, mode);
     if (useMode != mode) {
-      d.mode = 'config';
-      d.ctx = '';
+      if (useMode == 'config') {
+        d.mode = 'config';
+        d.ctx = '';
+      } else {
+        d.mode = useMode;
+      }
+      d.sub = '';
+      d.afParent = '';
     }
     var out = _apply(d, res.p!, neg);
     if (filt.isNotEmpty) out = _filter(out, filt);
@@ -632,13 +653,78 @@ class LabSession {
     return nb;
   }
 
+  /// Inner lines of an address-family section: [start, end) in block.lines, or null.
+  List<int>? _afRange(CfgBlock b, String head) {
+    for (var i = 0; i < b.lines.length; i++) {
+      final l = b.lines[i];
+      if (l.startsWith(' ') || !_norm(l).startsWith('address-family ')) continue;
+      if (_afHead(l) != _afHead(head)) continue;
+      var end = i + 1;
+      while (end < b.lines.length && b.lines[end].startsWith(' ')) {
+        end++;
+      }
+      return [i + 1, end];
+    }
+    return null;
+  }
+
+  List<String> _enterAf(LabDev d, _P p, bool neg, String newMode) {
+    final head = _afHead(p.exp.join(' '));
+    final b = _block(d);
+    if (b == null) return [];
+    if (neg) {
+      final r = _afRange(b, head);
+      if (r != null) {
+        var end = r[1];
+        if (end < b.lines.length && _norm(b.lines[end]) == 'exit-address-family') end++;
+        b.lines.removeRange(r[0] - 1, end);
+        d.saved = false;
+      }
+      return [];
+    }
+    if (_afRange(b, head) == null) {
+      b.lines.add(head);
+      b.lines.add('exit-address-family');
+      d.saved = false;
+    }
+    d.afParent = d.mode;
+    d.mode = newMode;
+    d.sub = head;
+    return [];
+  }
+
+  List<String> _exitAf(LabDev d) {
+    if (d.sub.isEmpty) return [];
+    d.mode = d.afParent.isEmpty ? 'config-router' : d.afParent;
+    d.sub = '';
+    d.afParent = '';
+    return [];
+  }
+
   List<String> _lines(LabDev d) {
+    if (d.sub.isNotEmpty) {
+      final b = _block(d);
+      final r = b == null ? null : _afRange(b, d.sub);
+      return (b == null || r == null) ? <String>[] : b.lines.sublist(r[0], r[1]);
+    }
     if (_global(d)) return [for (final b in d.cfg) b.head];
     final b = _block(d);
     return b == null ? <String>[] : b.lines;
   }
 
   void _add(LabDev d, String line) {
+    if (d.sub.isNotEmpty) {
+      final b = _block(d) ?? _ensureBlock(d, d.ctx);
+      var r = _afRange(b, d.sub);
+      if (r == null) {
+        b.lines.add(d.sub);
+        b.lines.add('exit-address-family');
+        r = _afRange(b, d.sub);
+      }
+      b.lines.insert(r == null ? b.lines.length : r[1], ' $line');
+      d.saved = false;
+      return;
+    }
     if (_global(d)) {
       d.cfg.add(CfgBlock(line));
     } else {
@@ -649,7 +735,18 @@ class LabSession {
 
   int _removeWhere(LabDev d, bool Function(String) test) {
     var n = 0;
-    if (_global(d)) {
+    if (d.sub.isNotEmpty) {
+      final b = _block(d);
+      final r = b == null ? null : _afRange(b, d.sub);
+      if (b != null && r != null) {
+        for (var i = r[1] - 1; i >= r[0]; i--) {
+          if (test(b.lines[i])) {
+            b.lines.removeAt(i);
+            n++;
+          }
+        }
+      }
+    } else if (_global(d)) {
       final before = d.cfg.length;
       d.cfg.removeWhere((b) => b.lines.isEmpty && test(b.head));
       n = before - d.cfg.length;
@@ -690,6 +787,7 @@ class LabSession {
     final def = p.def;
     if (def.action.isNotEmpty) return _action(d, p);
     final text = p.exp.join(' ');
+    if (def.enter.endsWith('-af')) return _enterAf(d, p, neg, def.enter);
     if (def.enter.isNotEmpty) {
       if (!neg) {
         if (def.enter == 'config-if' && !_ifOk(d, text)) {
@@ -698,6 +796,8 @@ class LabSession {
         final b = _ensureBlock(d, text);
         d.mode = def.enter;
         d.ctx = b.head;
+        d.sub = '';
+        d.afParent = '';
       } else {
         final before = d.cfg.length;
         d.cfg.removeWhere((b) => _startsWord(b.head, text));
@@ -734,8 +834,13 @@ class LabSession {
       case 'conft':
         d.mode = 'config';
         d.ctx = '';
+        d.sub = '';
+        d.afParent = '';
         return ['Enter configuration commands, one per line.  End with CNTL/Z.'];
+      case 'exit_af':
+        return _exitAf(d);
       case 'exit':
+        if (d.sub.isNotEmpty) return _exitAf(d);
         if (d.mode == 'config') {
           d.mode = 'priv';
         } else if (d.mode.startsWith('config')) {
@@ -748,6 +853,8 @@ class LabSession {
       case 'end':
         d.mode = 'priv';
         d.ctx = '';
+        d.sub = '';
+        d.afParent = '';
         return [];
       case 'do':
         return _exec(d, p.exp[1], 'priv');
@@ -988,12 +1095,33 @@ class LabSession {
     if (found == null) return false;
     final LabDev dv = found;
     final String? inStr = c['in'] != null ? '${c['in']}' : scopeIn;
-    final List<CfgBlock>? inb =
-        inStr == null ? null : dv.cfg.where((b) => labWild(normHead(inStr), b.head)).toList();
+    // "in": "interface Gi0/0", or "router bgp 65001 > address-family ipv4" for one address-family section.
+    List<String>? scopeLines;
+    if (inStr != null) {
+      final parts = inStr.split('>');
+      final bp = normHead(parts[0].trim());
+      final afp = parts.length > 1 ? parts[1].trim() : '';
+      scopeLines = <String>[];
+      for (final blk in dv.cfg) {
+        if (!labWild(bp, blk.head)) continue;
+        if (afp.isEmpty) {
+          scopeLines.addAll(blk.lines);
+          continue;
+        }
+        var inSec = false;
+        for (final l in blk.lines) {
+          if (!l.startsWith(' ')) {
+            inSec = _norm(l).startsWith('address-family ') && labWild(_afHead(afp), _afHead(l));
+            continue;
+          }
+          if (inSec) scopeLines.add(l);
+        }
+      }
+    }
     bool lineIn(String pat) {
-      final scope = inb;
+      final scope = scopeLines;
       if (scope == null) return dv.cfg.any((b) => labWild(pat, b.head));
-      return scope.any((b) => b.lines.any((l) => labWild(pat, l)));
+      return scope.any((l) => labWild(pat, l));
     }
 
     final has = c['has'];

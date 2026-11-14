@@ -9,6 +9,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import 'library.dart' show courseProvider;
 import 'providers.dart';
+import 'quests.dart' show metaProvider, questsDoneCount;
+import 'settings.dart';
 import 'study.dart';
 
 const MethodChannel _ch = MethodChannel('duckpacket/widget');
@@ -75,6 +77,8 @@ Future<void> syncHomeWidget(WidgetRef ref) async {
       'wrong': wrong,
       'exam': ref.read(examDateProvider),
       'weak': weak,
+      'theme': ref.read(settingsProvider).theme,
+      'quests': questsDoneCount(ref.read(metaProvider)),
     });
   } catch (_) {
     // widget chưa được thêm hoặc kênh chưa có: bỏ qua

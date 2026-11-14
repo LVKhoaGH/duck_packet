@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'i18n.dart';
+import 'widget_theme.dart';
 
 class SettingsState {
   final bool sound, haptics;
@@ -41,6 +42,7 @@ class SettingsNotifier extends Notifier<SettingsState> {
   void setTheme(String t) {
     _box.put('x_theme', t);
     state = state.copy(theme: t);
+    pushWidgetTheme(t);
   }
 
   void setLang(String l) {

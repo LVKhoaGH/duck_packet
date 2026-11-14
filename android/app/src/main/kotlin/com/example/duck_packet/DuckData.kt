@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.widget.RemoteViews
 import java.util.Calendar
 import java.util.Locale
@@ -34,15 +35,20 @@ object DuckData {
 
     fun save(ctx: Context, a: Map<*, *>) {
         val e = sp(ctx).edit()
-        e.putInt("streak", (a["streak"] as? Number)?.toInt() ?: 0)
-        e.putInt("freezes", (a["freezes"] as? Number)?.toInt() ?: 0)
-        e.putInt("wrong", (a["wrong"] as? Number)?.toInt() ?: 0)
-        e.putString("lastDay", a["lastDay"] as? String ?: "")
-        e.putString("days", a["days"] as? String ?: "")
-        e.putString("glossary", a["glossary"] as? String ?: "[]")
-        e.putString("dueDays", a["dueDays"] as? String ?: "")
-        e.putString("exam", a["exam"] as? String ?: "")
-        e.putString("weak", a["weak"] as? String ?: "")
+        fun int(k: String) { if (a.containsKey(k)) e.putInt(k, (a[k] as? Number)?.toInt() ?: 0) }
+        fun str(k: String, d: String) { if (a.containsKey(k)) e.putString(k, a[k] as? String ?: d) }
+        int("streak"); int("freezes"); int("wrong"); int("quests")
+        str("lastDay", ""); str("days", ""); str("glossary", "[]"); str("dueDays", "")
+        str("exam", ""); str("weak", ""); str("theme", "auto")
+        if (a.containsKey("dueDays")) {
+            // mốc số câu cần ôn đầu ngày, để vẽ thanh tiến độ ở widget Review
+            val today = todayNum()
+            val due = ((a["dueDays"] as? String) ?: "").split(",").mapNotNull { it.toLongOrNull() }.count { it <= today }
+            val s0 = sp(ctx)
+            val base = if (s0.getLong("dueBaseDay", -1L) == today) maxOf(s0.getInt("dueBase", 0), due) else due
+            e.putLong("dueBaseDay", today)
+            e.putInt("dueBase", base)
+        }
         e.apply()
     }
 
@@ -80,11 +86,46 @@ object DuckData {
         return FACES[idx]
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    fun duckRes(ctx: Context): Int {
-        val i = FACES.indexOf(faceName())
+    fun faceRes(name: String): Int {
+        val i = FACES.indexOf(name)
         return if (i >= 0) FACE_RES[i] else 0
     }
+
+    fun hour(): Int = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+
+    fun <T> pick(a: Array<T>): T = a[(todayNum() % a.size).toInt()]
+
+    /** Sáng/tối theo cài đặt Appearance trong app (auto = theo hệ thống). */
+    fun isDark(ctx: Context): Boolean = when (sp(ctx).getString("theme", "auto")) {
+        "dark" -> true
+        "light" -> false
+        else -> (ctx.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+    }
+
+    fun doneToday(ctx: Context): Boolean {
+        val k = todayKey()
+        return (sp(ctx).getString("lastDay", "") ?: "") == k || doneDays(ctx).contains(k)
+    }
+
+    fun questsDone(ctx: Context): Int = sp(ctx).getInt("quests", 0).coerceIn(0, 3)
+
+    /** Mặt vịt theo trạng thái hôm nay; trạng thái trung tính thì dùng mặt ngẫu nhiên đổi mỗi 8 giờ. */
+    fun stateFaceName(ctx: Context): String {
+        val streak = streakShown(ctx)
+        val h = hour()
+        return when {
+            doneToday(ctx) && questsDone(ctx) >= 3 -> "cheer"
+            doneToday(ctx) && streak >= 30 -> "cool"
+            doneToday(ctx) -> "happy"
+            h in 0..5 -> "sleeping"
+            h >= 21 && streak > 0 -> "worried"
+            h >= 18 && streak > 0 -> "determined"
+            else -> faceName()
+        }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun duckRes(ctx: Context): Int = faceRes(stateFaceName(ctx))
 
     /** Số ngày chuỗi đang hiển thị: tính cả Streak Freeze, quá hạn thì về 0. */
     fun streakShown(ctx: Context): Int {

@@ -26,7 +26,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#FFFFFF"
-            android:textSize="42sp"
+            android:textSize="36sp"
             android:textStyle="bold" />
         <TextView
             android:id="@+id/rLbl"
@@ -37,6 +37,15 @@
             android:textColor="#F2FFFFFF"
             android:textSize="13sp"
             android:textStyle="bold" />
+        <ProgressBar
+            android:id="@+id/rBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:layout_marginTop="5dp"
+            android:max="100"
+            android:progress="0"
+            android:progressDrawable="@drawable/bar_progress" />
         <TextView
             android:id="@+id/rMsg"
             android:layout_width="match_parent"
